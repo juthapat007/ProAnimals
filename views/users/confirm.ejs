@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ยืนยันการจอง | ไชยปราการสัตวแพทย์</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="/css/styles.css"> 
+</head>
+<body>
+    <div class="container">
+<div class="header" style="display: flex;color: #FF9AA2;justify-content: space-between; align-items: center;">
+  <h2>ไชยปราการสัตวแพทย์</h2>
+
+  <div class="menu">
+    <i class="fa-solid fa-house" onclick="window.location.href='/main'"></i>
+<i class="fas fa-user" onclick="window.location.href='/edit_person' "></i>
+    <div class="hamburger" onclick="toggleDropdown()">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="dropdown" id="dropdownMenu">
+      <a href="/history"><i class="fas fa-history"></i> ประวัติการรักษา</a>
+      <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+    </div>
+  </div>
+</div>
+
+        <div class="progress">
+            <div class="progress-step">
+                <div class="progress-circle">1</div>
+                <span>ข้อมูลสัตว์</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-circle">2</div>
+                <span>เลือกบริการ-วัน</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-circle">3</div>
+                <span>เวลา</span>
+            </div>
+            <div class="progress-step active">
+                <div class="progress-circle">4</div>
+                <span>ยืนยัน</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-circle">5</div>
+                <span>เสร็จสิ้น</span>
+            </div>
+        </div>
+
+        <div class="booking-container">
+            <div class="booking-header">
+                <h2><i class="fas fa-calendar-check"></i> ข้อมูลการจอง</h2>
+                <p>กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยันการจอง</p>
+            </div>
+
+            <div class="info-grid">
+                <!-- ข้อมูลสัตว์เลี้ยง -->
+                <div class="info-card">
+                    <h3><i class="fas fa-paw"></i> ข้อมูลสัตว์เลี้ยง</h3>
+                    <div class="info-item">
+                        <div class="info-label">ชื่อสัตว์เลี้ยง</div>
+                        <div class="info-value"><%= petInfo.pet_name %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">เพศ</div>
+                        <div class="info-value"><%= petInfo.pet_gender %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">ประเภท</div>
+                        <div class="info-value"><%= petInfo.pet_type_name %></div>
+                    </div>
+                </div>
+
+                <!-- ข้อมูลเจ้าของ -->
+                <div class="info-card">
+                    <h3><i class="fas fa-user"></i> ข้อมูลเจ้าของ</h3>
+                    <div class="info-item">
+                        <div class="info-label">ชื่อ-นามสกุล</div>
+                        <div class="info-value"><%= petInfo.cus_name %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">เบอร์โทรศัพท์</div>
+                        <div class="info-value"><%= petInfo.cus_phon %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">อีเมล</div>
+                        <div class="info-value"><%= petInfo.cus_email %></div>
+                    </div>
+                </div>
+
+                <!-- รายละเอียดการจอง -->
+                <div class="info-card">
+                    <h3><i class="fas fa-calendar-alt"></i> รายละเอียดการจอง</h3>
+                    <div class="info-item">
+                        <div class="info-label">บริการ</div>
+                        <div class="info-value"><%= serviceInfo.service_type %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">วันที่</div>
+                        <div class="info-value"><%= formattedDate %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">เวลา</div>
+                        <div class="info-value"><%= formattedTime %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">ค่าบริการ</div>
+                        <div class="info-value"><%= Number(serviceInfo.service_price).toLocaleString('th-TH', { minimumFractionDigits: 2 }) %> บาท</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>กรุณาตรวจสอบข้อมูลให้ถูกต้อง</strong>
+                    <p>หลังจากยืนยันการจองแล้ว จะไม่สามารถแก้ไขได้</p>
+                </div>
+            </div>
+
+            <form action="/users/confirm/submit" method="POST">
+  <input type="hidden" name="cus_id" value="<%= cus_id %>">
+  <input type="hidden" name="pet_id" value="<%= pet_id %>">
+  <input type="hidden" name="service_id" value="<%= service_id %>">
+  <input type="hidden" name="date" value="<%= date %>">
+  <input type="hidden" name="time" value="<%= time %>">
+
+  <div class="action-buttons">
+      <button type="button" class="button btn-back" onclick="history.back()">
+          <i class="fas fa-arrow-left"></i> ย้อนกลับ
+      </button>
+      <button type="submit" class="button btn-confirm">
+          <i class="fas fa-check-circle"></i> ยืนยันการจอง
+      </button>
+  </div>
+</form>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector(".hamburger");
+            const dropdown = document.querySelector(".dropdown");
+            
+            hamburger.addEventListener("click", function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle("show");
+            });
+            
+            document.addEventListener('click', function() {
+                dropdown.classList.remove("show");
+            });
+            
+            document.getElementById('confirmForm').addEventListener('submit', function(e) {
+                const btn = this.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังดำเนินการ...';
+            });
+        });
+    </script>
+</body>
+</html>

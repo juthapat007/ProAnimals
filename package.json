@@ -1,0 +1,39 @@
+{
+  "name": "proanimals",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-css": "tailwindcss -i ./src/input.css -o ./public/css/output.css",
+    "watch-css": "tailwindcss -i ./src/input.css -o ./public/css/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "await": "^0.2.6",
+    "bcrypt": "^6.0.0",
+    "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1",
+    "chart.js": "^4.5.0",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "ejs": "^3.1.10",
+    "eventsource": "^4.0.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "flatpickr": "^4.6.13",
+    "moment-timezone": "^0.6.0",
+    "multer": "^2.0.1",
+    "mysql2": "^3.14.3",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}

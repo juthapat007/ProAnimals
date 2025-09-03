@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ไชปราการสัตวแพทย์ - คิวการรักษา</title>
+  <meta name="viewport" content="width=900, initial-scale=1">
+<%- include('../partials/link') %>
+  
+</head>
+<body>
+  <div class="container">
+<%- include('../partials/header_admin') %>
+
+    <div style="display: flex;justify-content: space-between;">
+    <h2>คิวการรักษา</h2>
+    <input class="date-input-wrapper" type="date" id="SelectDate" value="<%= selectedDate %>">
+  </div><br>
+
+    <!-- ฟอร์มเพิ่มข้อมูล -->
+<input class="form-row form-row-small" type="text" id="cus_id" placeholder="ลำดับ">
+<input class="form-row" type="text" id="cus_name" placeholder="ชื่อลูกค้า">
+<input class="form-row" type="email" id="cus_email" placeholder="Email">
+<input class="form-row" type="text" id="cus_phon" placeholder="เบอร์โทร">
+<input class="form-row" type="date" id="qDate">
+<input class="form-row" type="time" id="qTime">
+<select class="form-row" name="status" id="qStatus">
+    <option value="">เลือกสถานะ</option>
+    <% statusOptions.forEach(status => { %>
+      <option value="<%= status %>"><%= status %></option>
+    <% }) %>
+  </select>
+  <button type="submit" id="btnSave"
+          class="btn-edit" >อัพเดต</button>
+
+
+    <!-- ตารางข้อมูล -->
+    <div class="table-responsive">
+      <table id="queueTable">
+        <thead>
+          <tr>
+            <th>ลำดับ</th>
+            <th>เบอร์โทร</th>
+            <th>สัตว์เลี้ยง</th>
+            <th>ชื่อลูกค้า</th>
+            <th>Email</th>
+            <th>วันที่</th>
+            <th>เวลา</th>
+            <th>สถานะ</th>
+            <th>เคส</th>
+            <th>ชำระเงิน</th>
+          </tr>
+        </thead>
+        <tbody>
+  <% data.forEach((booking, i) => { %>
+    <tr class="clickable-row"
+        data-id="<%= booking.booking_id %>"
+        data-name="<%= booking.cus_name %>"
+        data-email="<%= booking.cus_email %>"
+        data-phon="<%= booking.cus_phon %>" 
+        data-date="<%= moment(booking.booking_date).format('YYYY-MM-DD') %>"
+        data-time="<%= booking.time_booking %>"
+        data-status="<%= booking.status %>">
+      
+      <!-- ใส่ลำดับ -->
+      <td><%= i + 1 %></td>
+      <td><%= booking.cus_phon %></td>
+      <td><%= booking.pet_name %></td>
+      <td><%= booking.cus_name %></td>
+      <td><%= booking.cus_email %></td>
+      <td><%= moment(booking.booking_date).format('DD/MM/YYYY') %></td>
+      <td><%= booking.time_booking %></td>
+      <td><%= booking.status %></td>
+      <td><%= booking.booking_id %></td>
+      <td>
+<button class="btn-info" 
+        type="button" onclick="window.location.href='/admin/total_pay?booking_id=<%= booking.booking_id %>'">
+  ชำระเงิน
+</button>
+
+</td>
+
+    </tr>
+  <% }) %>
+</tbody>
+
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+    <% if (data) { %>
+  <h3>ข้อมูลวันที่ <%= selectedDate %></h3>
+<% } %>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('paid') === 'success') {
+      Swal.fire({
+        icon: 'success',
+        title: 'ชำระเงินสำเร็จ',
+        text: 'บันทึกการชำระเงินเรียบร้อยแล้ว',
+        confirmButtonText: 'ตกลง'
+      });
+    }
+  });
+  </script>
+  <script>
+      function toggleDropdown() {
+    const dropdown = document.getElementById('dropdownMenu');
+    dropdown.classList.toggle('show');
+  }
+
+// ปิด dropdown เมื่อคลิกข้างนอก
+window.addEventListener('click', function(e) {
+  const menu = document.querySelector('.menu');
+  if (!menu.contains(e.target)) {
+    document.getElementById('dropdownMenu').classList.remove('show');
+  }
+});
+;
+// ในส่วนของ JavaScript
+document.addEventListener("DOMContentLoaded", function() {
+    const dateInput = document.getElementById("SelectDate");
+    
+    // ตั้งค่าวันที่เริ่มต้นจาก URL (ถ้ามี)
+    const urlParams = new URLSearchParams(window.location.search);
+    const dateParam = urlParams.get('date');
+    if (dateParam) {
+        dateInput.value = dateParam;
+    }
+
+    // เมื่อวันที่เปลี่ยน
+    dateInput.addEventListener("change", function() {
+        const selectedDate = this.value;
+        window.location.href = `/admin/mg_queue?date=${selectedDate}`;
+    });
+});
+
+//   function goToPay(bookingId) {
+//   if (bookingId) {
+//     // ส่ง bookingId ไปหน้า /admin/total_pay
+//     window.location.href = `/total_pay?booking_id=${encodeURIComponent(bookingId)}`;
+//   } else {
+//     alert("ไม่พบ Booking ID");
+//   }
+// }
+
+
+// เมื่อเปลี่ยนวันที่ → โหลดหน้าใหม่พร้อม query date
+document.getElementById('SelectDate').addEventListener('change', function() {
+  const selectedDate = this.value;
+  window.location.href = `/admin/mg_queue?date=${selectedDate}`;
+});
+
+  // ใช้ event delegation สำหรับทุก <tr> ที่มี class="clickable-row"
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".clickable-row").forEach(function (row) {
+      row.addEventListener("click", function () {
+        // ดึงข้อมูลจาก data-* attributes
+        const id = this.dataset.id;
+        const name = this.dataset.name;
+        const email = this.dataset.email;
+        const phon = this.dataset.phon;
+        const date = this.dataset.date;
+        const time = this.dataset.time;
+        const status = this.dataset.status;
+        
+        // นำข้อมูลใส่ในฟอร์ม
+        document.getElementById("cus_id").value = id;
+        document.getElementById("cus_name").value = name;
+        document.getElementById("cus_email").value = email;
+        document.getElementById("cus_phon").value = phon;
+        document.getElementById("qDate").value = date;
+        document.getElementById("qTime").value = time;
+        // ตั้งค่า select status
+        const statusSelect = document.getElementById("qStatus");
+        for (let i = 0; i < statusSelect.options.length; i++) {
+          if (statusSelect.options[i].textContent === status || statusSelect.options[i].value.includes(status)) {
+            statusSelect.selectedIndex = i;
+            break;
+          }
+        }
+      });
+    });
+  });
+
+  
+
+  document.getElementById('btnSave').addEventListener('click', function () {
+  const data = {
+    booking_id: document.getElementById('cus_id').value,
+    status: document.getElementById('qStatus').value
+  };
+
+  if (!data.booking_id || !data.status) {
+    alert('กรุณาเลือกข้อมูลคิวและสถานะก่อนบันทึก');
+    return;
+  }
+
+  fetch('/admin/mg_queue/update-status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+    .then(res => res.json())
+    .then(response => {
+      if (response.success) {
+        alert('อัปเดตข้อมูลสำเร็จ');
+        location.reload();
+      } else {
+        alert('เกิดข้อผิดพลาด: ' + (response.message || 'ไม่ทราบสาเหตุ'));
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+    });
+});
+
+
+document.querySelectorAll('.qStatus').forEach(select => {
+  select.addEventListener('change', async (e) => {
+    const bookingId = e.target.getAttribute('data-booking-id');
+    const newStatus = e.target.value;
+
+    if (!bookingId || !newStatus) return;
+
+    const res = await fetch('/admin/mg_queue/update-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_id: bookingId, status: newStatus })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert('อัปเดตสถานะสำเร็จ');
+    } else {
+      alert('อัปเดตไม่สำเร็จ');
+    }
+  });
+});
+
+
+</script>
+
+
+</body>
+</html>

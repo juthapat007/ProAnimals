@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายงานการเข้ารับบริการ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+   
+    <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <%- include('../partials/link') %>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    canvas { max-width: 800px; margin: 40px auto; display: block; }
+    h2 { text-align: center; }
+    #filterButtons { text-align: center; }
+    #filterButtons button {
+      padding: 8px 16px;
+      margin: 4px;
+      border: 1px solid #ccc;
+      background: #f0f0f0;
+      cursor: pointer;
+    }
+    #filterButtons button.active {
+      background: #007BFF;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+      <%- include('../partials/header_vet') %>
+  <h2>
+    กราฟรายงานการเข้ารับบริการ (
+    <% if (type === "week") { %> รายสัปดาห์ <% } else if (type === "year") { %> รายปี <% } else { %> รายเดือน <% } %>
+    )
+  </h2>
+
+    <div id="filterButtons">
+    <button data-type="week" class="<%= type === 'week' ? 'active' : '' %>">รายสัปดาห์</button>
+    <button data-type="month" class="<%= type === 'month' ? 'active' : '' %>">รายเดือน</button>
+    <button data-type="year" class="<%= type === 'year' ? 'active' : '' %>">รายปี</button>
+  </div>
+  
+  
+
+  <canvas id="chartCanvas"></canvas>
+</div>
+  <script>
+    // ปุ่ม filter
+    document.querySelectorAll('#filterButtons button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-type');
+        window.location.href = '?type=' + type;
+      });
+    });
+
+    // Chart
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: <%- JSON.stringify(labels) %>,
+        datasets: [{
+          label: 'จำนวนการเข้ารับบริการ',
+          data: <%- JSON.stringify(data) %>,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'จำนวน' } },
+          x: { title: { display: true, text: 'ช่วงเวลา' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+<title>ระบบจัดการลูกค้า</title>
+<!--  -->
+</head>
+<body>
+  
+<div class="container">
+
+  <%- include('../partials/header_admin') %>
+    <div style="display: flex;justify-content: space-between;"><div class="section-title">ข้อมูลและช่องทางการติดต่อ ลูกค้า</div>
+    <input type="text" id="searchName" placeholder="ค้นหา ชื่อ-นามสกุล" required></div><br>
+    <ul id="resultList" style="list-style:none; padding:0; margin-top:4px;"></ul><br>
+
+    <form action="/admin/contact-customer/add" method="post" style="margin-bottom: 16px; text-align: left;">
+      <input class="form-row" type="text" id="cus_id" placeholder="ลำดับ" required style="width: 55px;">
+      <input class="form-row" type="text" id="cus_name" placeholder="ชื่อ-นามสกุล" required>
+      <input class="form-row" type="email" id="cus_email" placeholder="Email" required>
+      <input class="form-row" type="tel" id="cus_phon" placeholder="เบอร์โทร" required style="width: 140px;">
+      <button type="submit" class="btn-info">เพิ่ม</button>
+      <button type="submit" class="btn" style="background-color: #FFC14E;" onclick="goToPetList()">สัตว์เลี้ยงที่มี</button>
+      <button type="button" class="btn-edit" onclick="goToAddPet()">เพิ่มข้อมูลสัตว์เลี้ยง</button>
+      <i class="fas fa-envelope"></i>
+ 
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>ชื่อ</th>
+                <th>เบอร์โทร</th>
+                <th>Email</th>
+                <th>จัดการข้อมูล</th>
+            </tr>
+        </thead>
+        <tbody>
+        <% customers.forEach(customer => { %>
+        <tr class="clickable-row"
+          data-id="<%= customer.cus_id %>"
+          data-name="<%= customer.cus_name %>"
+          data-email="<%= customer.cus_email %>"
+          data-phon="<%= customer.cus_phon %>" >
+          
+        <td><%= customer.cus_id %></td>
+        <td><%= customer.cus_name %></td>
+        <td><%= customer.cus_phon %></td>
+        <td><%= customer.cus_email %></td>
+        <td>
+            <div class="btn"><i class="fas fa-envelope"></i></div>
+            <a href="?edit_id=<?= urlencode($c[0]) ?>" class="btn" style="background-color: #FFC14E;">แก้ไข</a>
+            <a href="?action=delete&id=<?= urlencode($c[0]) ?>" class="btn-delete"  onclick="return confirm('ยืนยันการลบข้อมูล?');">ลบ</a>
+        </td>
+
+        </tr>
+
+      <% }) %>
+        </tbody>
+    </table>
+</div>
+<script>
+  function goToPetList() {
+    const cusId = document.getElementById("cus_id").value;
+    if (cusId) {
+      window.location.href = `/admin/pet-list?cus_id=${encodeURIComponent(cusId)}`;
+    } else {
+      alert("กรุณากรอก cus_id ก่อน");
+    }
+  }
+
+  function goToAddPet() {
+    const cusId = document.getElementById("cus_id").value;
+    if (cusId) {
+      window.location.href = `/admin/add_pet?cus_id=${encodeURIComponent(cusId)}`;
+    } else {
+      alert("กรุณากรอก cus_id ก่อน");
+    }
+  }
+    function Pay() {
+    const cusId = document.getElementById("cus_id").value;
+    if (cusId) {
+      window.location.href = `/total_pay?cus_id=${encodeURIComponent(cusId)}`;
+    } else {
+      alert("กรุณากรอก cus_id ก่อน");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".clickable-row").forEach(function (row) {
+      row.addEventListener("click", function () {
+        // ดึงข้อมูลจาก data-* attributes
+        const id = this.dataset.id;
+        const name = this.dataset.name;
+        const email = this.dataset.email;
+        const phon = this.dataset.phon;
+        
+        // นำข้อมูลใส่ในฟอร์ม
+        document.getElementById("cus_id").value = id;
+        document.getElementById("cus_name").value = name;
+        document.getElementById("cus_email").value = email;
+        document.getElementById("cus_phon").value = phon;
+       
+      });
+    });
+  });
+document.getElementById("searchName").addEventListener("keyup", function() {
+  const searchValue = this.value.trim();
+  const list = document.getElementById("resultList");
+  list.innerHTML = ""; // ล้างรายการเก่า
+
+  if (searchValue.length < 2) return; // พิมพ์น้อยกว่า 2 ตัวไม่ค้น
+
+  fetch(`/contact_customer/search_customer?name=${encodeURIComponent(searchValue)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.length === 0) {
+        list.innerHTML = "<li>ไม่พบข้อมูล</li>";
+        return;
+      }
+      data.forEach(cus => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+<table>
+  <tr>
+  <td><div style="display: flex;justify-content: space-between;">
+    <div style="width:15px"><strong>${cus.cus_id}</strong></div>
+    <div style="color:#2c3e50;">${cus.cus_name}</div>
+    <div style="color:#27ae60;">${cus.cus_phon}</div>
+    <div style="color:#2980b9;">${cus.cus_email}</div>
+    <div style="color:#2c3e50;>
+    
+      <div class="cell">
+      <button class="btn-edit">แก้ไข</button>
+      <button class="btn-delete">ลบ</button>
+    </div>
+  </div></td>
+  </tr>
+</table>
+`;
+        
+        // เมื่อคลิกชื่อ → ใส่ค่าในฟอร์ม
+        li.addEventListener("click", () => {
+          document.getElementById("cus_id").value = cus.cus_id;          
+          document.getElementById("cus_name").value = cus.cus_name;
+          document.getElementById("cus_email").value = cus.cus_email;
+          document.getElementById("cus_phon").value = cus.cus_phon;
+          list.innerHTML = ""; // ซ่อนรายการ
+        });
+        
+        list.appendChild(li);
+      });
+    })
+    .catch(err => console.error("Search error:", err));
+});
+
+</script>
+</body>
+</html>

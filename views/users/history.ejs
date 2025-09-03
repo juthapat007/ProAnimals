@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติการรักษา - ไชยปราการสัตวแพทย์</title>
+  <%- include('../partials/link') %>
+  <style>
+    .history-container {
+      margin-top: 20px;
+    }
+    
+    .history-title {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .no-history {
+      text-align: center;
+      padding: 30px;
+      background-color: var(--light-gray);
+      border-radius: var(--border-radius);
+      margin: 30px 0;
+      color: var(--text-color);
+    }
+    
+    .history-card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: var(--transition);
+    }
+    
+    .history-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .pet-name {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+    
+    .treatment-date {
+      color: var(--text-color);
+      font-size: 0.9rem;
+    }
+    
+    .history-details {
+      margin-top: 15px;
+    }
+    
+    .detail-row {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    
+    .detail-label {
+      font-weight: 500;
+      color: var(--text-color);
+      min-width: 120px;
+    }
+    
+    .detail-value {
+      color: var(--text-color);
+      flex: 1;
+    }
+    
+    .status-completed {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+    
+    .status-pending {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: #FFC107;
+      color: #333;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+    
+    .filter-section {
+      background-color: white;
+      padding: 15px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-bottom: 20px;
+    }
+    
+    .filter-title {
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <%- include('../partials/header') %>
+    
+    <div class="welcome">
+      <br>ประวัติการรักษาสัตว์เลี้ยงของคุณ<br>
+    </div>
+    
+    <div class="history-container">
+      
+      <% if (history.length === 0) { %>
+        <div class="no-history">
+          <p>ไม่พบประวัติการรักษา</p>
+        </div>
+      <% } else { %>
+        <% history.forEach(record => { %>
+          <div class="history-card">
+            <div class="history-header">
+              <span class="pet-name"><%= record.pet_name %></span>
+              <span class="treatment-date"><%= new Date(record.treatment_date).toLocaleDateString('th-TH') %></span>
+            </div>
+            
+            <div class="history-details">
+              <div class="detail-row">
+                <span class="detail-label">บริการ:</span>
+                <span class="detail-value"><%= record.service_type %></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">สัตวแพทย์:</span>
+                <span class="detail-value"><%= record.vet_name %></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">น้ำหนัก:</span>
+                <span class="detail-value"><%= record.pet_weight_kg %> กก.</span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">สถานะ:</span>
+                <span class="detail-value">
+                  <% if (record.treatment_status === 'Completed') { %>
+                    <span class="status-completed">เสร็จสิ้น</span>
+                  <% } else { %>
+                    <span class="status-pending">รอดำเนินการ</span>
+                  <% } %>
+                </span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">รายละเอียด:</span>
+                <span class="detail-value"><%= record.treatment_details %></span>
+              </div>
+              
+              <div class="detail-row">
+                <span class="detail-label">ประเภทลูกค้า:</span>
+                <span class="detail-value">
+                  <% 
+                  const cus_type = record.cus_type.replace(/[‘’]/g, '');
+                  %>
+                  <%= cus_type === 'walkin' ? 'Walk-in' : 'จองล่วงหน้า' %>
+                </span>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.querySelector(".hamburger");
+      const dropdown = document.querySelector(".dropdown");
+      
+      hamburger.addEventListener("click", function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle("show");
+      });
+      
+      document.addEventListener('click', function() {
+        dropdown.classList.remove("show");
+      });
+    });
+  </script> -->
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>หน้าแรก - ไชยปราการสัตวแพทย์</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+ 
+</head>
+
+<body>
+<center>
+<div class="container">
+
+<%- include('../partials/header') %>
+
+
+<!-- ใน views/users/main.ejs -->
+  สวัสดีคุณ <%= user_name %>!
+
+
+
+  <div>
+    <img style="width: 100%;" src="/images/cat_dotor.jpg" alt="แมวสัตวแพทย์" loading="lazy">
+  </div>
+
+  <div class="menu-options" style="margin-top: 20px; width: 100%;">
+    <button class="bg-secondary from-secondary to-pink-300 text-white px-6 py-3 rounded-lg hover:scale-105 transition-transform"
+        onclick="window.location.href='/users/select_pet?cus_id=<%= cus_id %>'">
+  <i class="fas fa-calendar"></i> จองคิวบริการ
+</button>
+
+<br><div style="padding-bottom:10px;"></div>
+    <button class="bg-secondary from-secondary to-pink-300 text-white px-6 py-3 rounded-lg hover:scale-105 transition-transform"
+      onclick="window.location.href='/users/queue'">
+      <i class="fas fa-user" style="color: #fff;"></i> ดูคิวของท่าน
+    </button>
+  </div>
+</div>
+</center>
+
+  <!-- <script src="/js/menu.js"></script> -->
+</body>
+</html>

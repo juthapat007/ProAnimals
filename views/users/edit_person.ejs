@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>แก้ไขข้อมูลส่วนตัว</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+        <%- include('../partials/link') %>
+</head>
+
+<body>
+  <div class="container" style="width: 800px;">
+      <%- include('../partials/header') %>
+
+    <div class="title"><i class="fas fa-user-circle"></i> แก้ไขข้อมูลส่วนตัว</div>
+<form method="POST" action="/users/edit_person" enctype="multipart/form-data">
+  <input type="hidden" name="cus_id" value="<%= customer.cus_id %>">
+  <p><%= customer.cus_email %></p>
+<input type="hidden" name="cus_email" value="<%= customer.cus_email %>">
+
+  <div class="upload-icon">
+    <% if (customer.cus_img && customer.cus_img.trim() !== '') { %>
+      <img id="preview-image" src="/uploads/<%= customer.cus_img %>" alt="รูปprofile" class="image-preview">
+    <% } else { %>
+      <img id="preview-image" src="/uploads/default.png" alt="รูปprofile" class="image-preview">
+    <% } %>
+    <label class="camera-icon">
+      <i class="fas fa-camera"></i>
+      <input type="file" name="profile_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)">
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label for="name">ชื่อ</label>
+    <input type="text" id="name" name="cus_name" value="<%= customer.cus_name %>" required>
+  </div>
+
+  <div class="form-group">
+    <label for="phone">เบอร์โทร</label>
+    <input type="text" id="phone" name="cus_phon" value="<%= customer.cus_phon %>">
+  </div>
+
+  <strong>อีเมล </strong><%= customer.cus_email %>
+
+  <div class="btn-group">
+    <button type="button" class="btn-cancel" onclick="window.location.href='/users/main'">ยกเลิก</button>
+    <button type="submit" class="btn-primary">บันทึก</button>
+  </div>
+</form>
+
+  </div>
+  <script>
+  function previewSelectedImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('preview-image').src = e.target.result;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  function toggleDropdown() {
+    const dropdown = document.getElementById('dropdownMenu');
+    dropdown.classList.toggle('show');
+  }
+
+  // ปิด dropdown เมื่อคลิกข้างนอก
+  window.addEventListener('click', function(e) {
+    const menu = document.querySelector('.menu');
+    if (!menu.contains(e.target)) {
+      document.getElementById('dropdownMenu').classList.remove('show');
+    }
+  });
+</script>
+</body>
+</html>

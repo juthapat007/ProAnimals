@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>สมัครสมาชิก | ไชยปราการสัตวแพทย์</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 ><i class="fas fa-user-plus"></i> สมัครสมาชิก</h1>
+    </div>
+
+    <% if (error) { %>
+      <div class="error-message"><%= error %></div>
+    <% } %>
+
+    <% if (success) { %>
+      <div class="success-message"><%= success %></div>
+    <% } %>
+
+    <form class="register-form" action="/register" method="post">
+      <div class="form-group">
+        <label for="name">ชื่อ-นามสกุล</label>
+        <input type="text" name="name" id="name" required />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">เบอร์โทรศัพท์</label>
+        <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" required />
+        <small>รูปแบบ: 0912345678 (10 หลัก)</small>
+      </div>
+
+      <div class="form-group">
+        <label for="email">อีเมล</label>
+        <input type="email" name="email" id="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">รหัสผ่าน</label>
+        <input type="password" name="password" id="password" minlength="6" required />
+        <small>รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร</small>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">ยืนยันรหัสผ่าน</label>
+        <input type="password" name="confirm_password" id="confirm_password" required />
+      </div>
+
+      <button type="submit" class="btn-submit">
+        <i class="fas fa-user-plus"></i> สมัครสมาชิก
+      </button>
+    </form>
+
+    <div class="login-link">
+      มีบัญชีอยู่แล้ว? <a href="/">เข้าสู่ระบบที่นี่</a>
+    </div>
+  </div>
+</body>
+</html>

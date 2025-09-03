@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <title>แก้ไขประวัติการรักษา</title>
+            <%- include('../partials/link') %>
+
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+                    .form-row {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-bottom: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <%- include('../partials/header_vet') %>
+
+
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success"></div>
+        <div id="alertError" class="alert alert-error"></div>
+
+        <!-- Section: ระบบจัดการประวัติการรักษา -->
+        <div class="section-title">ระบบจัดการประวัติการรักษา</div>
+        <div class="form-section" id="mainForm">
+            <!-- Status Badge -->
+            <% if (hasExistingHistory) { %>
+                <div class="status-badge status-completed">
+                    ✅ เคสนี้บันทึกข้อมูลการรักษาเรียบร้อยแล้ว
+                </div>
+            <% } else { %>
+                <div class="status-badge status-pending">
+                    ⏳ รอบันทึกข้อมูลการรักษา
+                </div>
+            <% } %>
+
+            <div style="margin-bottom:20px;" class="pet-info">
+                <div class="light-pink">
+                    <strong >ID เคส:</strong> <%= booking.booking_id %>
+                </div>
+            </div>
+
+            <!-- ใช้ onclick แทน form -->
+            <div id="historyForm">
+                <div style="display: flex; justify-content: space-between;">
+                    <div class="form-row">
+                        <span><strong style="margin-left:20px;">ชื่อสัตว์เลี้ยง:</strong> <%= booking.pet_name %></span>
+                        <span><strong>ประเภทสัตว์เลี้ยง:</strong> <%= booking.pet_type_name %></span>
+                        
+                        <span><strong style="margin-left:20px;">เจ้าของ:</strong> <%= booking.owner_name %></span>
+                        
+                        <span><div class="form-label">น้ำหนัก (กก.) : <span class="form-required">*</span></div><input type="number" step="0.1" class="form-input" id="weight" style="width:100px;" required></span>
+                    </div>
+
+                    <div class="form-row">
+                        <span><strong style="margin-left:20px;">บริการที่เลือก:</strong> <%= booking.service_name %></span>
+                        <span><strong style="margin-left:20px;">วันที่นัดหมาย:</strong> <%= new Date(booking.booking_date).toLocaleDateString('th-TH') %></span>
+                        <span><strong style="margin-left:20px;">ประเภทลูกค้า:</strong> <%= booking.customer_type %></span>
+                    </div>
+
+                    <div class="form-row">
+                        <span><strong class="form-label">วันที่รักษา : </strong><%= today %></span>
+                        <span><strong class="form-label" style="width:120px;">สถานะการรักษา : </strong><%=booking.status %></span>
+                    </div>
+                </div>
+                
+                
+
+                <div class="form-row">
+                    <div class="form-label">การวิจัย/ตรวจพิเศษ :</div>
+                    <input type="text" id="research" style="width:320px;" placeholder="ถ้ามี">
+                </div>
+
+                <div class="form-row" style="align-items:flex-start;">
+                    <div class="form-label">รายละเอียดการรักษา : <span class="form-required">*</span></div>
+                </div>
+                <div class="form-row" style="align-items:flex-start;">
+                    <textarea class="form-textarea" id="treatment_details" required 
+          placeholder="กรุณากรอกรายละเอียดการรักษา..."></textarea>
+                </div>
+                
+
+                <div class="form-footer">
+                    <span class="doctor-info">สัตวแพทย์ : <%= vetName %></span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-cancel" onclick="goBack()">ยกเลิก</button>
+                        <button type="button" class="btn btn-save" id="saveBtn" onclick="saveHistory()" <%= hasExistingHistory ? 'disabled' : '' %>>
+                            <% if (hasExistingHistory) { %>
+                                ✅ บันทึกข้อมูลเสร็จสิ้น
+                            <% } else { %>
+                                บันทึกข้อมูล
+                            <% } %>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนของตารางแสดงประวัติการรักษา -->
+        <div class="section-title">รายการประวัติการรักษา</div>
+        <div class="overflow-x-auto rounded-lg shadow">
+        <div class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>ชื่อสัตว์เลี้ยง</th>
+                        <th>น้ำหนัก (กก.)</th>
+                        <th>วันที่รักษา</th>
+                        <th>บริการ</th>
+                        <th>สัตวแพทย์</th>
+                        <th>สถานะ</th>
+                        <th>ประเภทลูกค้า</th>
+                        <th>รายละเอียดการรักษา</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (histories && histories.length > 0) { %>
+                        <% histories.forEach((h) => { %>
+                        <tr>
+                            <td><%= h.treatment_id %></td>
+                            <td><%= h.pet_name || booking.pet_name %></td>
+                            <td><%= h.weight || '-' %> กก.</td>
+                            <td><%= new Date(h.treatment_date).toLocaleDateString('th-TH') %></td>
+                            <td><%= h.service_name || booking.service_name %></td>
+                            <td><%= h.vet_name %></td>
+                            <td><%= booking.status %></td>
+                            <td><%= h.customer_type || booking.customer_type || '-' %></td>
+                            <td class="treatment-detail">
+                                <%= h.treatment_details || '-' %>
+                            </td>
+                            <td>
+                                <button type="button" 
+  class="btn-edit"
+  onclick="editHistory(<%= h.treatment_id %>)">
+  แก้ไข
+</button>
+
+<a href="/veterinarian/order_medication/<%= h.treatment_id %>" 
+   class="btn-info">
+  จ่ายยา
+</a>
+
+    
+</td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 20px; color: #999;">
+                                ยังไม่มีประวัติการรักษา
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+
+    <script>
+let isSaving = false;
+const hasExistingHistory = <%= hasExistingHistory ? 'true' : 'false' %>;
+
+// ฟังก์ชันสำหรับบันทึกประวัติ
+async function saveHistory() {
+    if (isSaving || hasExistingHistory) return;
+    
+    const weight = document.getElementById('weight').value;
+    const research = document.getElementById('research').value;
+    const treatment_details = document.getElementById('treatment_details').value;
+    
+    // ตรวจสอบข้อมูลที่จำเป็น
+    if (!weight || !treatment_details) {
+        showAlert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน', 'error');
+        return;
+    }
+    
+    // เริ่มสถานะการบันทึก
+    isSaving = true;
+    const saveBtn = document.getElementById('saveBtn');
+    const originalText = saveBtn.innerHTML;
+    
+    // เปลี่ยนปุ่มเป็นสถานะ loading
+    saveBtn.disabled = true;
+    saveBtn.classList.add('btn-loading');
+    saveBtn.innerHTML = 'กำลังบันทึก...';
+    
+    const data = {
+        booking_id: <%= booking.booking_id %>,
+        weight: weight,
+        research: research,
+        treatment_details: treatment_details
+    };
+    
+    try {
+        const response = await fetch('/veterinarian/mg_history/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('บันทึกประวัติการรักษาเรียบร้อยแล้ว', 'success');
+            updateFormToCompleted();
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showAlert('เกิดข้อผิดพลาด: ' + result.message, 'error');
+            resetSaveButton(saveBtn, originalText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showAlert('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+        resetSaveButton(saveBtn, originalText);
+    }
+}
+
+// ฟังก์ชันรีเซ็ตปุ่มบันทึก
+function resetSaveButton(saveBtn, originalText) {
+    isSaving = false;
+    saveBtn.disabled = false;
+    saveBtn.classList.remove('btn-loading');
+    saveBtn.innerHTML = originalText;
+}
+
+// ฟังก์ชันอัพเดทฟอร์มเป็นสถานะเสร็จสิ้น
+function updateFormToCompleted() {
+    const saveBtn = document.getElementById('saveBtn');
+    const form = document.getElementById('mainForm');
+    
+    saveBtn.classList.remove('btn-loading');
+    saveBtn.classList.add('completed');
+    saveBtn.innerHTML = '✅ บันทึกข้อมูลเสร็จสิ้น';
+    saveBtn.disabled = true;
+    
+    document.getElementById('weight').disabled = true;
+    document.getElementById('research').disabled = true;
+    
+    form.classList.add('disabled');
+    
+    const statusBadge = document.querySelector('.status-badge');
+    if (statusBadge) {
+        statusBadge.className = 'status-badge status-completed';
+        statusBadge.innerHTML = '✅ เคสนี้บันทึกข้อมูลการรักษาเรียบร้อยแล้ว';
+    }
+}
+
+// ฟังก์ชันสำหรับกลับหน้าหลัก
+function goHome() {
+    window.location.href = '/veterinarian/pet_order';
+}
+
+// ฟังก์ชันสำหรับกลับหน้าที่แล้ว
+function goBack() {
+    window.history.back();
+}
+
+// ฟังก์ชันสำหรับแก้ไขประวัติ
+function editHistory(treatmentId) {
+    console.log('Edit clicked, ID:', treatmentId);
+    if (!treatmentId) {
+        alert('No treatment ID found');
+        return;
+    }
+    window.location.href = `/veterinarian/mg_history/edit/${treatmentId}`;
+}
+
+function Medication(treatmentId) {
+    console.log('Medication clicked, ID:', treatmentId);
+    if (!treatmentId) {
+        alert('No treatment ID found');
+        return;
+    }
+    window.location.href = `/veterinarian/order_medication/${treatmentId}`;
+}
+// ฟังก์ชันแสดง Alert
+function showAlert(message, type) {
+    const alertElement = document.getElementById(type === 'success' ? 'alertSuccess' : 'alertError');
+    if (alertElement) {
+        alertElement.textContent = message;
+        alertElement.style.display = 'block';
+        
+        setTimeout(() => {
+            alertElement.style.display = 'none';
+        }, 5000);
+    } else {
+        // Fallback ถ้าไม่มี alert element
+        alert(message);
+    }
+}
+
+// Auto-fill ข้อมูลจากประวัติที่มีอยู่
+<% if (hasExistingHistory && histories.length > 0) { %>
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const latestHistory = <%= JSON.stringify(histories[0]) %>;
+        if (latestHistory) {
+            const weightInput = document.getElementById('weight');
+            const treatmentInput = document.getElementById('treatment_details');
+            
+            if (weightInput && latestHistory.weight) {
+                weightInput.value = latestHistory.weight;
+            }
+            if (treatmentInput && latestHistory.treatment_details) {
+                treatmentInput.value = latestHistory.treatment_details;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading history data:', error);
+    }
+});
+<% } %>
+
+// เพิ่ม Event Listener สำหรับ Debug
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded successfully');
+    
+    // ตรวจสอบว่า elements มีอยู่หรือไม่
+    const requiredElements = ['weight', 'treatment_details', 'alertSuccess', 'alertError'];
+    requiredElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (!element) {
+            console.warn(`Element with ID '${id}' not found`);
+        }
+    });
+});
+</script>
+</body>
+</html>

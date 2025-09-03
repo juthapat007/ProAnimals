@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จัดการวันเปิดทำการของหมอ</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <!-- <style>
+     body {
+      font-family: "Prompt", sans-serif;
+      padding: 30px;
+      background: #fdfdfd;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #d96d7b;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+    label {
+      font-weight: bold;
+      color: #555;
+    }
+    input[type="text"] {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button {
+      padding: 8px 14px;
+      background: #f26c78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #e05865;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    th {
+      background: #f26c78;
+      color: white;
+      padding: 12px;
+    }
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    tr:nth-child(even) {
+      background: #fff6f7;
+    }
+    .delete-btn {
+      color: #e05865;
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid #e05865;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+    .delete-btn:hover {
+      background: #e05865;
+      color: white;
+    }
+  </style>  -->
+</head>
+<body>
+
+  <div class="container">
+    <%- include('../partials/header_vet') %>
+    <h2>กำหนดวันเปิดทำการของคุณหมอ</h2>
+
+    <form method="POST" action="/veterinarian/work_days/add">
+      <label for="datepicker">เลือกวันทำงาน:</label>
+      <input type="text" id="datepicker" name="work_dates" required><i class="fa-solid fa-calendar-days calendar-icon"></i>
+      <button type="submit">บันทึก</button>
+    </form>
+
+    <table>
+      <tr>
+        <th>วันที่</th>
+        <th>การจัดการ</th>
+      </tr>
+      <% schedule.forEach(row => { %>
+        <tr>
+          <td><%= new Date(row.work_date).toLocaleDateString("th-TH") %></td>
+          <td>
+            <center>
+            <a href="/veterinarian/work_days/delete/<%= row.work_date.toISOString().slice(0, 10) %>" 
+               class="delete-btn"
+               onclick="return confirm('คุณแน่ใจว่าต้องการลบวันนี้หรือไม่?');">
+               ลบ
+            </a></center>
+          </td>
+        </tr>
+      <% }) %>
+    </table>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+    const disabledDates = <%- JSON.stringify(disabledDates) %>;
+    flatpickr("#datepicker", {
+      mode: "multiple",
+      dateFormat: "Y-m-d",
+      minDate: "today",
+      disable: disabledDates,
+      onReady: function (selectedDates, dateStr, instance) {
+        const customButton = document.createElement("button");
+        customButton.textContent = "เลือกทั้งเดือนนี้";
+        customButton.type = "button";
+        customButton.style.margin = "5px";
+        customButton.style.padding = "5px 10px";
+        customButton.style.background = "#f26c78";
+        customButton.style.color = "white";
+        customButton.style.border = "none";
+        customButton.style.borderRadius = "6px";
+        customButton.style.cursor = "pointer";
+
+        customButton.addEventListener("click", () => {
+          const currentYear = instance.currentYear;
+          const currentMonth = instance.currentMonth;
+          const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+          const dates = [];
+          for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(currentYear, currentMonth, day);
+            const formattedDate = instance.formatDate(date, "Y-m-d");
+            if (date >= new Date() && !disabledDates.includes(formattedDate)) {
+              dates.push(date);
+            }
+          }
+          instance.setDate(dates, true);
+        });
+
+        instance.calendarContainer.appendChild(customButton);
+      }
+    });
+  </script>
+
+</body>
+</html>

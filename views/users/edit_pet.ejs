@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>แก้ไขข้อมูลสัตว์เลี้ยง | ไชยปราการสัตวแพทย์</title>
+    <%- include('../partials/link') %>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Prompt', sans-serif;
+      background-color: #ffe6e9;
+    }
+ 
+    .header {
+      display: flex;
+      justify-content: space-between;
+      /* align-items: center; */
+      color: #FF9AA2;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #FF9AA2;
+      padding-bottom: 10px;
+    }
+    .header h2 {
+      margin: 0;
+    }
+    .menu i {
+      font-size: 24px;
+      cursor: pointer;
+      margin-left: 10px;
+      color: #FF9AA2;
+    }
+    h3.title {
+      text-align: center;
+      color: #333;
+      margin-top: 0;
+    }
+    .edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .edit-form label {
+      color: #555;
+      font-weight: 500;
+    }
+    .edit-form input[type="text"],
+    .edit-form select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #FF9AA2;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    .edit-form input[type="file"] {
+      border: none;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+        <%- include('../partials/header') %>
+
+    <!-- Title -->
+    <h3 class="title">
+      <i class="fas fa-paw"></i> แก้ไขข้อมูลสัตว์เลี้ยง
+    </h3>
+
+    <!-- Form -->
+<form class="edit-form" action="/users/edit_pet" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
+<!-- ภาพ preview + ไอคอนกล้อง -->
+  <div class="upload-icon">
+  <img src="/uploads/<%= pet.img %>" alt="รูปสัตว์เลี้ยง" class="image-preview" id="previewImage" />
+  <label class="camera-icon">
+    <i class="fas fa-camera"></i>
+    <input type="file" name="pet_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)">
+
+  </label>
+</div>
+
+      <!-- Name -->
+      <label for="pet_name">ชื่อ</label>
+      <input type="text" name="pet_name" id="pet_name" value="<%= pet.pet_name %>" required>
+
+      <!-- Gender -->
+      <label for="pet_gender">เพศ</label>
+      <select name="pet_gender" id="pet_gender" required>
+        <option value="ผู้" <%= pet.pet_gender === 'ผู้' ? 'selected' : '' %>>ผู้</option>
+        <option value="เมีย" <%= pet.pet_gender === 'เมีย' ? 'selected' : '' %>>เมีย</option>
+      </select>
+
+      <!-- Pet Type -->
+      <label for="type_id">ประเภทสัตว์</label>
+      <select name="type_id" id="type_id" required>
+        <% pet_types.forEach(pt => { %>
+          <option value="<%= pt.type_id %>" <%= pt.type_id == pet.type_id ? 'selected' : '' %>>
+            <%= pt.type %>
+          </option>
+        <% }) %>
+      </select>
+
+
+      <!-- Buttons -->
+      <div class="btn-group">
+        <button type="button" class="button btn-back" onclick="window.history.back()">ยกเลิก
+      </button>
+        <button type="submit" class="button btn-next">บันทึก</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function previewSelectedImage(input) {
+    const file = input.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('previewImage').src = e.target.result;
+      }
+      reader.readAsDataURL(file);
+
+      // แสดงชื่อไฟล์
+      document.getElementById('file-name').textContent = file.name;
+    }
+  }
+    function toggleDropdown() {
+    const dropdown = document.getElementById('dropdownMenu');
+    dropdown.classList.toggle('show');
+  }
+  window.addEventListener('click', function(e) {
+    const menu = document.querySelector('.menu');
+    if (!menu.contains(e.target)) {
+      document.getElementById('dropdownMenu').classList.remove('show');
+    }
+  });
+    document.getElementById('pet_img').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        document.getElementById('previewImage').src = event.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+  </script>
+</body>
+</html>

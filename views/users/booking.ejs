@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เลือกบริการ | ไชยปราการสัตวแพทย์</title>
+
+<%- include('../partials/link') %>
+
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+
+  <style>
+
+    .service-card {
+  /* align-items: center; */
+  gap: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: border 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+    }
+    
+
+/* ✅ เพิ่ม CSS สำหรับแสดงสถานะการโหลด */
+.loading-message {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 10px;
+}
+
+.error-message {
+  color: #e74c3c;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #e74c3c;
+  border-radius: 5px;
+  background-color: #fdf2f2;
+}
+    
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- ส่วนหัว -->
+<%- include('../partials/header') %>
+  <!-- Progress Bar -->
+  <div class="progress">
+    <div class="progress-step">
+      <div class="progress-circle">1</div>
+      <span>ข้อมูลสัตว์</span>
+    </div>
+    <div class="progress-step active">
+      <div class="progress-circle">2</div>
+      <span>เลือกบริการ-วัน</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">3</div>
+      <span>เวลา</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">4</div>
+      <span>ยืนยัน</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">5</div>
+      <span>เสร็จสิ้น</span>
+    </div>
+  </div>
+
+    <!-- ✅ แสดงข้อมูลสัตว์เลี้ยงที่เลือก -->
+  <% if (locals.pet && locals.pet_id) { %>
+    <div class="pet-card">
+      <h4><i class="fas fa-paw"></i> ข้อมูลสัตว์เลี้ยงที่เลือก</h4>
+      <div class="pet-details">
+        <strong><%= pet.pet_name %></strong> •
+        <span><i class="fas fa-venus-mars"></i> <%= pet.pet_gender %></span> •
+        <span><i class="fas fa-tag"></i> <%= pet.pet_type_name || 'ไม่ระบุ' %></span>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="error-message">
+      <i class="fas fa-exclamation-triangle"></i> 
+      กรุณาเลือกสัตว์เลี้ยงก่อน
+      <br><br>
+      <a href="/users/select_pet" class="btn-primary" style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> กลับไปเลือกสัตว์เลี้ยง
+      </a>
+    </div>
+  <% } %>
+
+<strong>เลือกบริการที่ต้องการ <span style="color: red;">*</span></strong><br>
+  <!-- ฟอร์มเลือกบริการ -->
+  <form id="bookingForm" method="GET" action="/users/select_time">
+    <input type="hidden" name="pet_id" value="<%= pet_id %>">
+    <input type="hidden" name="cus_id" value="<%= cus_id %>">
+    
+    <% if (services.length > 0) { %>
+      <% services.forEach(service => { %>
+        <div class="service-card">
+            <label for="service_<%= service.service_id %>">
+              <div style="display: flex;">
+              <input type="radio" id="service_<%= service.service_id %>" name="service_id" value="<%= service.service_id %>" required>
+              <div class="service-title"><%= service.service_type %>  <div class="service-price"><%= service.service_price.toLocaleString() %> บาท</div></div>
+              </div>
+            </label>
+        </div>
+        <div style="padding-bottom: 5px;"></div>
+      <% }) %>
+    <% } else { %>
+      <p style="text-align: center; color: #666;">ไม่พบข้อมูลบริการ</p>
+    <% } %>
+
+    <div style="text-align: left; display: flex;">
+  <strong>เลือกวันที่</strong><div style="color: red;">*</div>
+</div>
+  
+  <!-- ✅ เพิ่มข้อความแสดงสถานะ -->
+  <div id="loadingMessage" class="loading-message">กำลังโหลดวันที่ที่ให้บริการ...</div>
+  <div id="errorMessage" class="error-message" style="display: none;"></div>
+  
+  <div class="date-input-wrapper">
+    <input type="text" id="bookingDate" name="date" placeholder="เลือกวันที่..." required >
+    <i class="fa-solid fa-calendar-days calendar-icon"></i>
+  </div><br>
+
+  <button type="submit" class="btn-primary" style="width: 100%; height: 60px;">
+        ถัดไป <i class="fas fa-arrow-right"></i> 
+      </button><br><br>
+      <button type="button" class="btn-cancel" style="width: 100%; height: 60px;" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>  ย้อนกลับ
+      </button><br>
+      
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  
+  // ✅ ฟังก์ชันโหลดวันที่ที่ให้บริการจาก vet_work table
+  async function loadAvailableDates() {
+    const loadingMessage = document.getElementById('loadingMessage');
+    const errorMessage = document.getElementById('errorMessage');
+    const dateInput = document.getElementById('bookingDate');
+    
+    try {
+      // แสดงข้อความโหลด
+      loadingMessage.style.display = 'block';
+      errorMessage.style.display = 'none';
+      
+      // ดึงข้อมูลวันที่จาก API
+      const response = await fetch('/users/api/available-dates');
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลได้');
+      }
+      
+      const availableDates = data.availableDates;
+      
+      // ซ่อนข้อความโหลด
+      loadingMessage.style.display = 'none';
+      
+      if (availableDates.length === 0) {
+        errorMessage.textContent = 'ขออภัย ไม่มีวันที่เปิดให้บริการในขณะนี้';
+        errorMessage.style.display = 'block';
+        return;
+      }
+      
+      // เปิดใช้งาน input
+      dateInput.disabled = false;
+      dateInput.placeholder = 'เลือกวันที่...';
+      flatpickr("#bookingDate", {
+  locale: "th",
+  dateFormat: "Y-m-d",
+  disableMobile: true,
+  altInput: true,
+  altFormat: "d/m/Y",
+  allowInput: false,
+
+  // ✅ ใช้ enable เพื่อบังคับเลือกได้เฉพาะวันจาก API
+  enable: availableDates,
+
+  // ✅ โฟกัสไปที่วันปัจจุบันแทน
+  defaultDate: new Date(),
+
+  onReady: function(selectedDates, dateStr, instance) {
+    if (availableDates.length === 0) {
+      instance.input.placeholder = 'ไม่มีวันที่ให้บริการ';
+    }
+  },
+
+  onValueUpdate: function(selectedDates, dateStr, instance) {
+    if (selectedDates.length === 0 && dateStr && !availableDates.includes(dateStr)) {
+      alert('วันที่ที่เลือกไม่เปิดให้บริการ กรุณาเลือกวันที่อื่น');
+    }
+  }
+});
+
+      
+      console.log('✅ โหลดวันที่ให้บริการสำเร็จ:', availableDates);
+      
+    } catch (error) {
+      console.error('❌ Error loading available dates:', error);
+      loadingMessage.style.display = 'none';
+      errorMessage.textContent = 'เกิดข้อผิดพลาดในการโหลดวันที่ให้บริการ กรุณาลองใหม่อีกครั้ง';
+      errorMessage.style.display = 'block';
+    }
+  }
+  
+  // โหลดวันที่เมื่อหน้าเว็บโหลดเสร็จ
+  loadAvailableDates();
+
+  // Validate form
+  document.getElementById("bookingForm").addEventListener("submit", function (e) {
+    const selectedService = document.querySelector('input[name="service_id"]:checked');
+    const selectedDate = document.getElementById("bookingDate").value;
+
+    if (!selectedService || !selectedDate) {
+      e.preventDefault();
+      alert("กรุณาเลือกบริการและวันที่ให้ครบถ้วน");
+    }
+  });
+});
+</script>
+
+</body>
+</html>

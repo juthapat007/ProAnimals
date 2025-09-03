@@ -1,0 +1,23 @@
+<!-- views/partials/header.ejs -->
+<div class="header" style="display: flex; color: #FF9AA2; justify-content: space-between; align-items: center;">
+  <h1>ไชยปราการสัตวแพทย์</h1>
+
+  <div class="menu">
+    <i class="fa-solid fa-house" onclick="window.location.href='/veterinarian/pet_order'"></i>
+    <i class="fa-solid fa-capsules" onclick="window.location.href='/veterinarian/manage_medication'"></i>
+    <i class="fa-solid fa-chart-line" onclick="window.location.href='/veterinarian/report'"></i>
+    <i class="fa-solid fa-calendar-alt" onclick="window.location.href='/veterinarian/work_days'"></i>
+    <div class="hamburger" onclick="toggleDropdown()">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="dropdown" id="dropdownMenu">
+      <a href="/history"><i class="fas fa-history"></i> ประวัติการรักษา</a>
+      <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')">
+  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+</a>
+
+    </div>
+  </div>
+</div>
+<script src="/js/menu.js" defer></script>

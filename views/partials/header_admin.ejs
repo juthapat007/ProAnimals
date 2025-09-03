@@ -1,0 +1,22 @@
+<!-- views/partials/header.ejs -->
+<div class="header" style="display: flex; color: #FF9AA2; justify-content: space-between; align-items: center;">
+  <h1>ไชยปราการสัตวแพทย์</h1>
+
+  <div class="menu">
+    <i class="fa-solid fa-house" onclick="window.location.href='/admin/mg_queue'"></i>
+    <i class="fas fa-user-plus" onclick="window.location.href='/admin/contact_customer'"></i>
+    <i class="fas fa-paw" onclick="window.location.href='/admin/edit_person'"></i>
+    <div class="hamburger" onclick="toggleDropdown()">
+      <i class="fas fa-bars"></i>
+      <div class="dropdown" id="dropdownMenu">
+      <a href="/history"><i class="fas fa-history"></i> ประวัติการรักษา</a>
+      <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')">
+  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+</a>
+
+    </div>
+    </div>
+
+    
+  </div>
+</div>

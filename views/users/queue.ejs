@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="description" content="ระบบนัดหมายสัตวแพทย์ ไชยปราการสัตวแพทย์" />
+  <title>คิวการจองของคุณ - ไชยปราการสัตวแพทย์</title>
+      <%- include('../partials/link') %>
+</head>
+
+<body>
+  <div class="container" >
+
+  
+    <%- include('../partials/header') %>
+
+    <div class="welcome">
+      <br>สวัสดีคุณ: <%= cus_name %>!<br>
+    </div>
+<center>
+      <h1>คิวการจองของคุณ</h1>
+      
+ <div class="overflow-x-auto rounded-lg shadow" style="height:800px;">
+      <% if (bookings && bookings.length > 0) { %>
+        <table>
+          
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>ช่วงเวลา</th>
+              <th>ชื่อสัตว์เลี้ยง</th>
+              <th>บริการ</th>
+              <th>ผู้จอง</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(booking) { %>
+              <tr>
+                 <td>
+            <%= new Date(booking.booking_date).toLocaleDateString('th-TH', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            }) %>
+          </td>
+                <td><span class="time-badge"><%= booking.time_booking %></span></td>
+                <td><%= booking.pet_name %></td>
+                <td><%= booking.service_type %></td>
+                <td><%= booking.status %></td>
+                
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+   
+      <% } else { %>
+        <div class="no-booking">
+          <p>คุณยังไม่มีคิวการจอง</p>
+          <button class="button" onclick="window.location.href='/select_pet'" style="margin-top: 15px;">
+            <i class="fas fa-calendar"></i> จองคิวบริการ
+          </button>
+        </div>
+      <% } %>
+    </div>
+    </center>
+  </div>
+
+</body>
+</html>

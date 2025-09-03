@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ไชปราการสัตวแพทย์ - คิวการรักษา</title>
+  <meta name="viewport" content="width=900, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <!-- <style>
+
+    .form-container {
+      background: #fff;
+      max-width: 1200px;
+      margin: 30px auto;
+      border-radius: 16px;
+      box-shadow: 0 0 10px #e7e7e7;
+      padding: 24px 32px 32px 32px;
+      border: 1.5px solid #f8d9e3;
+      position: relative;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .form-row input, .form-row select {
+      flex: 1;
+    }
+    label {
+      font-size: 1em;
+      color: #e57399;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input[type="text"], input[type="email"], input[type="tel"], select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #e7e7e7;
+      font-size: 1em;
+      background: #fdf6f8;
+      margin-bottom: 0;
+      box-sizing: border-box;
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 8px 0;
+      font-size: 1em;
+    }
+    .pet-image-box {
+      border: 1.5px dashed #f8d9e3;
+      border-radius: 8px;
+      background: #fdf6f8;
+      padding: 12px;
+      text-align: center;
+      color: #bdbdbd;
+      margin-bottom: 18px;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 12px 0;
+      font-size: 1.1em;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #f9a2b7, #f7b6c7);
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .submit-btn:hover {
+      background: linear-gradient(90deg, #f7b6c7, #f9a2b7);
+    }
+
+    /* ไอคอน */
+    .icons {
+      display: flex;
+      gap: 16px;
+    }
+    .icons svg {
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+    }
+
+    /* เมนูดรอปดาวน์ */
+    .dropdown-menu {
+      position: absolute;
+      top: 65px;
+      right: 32px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      list-style: none;
+      padding: 8px 0;
+      margin: 0;
+      display: none;
+      z-index: 999;
+    }
+    .dropdown-menu li {
+      padding: 10px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      color: #f48fb1;
+      font-weight: 500;
+    }
+    .dropdown-menu li:hover {
+      background: #ffe4ec;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        flex-direction: column;
+      }
+    }
+    
+  </style> -->
+</head>
+<body>
+  <div class="container" style="width: 1200px;">
+  <%- include('../partials/header_admin') %>
+
+    <form method="post" action="/add_pet" enctype="multipart/form-data">
+      <div class="form-group">
+        <strong>เพิ่มข้อมูลสัตว์ที่เข้ารักษา</strong>
+        <br>
+        
+        <div class="form-row" style="justify-content: space-between;">
+
+            <p><strong>รหัสลูกค้า:</strong> <%= cusId %></p>
+            <input type="hidden" name="cus_id" value="<%= cusId %>">
+            <p><strong>ชื่อ-นามสกุล:</strong> <%= customer.cus_name %></p>
+            <p><strong>Email:</strong> <%= customer.cus_email %></p>
+            <p><strong>เบอร์โทร:</strong> <%= customer.cus_phon %></p>
+        </div>
+      </div>
+
+      
+      <div class="form-row">
+  <input type="text" name="pet_type" placeholder="ชื่อสัตว์เลี้ยง เช่น มะลิ" required>
+  <select name="pet_gender" required>
+          <option value="">--กรุณาเลือกเพศ--</option>
+          <option value="ผู้">ผู้</option>
+          <option value="เมีย">เมีย</option>
+        </select>
+</div>
+
+
+      <div class="form-row">
+        <select name="pet_type" required>
+    <option value="">--กรุณาเลือกประเภทสัตว์--</option>
+    <% types.forEach(type => { %>
+      <option value="<%= type.type %>"><%= type.type %></option>
+    <% }); %>
+  </select>
+      </div>
+
+
+<div class="pet-image-box">
+  <label for="pet_image"><i class="fas fa-cloud-upload-alt"></i> เลือกรูปสัตว์เลี้ยง</label>
+  <input type="file" name="pet_image" id="pet_image" accept="image/*" style="display:none;">
+  <center>
+  <div style="margin-top:10px;">
+    <img id="preview" src="" alt="ตัวอย่างรูป" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
+  </div></center>
+</div>
+<button class="submit-btn" >บันทึก</button>
+
+<!-- <style>
+.upload-label {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+.upload-label:hover {
+  background: var(--secondary);
+}
+</style> -->
+
+<script>
+document.getElementById('pet_image').addEventListener('change', function(event) {
+  const file = event.target.files[0];
+  const preview = document.getElementById('preview');
+  
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = '';
+    preview.style.display = 'none';
+  }
+});
+</script>
+
+</body>
+</html>

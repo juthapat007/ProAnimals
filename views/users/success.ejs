@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>การจองสำเร็จ | ไชยปราการสัตวแพทย์</title>
+  <style>
+    :root {
+      --primary-color: #FF9AA2;
+      --secondary-color: #FFB7B2;
+      --success-color: #4CAF50;
+      --light-bg: #F9F9F9;
+      --text-color: #333;
+      --border-radius: 12px;
+      --box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    body {
+      font-family: 'Prompt', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #FFF5F5, #FFF0EB);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-color);
+    }
+    
+    .success-container {
+      text-align: center;
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      max-width: 450px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .success-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .success-icon {
+      font-size: 80px;
+      color: var(--success-color);
+      margin-bottom: 20px;
+      animation: bounce 1s ease infinite alternate;
+    }
+    
+    h2 {
+      color: var(--success-color);
+      font-size: 28px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .success-message {
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    
+    .booking-details {
+      background: var(--light-bg);
+      border-radius: var(--border-radius);
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    
+    .detail-label {
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .detail-value {
+      font-weight: 600;
+    }
+    
+    .queue-number {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 20px 0;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .queue-number::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 3px;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(255, 154, 162, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(255, 154, 162, 0.4);
+    }
+    
+    .btn i {
+      font-size: 18px;
+    }
+    
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+    
+    @media (max-width: 480px) {
+      .success-container {
+        padding: 30px 20px;
+      }
+      
+      .success-icon {
+        font-size: 60px;
+      }
+      
+      h2 {
+        font-size: 24px;
+      }
+      
+      .queue-number {
+        font-size: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="success-container">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>การจองสำเร็จแล้ว!</h2>
+    <p class="success-message">
+      ขอบคุณที่ใช้บริการไชยปราการสัตวแพทย์<br>
+      กรุณาตรวจสอบข้อมูลการจองด้านล่าง
+    </p>
+    
+    <div class="booking-details">
+      <div class="detail-item">
+        <span class="detail-label">เลขที่การจอง:</span>
+        <span class="detail-value">#<%= booking_id %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">วันที่:</span>
+        <span class="detail-value"><%= date %></span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">เวลา:</span>
+        <span class="detail-value"><%= time %></span>
+      </div>
+    </div>
+    
+    <div class="queue-number" id="queueNumber">
+      #<%= booking_id %>
+    </div>
+    
+    <button class="btn" onclick="goHome()">
+      <i class="fas fa-home"></i> กลับหน้าแรก
+    </button>
+  </div>
+
+  <script>
+    function goHome() {
+      window.location.href = "/users/main";
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(() => {
+        document.querySelector('.success-container').style.opacity = '1';
+      }, 100);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คำนวดค่าบริการ - ไชยปราการสัตวแพทย์</title>
+    <%- include('../partials/link') %>
+  <style>
+
+    .booking-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #e9ecef;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 5px 0;
+    }
+    
+    .info-label {
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .service-summary {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #2196f3;
+    }
+    
+    .medicine-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #ddd;
+    }
+    
+    .total-summary {
+      background: #e8f5e8;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #4caf50;
+    }
+    
+    .payment-form {
+      background: #fff3e0;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #ff9800;
+    }
+    
+    .dropdown {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      width: 100%;
+    }
+    
+    .dropdown div {
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .dropdown div:hover {
+      background: #f0f0f0;
+    }
+    
+    .medicine-item {
+      background: #f9f9f9;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .dispensed-medicines {
+      background: #f0f8f0;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #4caf50;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" style="width: 80%">
+    <%- include('../partials/header_admin') %>
+
+    <!-- บริการหลัก -->
+    <div class="service-summary">
+      <b>บริการหลัก</b><br />
+      บริการที่เลือก: <span id="service-name"><%= booking.service_name || 'ตรวจสุขภาพ' %></span><br>
+      ราคา: <span id="service-price" data-price="<%= booking.service_price || 0 %>">
+        <%= (booking.service_price || 0).toFixed(2) %> บาท
+      </span>
+    </div>
+
+    <!-- ยาที่จ่ายแล้ว -->
+    <div class="dispensed-medicines">
+      <h4>รายการจ่ายยา</h4>
+      <div id="dispensed-list">
+        <% if (dispensedMeds && dispensedMeds.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>ยา</th>
+                  <th>บรรจุภัณฑ์</th>
+                  <th class="text-end">ราคา/หน่วย</th>
+                  <th class="text-center">จำนวน</th>
+                  <th class="text-end">รวม</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% let medicineTotal = 0; %>
+                <% dispensedMeds.forEach(function(d){ %>
+                  <% medicineTotal += parseFloat(d.total_price); %>
+                  <tr data-dispens-id="<%= d.dispens_id %>">
+                    <td><%= d.medicine_name %></td>
+                    <td><small class="text-muted"><%= d.medicine_package %></small></td>
+                    <td class="text-end">฿<%= (+d.medicine_price).toFixed(2) %></td>
+                    <td class="text-center"><%= d.quantity %></td>
+                    <td class="text-end">฿<%= (+d.total_price).toFixed(2) %></td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-sm btn-outline-danger"
+                              onclick="removeDispens('<%= d.dispens_id %>')">ลบ</button>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+              <tfoot>
+                <tr style="font-weight: bold;">
+                  <td colspan="4" class="text-end">รวมค่ายา:</td>
+                  <td class="text-end">฿<%= medicineTotal.toFixed(2) %></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-muted">ยังไม่มีรายการยาที่จ่าย</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- เพิ่มยาใหม่ -->
+    <h3 class="text-lg font-bold mb-3">เพิ่มยาและอุปกรณ์การแพทย์</h3>
+    <form id="medicine-form" onsubmit="return false;" class="w-full p-4 bg-white rounded-xl shadow-md">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+
+        <!-- Search -->
+        <div class="md:col-span-2 relative">
+          <input type="text" 
+                 id="med_search" 
+                 placeholder="ค้นหารหัสหรือชื่อยา" 
+                 autocomplete="off"
+                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+          <div id="med_dropdown" class="dropdown absolute left-0 right-0 bg-white border rounded-lg mt-1 shadow-lg hidden"></div>
+        </div>
+
+        <!-- จำนวน -->
+        <div>
+          <input type="number" 
+                 id="med_num" 
+                 placeholder="จำนวน" 
+                 min="1" 
+                 value="1"
+                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <!-- บรรจุภัณฑ์ -->
+        <div>
+          <input type="text" 
+                 id="med_unit" 
+                 value="บรรจุภัณฑ์" 
+                 disabled
+                 class="w-full border rounded-lg px-3 py-2 bg-gray-200 text-gray-500 cursor-not-allowed" />
+        </div>
+
+        <!-- ราคา/หน่วย -->
+        <div>
+          <input type="text" 
+                 id="med_price" 
+                 value="ราคา/หน่วย" 
+                 disabled
+                 class="w-full border rounded-lg px-3 py-2 bg-gray-200 text-gray-500 cursor-not-allowed" />
+        </div>
+
+        <!-- ปุ่มเพิ่ม -->
+          <button type="button"
+                  onclick="addMedicine()"
+                  class="btn-info">
+            เพิ่ม
+          </button>
+
+        <!-- รวมราคา -->
+        <div class="flex items-center font-bold text-gray-700">
+          รวม: <span class="total-price text-blue-600 ml-2" id="med_total">0.00</span> บาท
+        </div>
+
+      </div>
+    </form>
+
+    <!-- รายการยาที่เลือกเพิ่ม -->
+    <div class="medicine-section">
+      <div id="selected-medicines">
+        <h4>รายการยาที่เลือกเพิ่ม:</h4>
+        <div id="medicine-list"></div>
+      </div>
+    </div>
+
+    <!-- สรุปยอดรวม -->
+    <div class="total-summary">
+      <h3>สรุปค่าใช้จ่าย</h3>
+      <div class="info-row">
+        <span>ค่าบริการหลัก:</span>
+        <span id="summary-service-price"><%= (booking.service_price || 0).toFixed(2) %> บาท</span>
+      </div>
+      <div class="info-row">
+        <span>ค่ายาที่จ่ายแล้ว:</span>
+        <span id="summary-dispensed-price">
+          <% let totalDispensed = 0; %>
+          <% if (dispensedMeds && dispensedMeds.length > 0) { %>
+            <% dispensedMeds.forEach(d => totalDispensed += parseFloat(d.total_price)); %>
+          <% } %>
+          <%= totalDispensed.toFixed(2) %> บาท
+        </span>
+      </div>
+      <div class="info-row">
+        <span>ค่ายาและอุปกรณ์เพิ่ม:</span>
+        <span id="summary-medicine-price">0.00 บาท</span>
+      </div>
+      <hr>
+      <div class="info-row" style="font-size: 18px; font-weight: bold; color: #2e7d32;">
+        <span>ยอดรวมทั้งสิ้น:</span>
+        <span id="summary-total-price"><%= ((booking.service_price || 0) + totalDispensed).toFixed(2) %> บาท</span>
+      </div>
+    </div>
+
+    <!-- ฟอร์มชำระเงิน -->
+    <div class="payment-form">
+      <h3>บันทึกการชำระเงิน</h3>
+      <form id="payment-form" action="/admin/total_pay" method="POST">
+        <input type="hidden" name="booking_id" value="<%= booking.booking_id %>">
+        <input type="hidden" name="medications" id="medications-data" value="[]">
+        
+        <div class="form-group">
+          <label for="payment_amount">จำนวนเงินที่รับชำระ (บาท):</label>
+          <input type="number" 
+                 id="payment_amount" 
+                 name="payment_amount" 
+                 value="<%= ((booking.service_price || 0) + totalDispensed).toFixed(2) %>" 
+                 min="0" 
+                 step="0.01" 
+                 required>
+        </div>
+        
+        <div class="form-group">
+          <label for="payment_method">วิธีการชำระเงิน:</label>
+          <select id="payment_method" name="payment_method" required>
+  <option value="">-- เลือกวิธีการชำระ --</option>
+  <% paymentOptions.forEach(pm => { %>
+    <option value="<%= pm %>" <%= currentPayment === pm ? 'selected' : '' %>>
+      <%= pm %>
+    </option>
+  <% }) %>
+</select>
+
+<% if (paymentDone) { %>
+  <div class="text-green-600 font-bold mt-2">
+    ✅ คุณได้ชำระเงินแล้ว
+  </div>
+<% } %>
+        </div>
+        
+        <div class="form-group">
+          <label for="payment_note">หมายเหตุการชำระเงิน:</label>
+          <input type="text" 
+                 id="payment_note" 
+                 name="payment_note" 
+                 placeholder="เช่น เงินทอน, หมายเลขอ้างอิง">
+        </div>
+
+        <div class="btn-group">
+          <button class="btn-cancel" type="button" onclick="goBack()">ย้อนกลับ</button>
+          <button class="btn-success" type="submit">บันทึกการชำระเงิน</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="success" style="display:none;" class="success-msg">
+      ✅ บันทึกข้อมูลสำเร็จ!
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // ตัวแปรสำหรับเก็บรายการยา
+    let selectedMedicines = [];
+    let servicePrice = parseFloat('<%= booking.service_price || 0 %>');
+    let dispensedPrice = parseFloat('<%= totalDispensed || 0 %>'); // ค่ายาที่จ่ายแล้ว
+
+    // ค้นหายา
+    const input = document.getElementById('med_search');
+    const dropdown = document.getElementById('med_dropdown');
+
+    input.addEventListener('input', function() {
+      const keyword = this.value.trim();
+      if (!keyword) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      fetch(`/admin/total_pay/search?keyword=${encodeURIComponent(keyword)}`)
+        .then(res => res.json())
+        .then(data => {
+          dropdown.innerHTML = '';
+          if (data.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+          }
+
+          data.forEach(med => {
+            const div = document.createElement('div');
+            div.textContent = `${med.medication_id} - ${med.medicine_name} (${med.medicine_price} บาท)`;
+            div.addEventListener('click', () => {
+              input.value = med.medicine_name;
+              dropdown.style.display = 'none';
+              
+              document.getElementById('med_unit').value = med.medicine_package;
+              document.getElementById('med_price').value = med.medicine_price;
+              updateMedicineTotal();
+              
+              input.dataset.selectedMed = JSON.stringify(med);
+            });
+            dropdown.appendChild(div);
+          });
+
+          dropdown.style.display = 'block';
+        })
+        .catch(err => console.error('Medicine search error:', err));
+    });
+
+    // ซ่อน dropdown เมื่อคลิกนอก
+    document.addEventListener('click', function(e) {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    // คำนวดราคารวมยา
+    function updateMedicineTotal() {
+      const quantity = parseInt(document.getElementById('med_num').value) || 0;
+      const price = parseFloat(document.getElementById('med_price').value) || 0;
+      const total = quantity * price;
+      document.getElementById('med_total').textContent = total.toFixed(2);
+    }
+
+    document.getElementById('med_num').addEventListener('input', updateMedicineTotal);
+
+    // เพิ่มยาลงรายการ
+    function addMedicine() {
+      const medSearch = document.getElementById('med_search');
+      const quantity = parseInt(document.getElementById('med_num').value);
+      const unit = document.getElementById('med_unit').value;
+      const price = parseFloat(document.getElementById('med_price').value);
+
+      if (!medSearch.dataset.selectedMed || !quantity || !price) {
+        alert('กรุณากรอกข้อมูลยาให้ครบถ้วน');
+        return;
+      }
+
+      const selectedMed = JSON.parse(medSearch.dataset.selectedMed);
+      const totalPrice = quantity * price;
+
+      const medicine = {
+        medication_id: selectedMed.medication_id,
+        medicine_name: selectedMed.medicine_name,
+        quantity: quantity,
+        unit: unit,
+        unit_price: price,
+        total_price: totalPrice
+      };
+
+      selectedMedicines.push(medicine);
+      updateMedicineDisplay();
+      clearMedicineForm();
+    }
+
+    // แสดงรายการยาที่เลือก
+    function updateMedicineDisplay() {
+      const medicineList = document.getElementById('medicine-list');
+      medicineList.innerHTML = '';
+
+      let totalMedicinePrice = 0;
+
+      selectedMedicines.forEach((med, index) => {
+        totalMedicinePrice += med.total_price;
+        
+        const div = document.createElement('div');
+        div.className = 'medicine-item';
+        div.innerHTML = `
+          <span>${med.medicine_name} × ${med.quantity} ${med.unit}</span>
+          <span>${med.total_price.toFixed(2)} บาท</span>
+          <button type="button" onclick="removeMedicine(${index})" style="color: red;">ลบ</button>
+        `;
+        medicineList.appendChild(div);
+      });
+
+      // อัปเดตสรุปราคา
+      document.getElementById('summary-medicine-price').textContent = totalMedicinePrice.toFixed(2) + ' บาท';
+      const totalPrice = servicePrice + dispensedPrice + totalMedicinePrice;
+      document.getElementById('summary-total-price').textContent = totalPrice.toFixed(2) + ' บาท';
+      document.getElementById('payment_amount').value = totalPrice.toFixed(2);
+
+      // อัปเดต hidden input
+      document.getElementById('medications-data').value = JSON.stringify(selectedMedicines);
+    }
+
+    // ลบยา
+    function removeMedicine(index) {
+      selectedMedicines.splice(index, 1);
+      updateMedicineDisplay();
+    }
+
+    // ล้างฟอร์มยา
+    function clearMedicineForm() {
+      document.getElementById('med_search').value = '';
+      document.getElementById('med_search').dataset.selectedMed = '';
+      document.getElementById('med_num').value = '1';
+      document.getElementById('med_unit').value = '';
+      document.getElementById('med_price').value = '';
+      document.getElementById('med_total').textContent = '0.00';
+    }
+
+    // ย้อนกลับ
+    function goBack() {
+      if (confirm('คุณต้องการย้อนกลับหรือไม่? ข้อมูลที่ยังไม่ได้บันทึกจะหายไป')) {
+        window.location.href = '/admin/mg_queue';
+      }
+    }
+
+    // ลบยาที่จ่ายแล้ว
+    async function removeDispens(dispensId) {
+      if (!confirm('ยืนยันการลบยาที่จ่ายแล้วใช่หรือไม่?')) return;
+      
+      try {
+        const res = await fetch(`/veterinarian/order_medication/remove_medication/${dispensId}`, {
+          method: 'DELETE'
+        });
+        const json = await res.json();
+        
+        if (json.success) {
+          alert(json.message);
+          location.reload();
+        } else {
+          alert(json.message || 'ลบไม่สำเร็จ');
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาด: ' + err.message);
+      }
+    }
+
+    // ส่งฟอร์มชำระเงิน
+    document.getElementById('payment-form').addEventListener('submit', function(e) {
+      const paymentAmount = parseFloat(document.getElementById('payment_amount').value);
+      const paymentMethod = document.getElementById('payment_method').value;
+      
+      if (!paymentAmount || paymentAmount <= 0) {
+        e.preventDefault();
+        alert('กรุณากรอกจำนวนเงินที่ถูกต้อง');
+        return;
+      }
+      
+      if (!paymentMethod) {
+        e.preventDefault();
+        alert('กรุณาเลือกวิธีการชำระเงิน');
+        return;
+      }
+      
+      if (!confirm(`ยืนยันการชำระเงิน ${paymentAmount.toFixed(2)} บาท?`)) {
+        e.preventDefault();
+        return;
+      }
+    });
+  </script>
+
+</body>
+</html>

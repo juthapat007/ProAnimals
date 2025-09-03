@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จ่ายยา - <%= booking.pet_name %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/output.css">
+  <!-- Bootstrap CSS + JS (bundle ต้องมีเพื่อให้ collapse ทำงาน) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
+        
+
+</head>
+<body class="bg-light">
+<div class="container py-3">
+  <%- include('../partials/header_vet') %>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h4 class="mb-0">จ่ายยา</h4>
+      <small class="text-muted">
+        สัตวแพทย์: <%= vetName %> |
+        Treatment ID: <%= treatmentId %> |
+        Booking ID: <%= booking.booking_id %>
+      </small>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" onclick="location.href='/veterinarian/pet_order'">กลับ</button>
+  </div>
+
+  <!-- ข้อมูลพื้นฐาน -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-4"><strong>เจ้าของ:</strong> <%= booking.owner_name %></div>
+        <div class="col-md-4"><strong>สัตว์เลี้ยง:</strong> <%= booking.pet_name %> (<%= booking.pet_type_name %>)</div>
+        <div class="col-md-4"><strong>บริการ:</strong> <%= booking.service_name %> (฿<%= (booking.service_price||0).toFixed(2) %>)</div>
+        <div class="col-md-4"><strong>วันที่:</strong> <%= new Date(booking.booking_date).toLocaleDateString('th-TH') %></div>
+        <div class="col-md-4"><strong>เวลา:</strong> <%= booking.time_booking %></div>
+        <div class="col-md-4"><strong>สถานะ:</strong> <%= booking.status %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- รายการยาที่จ่ายแล้ว -->
+  <div class="card mb-3">
+    
+    <div class="card-header">รายการยาที่จ่ายแล้ว</div>
+    <div class="card-body">
+      <div id="dispensed-list">
+        <% if (dispensedMeds && dispensedMeds.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>ยา</th>
+                  <th>บรรจุภัณฑ์</th>
+                  <th class="text-end">ราคา/หน่วย</th>
+                  <th class="text-center">จำนวน</th>
+                  <th class="text-end">รวม</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% dispensedMeds.forEach(function(d){ %>
+                  <tr data-dispens-id="<%= d.dispens_id %>">
+                    <td><%= d.medicine_name %></td>
+                    <td><small class="text-muted"><%= d.medicine_package %></small></td>
+                    <td class="text-end">฿<%= (+d.medicine_price).toFixed(2) %></td>
+                    <!-- ⚠️ ใช้ d.quantity ให้ตรงกับคอลัมน์ใน DB -->
+                    <td class="text-center"><%= d.quantity %></td>
+                    <td class="text-end">฿<%= (+d.total_price).toFixed(2) %></td>
+                    <td class="text-end">
+                      <button type="button" class="btn btn-sm btn-outline-danger"
+                              onclick="removeDispens('<%= d.dispens_id %>')">ลบ</button>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="text-muted">ยังไม่มีรายการยาที่จ่าย</div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- ตะกร้ารอยืนยัน -->
+  <div id="cartCard" class="card mb-3" style="display:none;">
+    <div class="card-header">รายการยาที่เลือกไว้</div>
+    <div class="card-body">
+      <div id="cartList"></div>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div><strong>ค่ายารวม: ฿<span id="cartTotal">0.00</span></strong></div>
+        <div>
+          <button type="button" class="btn btn-outline-secondary me-2" onclick="clearCart()">ล้าง</button>
+          <button type="button" class="btn btn-success" id="saveCartBtn" onclick="saveBatch()">บันทึกทั้งหมด</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- ปุ่มเปิดเมนูยา -->
+  <button type="button" onclick="toggleMenu()" class="bg-blue-500 text-white px-3 py-1 rounded">
+  + เพิ่มยา
+</button>
+
+  <!-- เมนูยา (collapse) -->
+  <div id="addMedicineSection" class="hidden border rounded p-2">
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="mb-2">
+          <input type="text" id="medicineSearch" class="form-control" placeholder="ค้นหาด้วยชื่อยา...">
+        </div>
+        <div id="medicineList" class="border rounded p-2" style="max-height: 320px; overflow:auto;">
+          <% if (medication && medication.length > 0) { %>
+            <% medication.forEach(m => { %>
+              <div class="row g-2 align-items-center border-bottom py-2" data-medication-id="<%= m.medication_id %>">
+                <div class="col-md-4">
+                  <strong class="medicine-name"><%= m.medicine_name %></strong><br>
+                  <small class="text-muted"><%= m.medicine_package %></small>
+                </div>
+                <div class="col-md-2">ราคา: ฿<span class="price"><%= m.medicine_price %></span></div>
+                <div class="col-md-2">คงเหลือ: <span class="stock"><%= m.stock_quantity %></span></div>
+                <div class="col-md-2">
+                  <input type="number" class="form-control form-control-sm qty-input" value="1" min="1" max="<%= m.stock_quantity %>">
+                </div>
+                <div class="col-md-2 text-end">
+                  <button type="button" class="btn btn-sm btn-outline-success add-to-cart">เพิ่ม</button>
+                </div>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="text-muted">ไม่มีข้อมูลยา</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- สรุปทั้งหมด -->
+  <div class="card">
+    <div class="card-body d-flex justify-content-between">
+      <div>ค่าบริการ: ฿<%= (booking.service_price||0).toFixed(2) %></div>
+      <div>ค่ายาที่จ่ายแล้ว: ฿<%= (medicineTotal||0).toFixed(2) %></div>
+      <div><strong>รวมสุทธิ: ฿<%= (grandTotal||0).toFixed(2) %></strong></div>
+    </div>
+  </div>
+
+</div>
+
+<input type="hidden" id="treatmentId" value="<%= treatmentId %>">
+
+<script>
+  // ---- ตะกร้ายาแบบง่าย ----
+  const cart = []; // {medication_id, name, price, package, stock, qty}
+  function toggleMenu() {
+    const el = document.getElementById("addMedicineSection");
+    el.classList.toggle("hidden");
+  }
+  function refreshCartUI(){
+    const card = document.getElementById('cartCard');
+    const list = document.getElementById('cartList');
+    const totalEl = document.getElementById('cartTotal');
+
+    if(cart.length === 0){
+      card.style.display = 'none';
+      list.innerHTML = '';
+      totalEl.textContent = '0.00';
+      return;
+    }
+
+    card.style.display = 'block';
+    list.innerHTML = cart.map(item => `
+      <div class="row g-2 align-items-center border-bottom py-2" data-medication-id="${item.medication_id}">
+        <div class="col-md-4">
+          <strong>${item.name}</strong><br>
+          <small class="text-muted">${item.package}</small>
+        </div>
+        <div class="col-md-2 text-end">฿${(+item.price).toFixed(2)}</div>
+        <div class="col-md-3 d-flex align-items-center">
+          <input type="number" class="form-control form-control-sm me-2 cart-qty"
+                 value="${item.qty}" min="1" max="${item.stock}"
+                 oninput="updateQty('${item.medication_id}', this.value)">
+          <small class="text-muted">คงเหลือ: ${item.stock}</small>
+        </div>
+        <div class="col-md-2 text-end">฿${(+item.price * item.qty).toFixed(2)}</div>
+        <div class="col-md-1 text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.medication_id}')">ลบ</button>
+        </div>
+      </div>
+    `).join('');
+
+    const total = cart.reduce((s,i)=> s + (+i.price * i.qty), 0);
+    totalEl.textContent = total.toFixed(2);
+  }
+
+  function addToCart(row){
+    const id = row.getAttribute('data-medication-id');
+    const name = row.querySelector('.medicine-name').textContent.trim();
+    const price = parseFloat(row.querySelector('.price').textContent.trim());
+    const stock = parseInt(row.querySelector('.stock').textContent.trim());
+    const pkg = row.querySelector('.text-muted').textContent.trim();
+    const qtyInput = row.querySelector('.qty-input');
+    const qty = parseInt(qtyInput.value);
+
+    if(!qty || qty <= 0){ alert('กรุณาใส่จำนวนให้ถูกต้อง'); return; }
+    if(qty > stock){ alert('จำนวนเกินสต็อก'); return; }
+    if(cart.find(x=>x.medication_id===id)){ alert('มีรายการนี้ในตะกร้าแล้ว'); return; }
+
+    cart.push({ medication_id:id, name, price, package:pkg, stock, qty });
+    refreshCartUI();
+  }
+
+  function removeFromCart(id){
+    const idx = cart.findIndex(x=>x.medication_id===id);
+    if(idx>-1){ cart.splice(idx,1); refreshCartUI(); }
+  }
+
+  function updateQty(id, val){
+    const item = cart.find(x=>x.medication_id===id);
+    if(!item) return;
+    const q = parseInt(val);
+    if(!q || q<=0) return;
+    if(q > item.stock){ alert('จำนวนเกินสต็อก'); return; }
+    item.qty = q;
+    refreshCartUI();
+  }
+
+  function clearCart(){
+    cart.length = 0;
+    refreshCartUI();
+  }
+
+  // bind ปุ่มเพิ่มในรายการยา
+  document.addEventListener('click', (e)=>{
+    if(e.target.classList.contains('add-to-cart')){
+      const row = e.target.closest('[data-medication-id]');
+      addToCart(row);
+    }
+  });
+
+  // ค้นหา
+  document.getElementById('medicineSearch')?.addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#medicineList [data-medication-id]').forEach(row=>{
+      const name = row.querySelector('.medicine-name').textContent.toLowerCase();
+      row.style.display = name.includes(q) ? '' : 'none';
+    });
+  });
+
+  // บันทึก Batch
+  async function saveBatch(){
+    if(cart.length === 0){ alert('ยังไม่มีรายการยาในตะกร้า'); return; }
+    const btn = document.getElementById('saveCartBtn');
+    btn.disabled = true; btn.textContent = 'กำลังบันทึก...';
+
+    try{
+      const treatmentId = document.getElementById('treatmentId').value;
+      const payload = {
+        treatment_id: treatmentId,
+        medications: cart.map(i => ({ medication_id: i.medication_id, quantity: i.qty }))
+      };
+
+      const res = await fetch('/veterinarian/order_medication/save_medications_batch', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if(!json.success){
+        alert(json.message || 'บันทึกไม่สำเร็จ');
+        btn.disabled = false; btn.textContent = 'บันทึกทั้งหมด';
+        return;
+      }
+      alert(json.message);
+      location.reload();
+    }catch(err){
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+      btn.disabled = false; btn.textContent = 'บันทึกทั้งหมด';
+    }
+  }
+
+  // ลบรายการที่จ่ายไปแล้ว (คืนสต็อกด้วยในฝั่ง server)
+  async function removeDispens(dispensId){
+    if(!confirm('ยืนยันการลบการจ่ายยารายการนี้?')) return;
+    try{
+      const res = await fetch(`/veterinarian/order_medication/remove_medication/${dispensId}`, { method:'DELETE' });
+      const json = await res.json();
+      if(json.success){ alert(json.message); location.reload(); }
+      else { alert(json.message || 'ลบไม่สำเร็จ'); }
+    }catch(err){
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+ให้tailwind ทำงาน
+(ลดรูปแล้ว)
+npm run build-css
+npx tailwindcss -i ./src/input.css -o ./public/css/output.css --watch

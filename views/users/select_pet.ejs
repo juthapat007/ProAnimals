@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>สัตว์เลี้ยงของฉัน | ไชยปราการสัตวแพทย์</title>
+<%- include('../partials/link') %>
+  <style>
+    /* styles เหมือนเดิม */
+  </style>
+</head>
+<body>
+<div class="container">
+<%- include('../partials/header') %>
+
+  <div class="progress">
+    <div class="progress-step active">
+      <div class="progress-circle">1</div>
+      <span>ข้อมูลสัตว์</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">2</div>
+      <span>เลือกบริการ-วัน</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">3</div>
+      <span>เวลา</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">4</div>
+      <span>ยืนยัน</span>
+    </div>
+    <div class="progress-step">
+      <div class="progress-circle">5</div>
+      <span>เสร็จสิ้น</span>
+    </div>
+  </div>
+
+  <p>สัตว์เลี้ยงทั้งหมดของคุณ : <%= cus_name %> <!-- <(cus_id = <%= cus_id %>)--></p> 
+  <% if (error) { %>
+    <div class="error-message"><%= error %></div>
+  <% } %>
+
+<% if (pets && pets.length > 0) { %>
+  <!-- <div class="pet-card" style="display: flex; flex-wrap: wrap; gap: 20px;"> -->
+    <% pets.forEach(function(pet) { %>
+      <form method="POST" action="/users/booking" class="pet-form" >
+        <div style="display: flex;">
+        <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
+        <input type="hidden" name="cus_id" value="<%= cus_id %>">
+
+        <button type="submit" class="pet-card" style="width: 150%;">
+        <div style="display: flex; " >
+          <div class="image-preview" >
+            <img style="width: 150px; height: 150px; border-radius: 10px; object-fit: cover;"
+                 src="/uploads/<%= pet.img %>"
+                 alt="รูปภาพสัตว์เลี้ยง">
+          </div>
+          <div style="text-align: left;">
+            <strong class="text-primary"><%= pet.pet_name %></strong><br>
+    <p>
+    <i class="fas fa-venus-mars"></i> เพศ: <%= pet.pet_gender %><br>
+    <i class="fas fa-paw"></i> ประเภท: <%= pet.type || '-' %>
+  </p>
+</div>
+
+          </div>
+        </button>
+
+        <a href="/users/edit_pet?pet_id=<%= pet.pet_id %>" 
+        class="btn-edit">
+  <center><div style="padding-top: 100%; height: 100px;"><i class="fas fa-edit">แก้ไขข้อมูล</i></div></center>
+</a></div>
+
+      </form>
+
+    <% }) %>
+  <!-- </div> -->
+<% }
+  else { %>
+  <p class="no-pets">ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+  <br>
+<% } %>
+<a href="/users/insert_pet" class="button add-pet-btn">
+    <i class="fas fa-plus"></i> เพิ่มข้อมูลสัตว์เลี้ยง
+  </a>
+
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const update = urlParams.get('update');
+
+    if (update === 'success') {
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกเรียบร้อย',
+        text: 'ข้อมูลสัตว์เลี้ยงของคุณถูกอัปเดตแล้ว',
+        confirmButtonText: 'ตกลง'
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

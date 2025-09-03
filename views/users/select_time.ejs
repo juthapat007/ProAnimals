@@ -1,0 +1,216 @@
+<% 
+const isTimeAvailable = (time, booked_times) => !booked_times.includes(time);
+%>
+
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>จองคิวบริการ - เลือกเวลา</title>
+  <style>
+    .time-table th {
+      background-color: #FFB7B2;
+      color: white;
+      padding: 12px;
+      text-align: center;
+      border-radius: var(--border-radius);
+    }
+    /* Mobile Responsive Styles */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+        margin: 10px;
+      }
+
+      .time-table {
+        border-spacing: 5px;
+        margin: 15px 0;
+      }
+
+      .time-table th {
+        padding: 10px 4px;
+        font-size: 0.95em;
+      }
+
+      .slot-btn {
+        min-width: 60px;
+        padding: 10px 4px;
+        font-size: 0.9rem;
+      }
+
+      .button {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Extra Small Mobile (< 360px) */
+    @media (max-width: 359px) {
+      .time-table {
+        border-spacing: 3px;
+      }
+
+      .time-table th {
+        padding: 8px 2px;
+        font-size: 0.85em;
+      }
+
+      .slot-btn {
+        min-width: 50px;
+        padding: 8px 2px;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* Tablet Styles */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .time-table {
+        border-spacing: 10px;
+      }
+
+      .slot-btn {
+        min-width: 80px;
+        padding: 14px 10px;
+        font-size: 1.05rem;
+      }
+    }
+
+    /* Large Screen Styles */
+    @media (min-width: 769px) {
+      .time-table {
+        border-spacing: 12px;
+      }
+
+      .slot-btn {
+        min-width: 90px;
+        padding: 16px 12px;
+        font-size: 1.1rem;
+      }
+    }
+
+    /* Landscape Mode for Mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .time-table {
+        margin: 10px 0;
+      }
+      
+      .slot-btn {
+        padding: 8px 6px;
+      }
+    }
+  </style>
+  <%- include('../partials/link') %>
+</head>
+<body>
+  <div class="container">
+<%- include('../partials/header') %>
+
+    <div class="progress">
+      <div class="progress-step">
+        <div class="progress-circle">1</div>
+        <span>ข้อมูลสัตว์</span>
+      </div>
+      <div class="progress-step">
+        <div class="progress-circle">2</div>
+        <span>เลือกบริการ-วัน</span>
+      </div>
+      <div class="progress-step active">
+        <div class="progress-circle">3</div>
+        <span>เวลา</span>
+      </div>
+      <div class="progress-step">
+        <div class="progress-circle">4</div>
+        <span>ยืนยัน</span>
+      </div>
+      <div class="progress-step">
+        <div class="progress-circle">5</div>
+        <span>เสร็จสิ้น</span>
+      </div>
+    </div>
+    
+
+    <form action="/users/confirm" method="post" id="bookingForm">
+      <!-- <div class="section"> -->
+        <p>วันที่: <%= date %></p>
+          <input type="hidden" name="date" value="<%= date %>">
+
+        <div style="text-align: left;">
+          <h2>เลือกเวลา <span style="color: red;">*</span></h2>
+        </div>
+
+        <input type="hidden" name="cus_id" value="<%= cus_id %>">
+        <input type="hidden" name="pet_id" value="<%= pet_id %>">
+        <input type="hidden" name="service_id" value="<%= service_id %>">
+        <input type="hidden" name="time" id="selectedTimeInput" required />
+
+        <center>
+          <div class="overflow-x-auto rounded-lg shadow">
+        <table class="time-table " >
+  <thead >
+    <tr>
+      <th>เช้า</th>
+      <th>บ่าย</th>
+      <th>เย็น</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% 
+      const times = [
+        ['09:00', '13:00', '16:00'],
+        ['10:00', '14:00', '17:00'],
+        ['11:00', '15:00', '18:00']
+      ];
+    %>
+
+    <% times.forEach(row => { %>
+      <tr>
+        <% row.forEach(time => { %>
+          <td>
+            <button 
+              type="button"
+              class="slot-btn <%= booked_times.includes(time) ? 'slot-booked' : 'slot-available' %>"
+              data-time="<%= time %>"
+              <%= booked_times.includes(time) ? 'disabled' : '' %>>
+              <%= time %>
+            </button>
+          </td>
+        <% }); %>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+</div><br>
+</center>
+        <button type="submit" class="button" style="width: 100%; height: 60px;"> ถัดไป </button><br><br>
+        <button type="button" class="button btn-back" onclick="history.back()"  style="width: 100%;"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
+      <!-- </div> -->
+    </form>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      
+
+      let selectedSlot = null;
+      document.querySelectorAll('.slot-btn.slot-available').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('slot-selected'));
+          this.classList.add('slot-selected');
+          selectedSlot = this.getAttribute('data-time');
+          document.getElementById("selectedTimeInput").value = selectedSlot;
+        });
+      });
+
+      document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('selectedTimeInput').value.trim()) {
+          e.preventDefault();
+          alert('กรุณาเลือกช่วงเวลาด้วยค่ะ');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
