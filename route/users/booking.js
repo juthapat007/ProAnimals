@@ -1,5 +1,9 @@
 import express from 'express';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+dayjs.extend(utc);
+dayjs.extend(timezone);
 import { requireLogin } from '../../middleware/auth.js';
 import { getPoolPromise } from '../../config/db.js';
 
@@ -74,7 +78,7 @@ router.post('/booking', async (req, res) => {
         pet: null,
         services: [],
         today: new Date().toISOString().slice(0, 10),
-        error: 'ไม่พบข้อมูลสัตว์เลี้ยง'
+        error: 'ไม่พบข้อมุลสัตว์เลี้ยง'
       });
     }
 
@@ -116,41 +120,105 @@ router.post('/booking', async (req, res) => {
 // ✅ API สำหรับดึงวันที่ที่เปิดให้บริการ (จาก vet_work table)
 router.get('/api/available-dates', async (req, res) => {
   try {
-    // ใช้ user_email จาก session หรือใช้ default
-    const userEmail = req.session?.user_email || 'default@example.com';
+    const pool = getPoolPromise(req.session.user_email || 'default@example.com');
+    
+    const [rows] = await pool.query(
+      `SELECT DISTINCT work_day FROM vet_work WHERE work_day >= CURDATE() ORDER BY work_day ASC`
+    );
+
+    // แปลงเป็น YYYY-MM-DD local timezone (Asia/Bangkok)
+    const availableDates = rows.map(row => 
+      dayjs(row.work_day).tz('Asia/Bangkok').format('YYYY-MM-DD')
+    );
+
+    res.json({
+      success: true,
+      availableDates: availableDates
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงวันที่' });
+  }
+});
+
+
+// ✅ API สำหรับดึงข้อมูลเวลาที่ให้บริการในวันที่เฉพาะ
+router.get('/api/available-times/:date', async (req, res) => {
+  try {
+    const { date } = req.params;
+    
+    // Validate date format
+    if (!dayjs(date, 'YYYY-MM-DD', true).isValid()) {
+      return res.status(400).json({
+        success: false,
+        message: 'รูปแบบวันที่ไม่ถูกต้อง'
+      });
+    }
+
+    const userEmail = req.session?.user_email || 'wun@example.com';
     const pool = getPoolPromise(userEmail);
     
-    // ดึงเฉพาะวันที่ >= วันนี้ จาก vet_work table
+    // ดึงข้อมูลเวลาทำงานของสัตวแพทย์ในวันที่เฉพาะ
     const [rows] = await pool.query(
-      `SELECT DISTINCT work_date 
-       FROM vet_work 
-       WHERE work_date >= CURDATE() 
-       ORDER BY work_date ASC`
+      `SELECT DISTINCT 
+         vw.vet_id,
+         v.vet_name,
+         vw.start_time,
+         vw.end_time,
+         TIME_FORMAT(vw.start_time, '%H:%i') as start_formatted,
+         TIME_FORMAT(vw.end_time, '%H:%i') as end_formatted
+       FROM vet_work vw
+       INNER JOIN veterinarian v ON vw.vet_id = v.vet_id
+       WHERE vw.work_day = ?
+       ORDER BY vw.start_time ASC`,
+      [date]
     );
     
-    // แปลงเป็น array ของวันที่ในรูปแบบ YYYY-MM-DD
-    const availableDates = rows.map(row => {
-      if (row.work_date instanceof Date) {
-        return row.work_date.toISOString().slice(0, 10);
-      } else {
-        // ถ้าเป็น string หรือรูปแบบอื่น
-        return dayjs(row.work_date).format('YYYY-MM-DD');
-      }
-    });
+    if (rows.length === 0) {
+      return res.json({
+        success: true,
+        availableTimes: [],
+        message: 'ไม่มีสัตวแพทย์ให้บริการในวันที่นี้'
+      });
+    }
+
+    // สร้างช่วงเวลาที่สามารถจองได้ (เป็นช่วง 30 นาที)
+    const availableTimes = [];
     
-    console.log('✅ Available dates loaded:', availableDates);
+    for (const vet of rows) {
+      const startTime = dayjs(`${date} ${vet.start_time}`);
+      const endTime = dayjs(`${date} ${vet.end_time}`);
+      
+      let currentTime = startTime;
+      
+      while (currentTime.isBefore(endTime)) {
+        availableTimes.push({
+          vet_id: vet.vet_id,
+          vet_name: vet.vet_name,
+          time: currentTime.format('HH:mm'),
+          display_time: currentTime.format('HH:mm'),
+          datetime: currentTime.format('YYYY-MM-DD HH:mm:ss')
+        });
+        
+        // เพิ่มทุกๆ 30 นาที
+        currentTime = currentTime.add(30, 'minute');
+      }
+    }
+    
+    console.log(`✅ Available times for ${date}:`, availableTimes.length, 'slots');
     
     res.json({
       success: true,
-      availableDates: availableDates,
-      count: availableDates.length
+      availableTimes: availableTimes,
+      date: date,
+      count: availableTimes.length
     });
     
   } catch (error) {
-    console.error('❌ Error fetching available dates:', error);
+    console.error('❌ Error fetching available times:', error);
     res.status(500).json({
       success: false,
-      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลวันที่',
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลเวลา',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -175,6 +243,5 @@ router.get('/api/session-info', (req, res) => {
     }
   });
 });
-
 
 export default router;

@@ -6,13 +6,21 @@
     <i class="fa-solid fa-house" onclick="window.location.href='/veterinarian/pet_order'"></i>
     <i class="fa-solid fa-capsules" onclick="window.location.href='/veterinarian/manage_medication'"></i>
     <i class="fa-solid fa-chart-line" onclick="window.location.href='/veterinarian/report'"></i>
-    <i class="fa-solid fa-calendar-alt" onclick="window.location.href='/veterinarian/work_days'"></i>
+        <i class="fas fa-user-cog" onclick="window.location.href='/veterinarian/mg_permission'"></i>
+    <i class="fa-solid fa-calendar-alt" 
+   style="cursor: pointer;" 
+   onclick="window.location.href='/veterinarian/work_days?vet_id=<%= vetId %>'">
+</i>
+
+
     <div class="hamburger" onclick="toggleDropdown()">
       <i class="fas fa-bars"></i>
     </div>
 
     <div class="dropdown" id="dropdownMenu">
-      <a href="/history"><i class="fas fa-history"></i> ประวัติการรักษา</a>
+      <a href="/veterinarian/report"><i class="fa-solid fa-chart-line" ></i>รายงานการเข้ารักษา</a>
+      <a href="/veterinarian/medication_history"><i class="fas fa-history"></i> ประวัติการจ่ายยาา</a>
+      <a href="/veterinarian/#"><i class="fas fa-history"></i> ประวัติการรักษา</a>
       <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')">
   <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
 </a>

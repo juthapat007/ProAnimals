@@ -3,12 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>ประวัติการจ่ายยา</title>
-   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/output.css">
-  <style>
+   <%- include('../partials/link') %>
+  <!-- <style>
     body { font-family: 'Kanit', sans-serif; background: #fdf6f9; padding:20px; }
     .container { background:#fff; padding:20px; border-radius:10px; max-width:1000px; margin:auto; box-shadow:0 2px 8px rgba(0,0,0,.1);}
     h2 { color:#d63384; margin-bottom:20px; }
@@ -20,7 +16,7 @@
     th, td { padding:10px; border:1px solid #eee; text-align:center; }
     th { background:#f8d7da; color:#721c24; }
     tr:nth-child(even) { background:#fdf2f4; }
-  </style>
+  </style> -->
 </head>
 <body>
   <div class="container">
@@ -31,10 +27,11 @@
     <form class="search-box" method="get" action="/veterinarian/medication_history">
       <input 
         type="text" 
+        class="form-row"
         name="treatment_id" 
         placeholder="ค้นหาด้วย Treatment ID"
         value="<%= searchTreatmentId || '' %>">
-      <button type="submit">ค้นหา</button>
+      <button type="submit" class="btn-success">ค้นหา</button>
     </form>
 
     <!-- ตารางแสดงข้อมูล -->

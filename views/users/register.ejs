@@ -12,7 +12,7 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1 ><i class="fas fa-user-plus"></i> สมัครสมาชิก</h1>
+      <h1><i class="fas fa-user-plus"></i> สมัครสมาชิก</h1>
     </div>
 
     <% if (error) { %>
@@ -20,45 +20,150 @@
     <% } %>
 
     <% if (success) { %>
-      <div class="success-message"><%= success %></div>
+      <div class="success-message">
+        <%= success %>
+        <br><br>
+        <a href="/" class="btn-login">เข้าสู่ระบบ</a>
+      </div>
     <% } %>
 
-    <form class="register-form" action="/register" method="post">
+    <% if (!success) { %>
+    <form class="register-form" action="/users/register" method="post">
       <div class="form-group">
-        <label for="name">ชื่อ-นามสกุล</label>
-        <input type="text" name="name" id="name" required />
+        <label for="name">ชื่อ-นามสกุล <span class="required">*</span></label>
+        <input 
+          type="text" 
+          name="name" 
+          id="name" 
+          value="<%= old.name || '' %>"
+          required 
+          placeholder="กรอกชื่อ-นามสกุล"
+        />
       </div>
 
       <div class="form-group">
-        <label for="phone">เบอร์โทรศัพท์</label>
-        <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" required />
+        <label for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+        <input 
+          type="tel" 
+          name="phone" 
+          id="phone" 
+          pattern="[0-9]{10}" 
+          value="<%= old.phone || '' %>"
+          required 
+          placeholder="0912345678"
+        />
         <small>รูปแบบ: 0912345678 (10 หลัก)</small>
       </div>
 
       <div class="form-group">
-        <label for="email">อีเมล</label>
-        <input type="email" name="email" id="email">
+        <label for="email">อีเมล <span class="required">*</span></label>
+        <input 
+          type="email" 
+          name="email" 
+          id="email"
+          value="<%= old.email || '' %>"
+          required
+          placeholder="example@email.com"
+        />
       </div>
 
       <div class="form-group">
-        <label for="password">รหัสผ่าน</label>
-        <input type="password" name="password" id="password" minlength="6" required />
+        <label for="password">รหัสผ่าน <span class="required">*</span></label>
+        <input 
+          type="password" 
+          name="password" 
+          id="password" 
+          minlength="6" 
+          required 
+          placeholder="อย่างน้อย 6 ตัวอักษร"
+        />
         <small>รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร</small>
       </div>
 
       <div class="form-group">
-        <label for="confirm_password">ยืนยันรหัสผ่าน</label>
-        <input type="password" name="confirm_password" id="confirm_password" required />
+        <label for="confirm_password">ยืนยันรหัสผ่าน <span class="required">*</span></label>
+        <input 
+          type="password" 
+          name="confirm_password" 
+          id="confirm_password" 
+          required 
+          placeholder="กรอกรหัสผ่านอีกครั้ง"
+        />
       </div>
 
       <button type="submit" class="btn-submit">
         <i class="fas fa-user-plus"></i> สมัครสมาชิก
       </button>
     </form>
+    <% } %>
 
     <div class="login-link">
       มีบัญชีอยู่แล้ว? <a href="/">เข้าสู่ระบบที่นี่</a>
     </div>
   </div>
+
+  <script>
+    // ตรวจสอบการยืนยันรหัสผ่าน
+    document.getElementById('confirm_password').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      
+      if (password !== confirmPassword && confirmPassword.length > 0) {
+        this.setCustomValidity('รหัสผ่านไม่ตรงกัน');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+
+    // ตรวจสอบรูปแบบเบอร์โทร
+    document.getElementById('phone').addEventListener('input', function() {
+      const phone = this.value;
+      if (phone.length > 0 && !/^[0-9]{10}$/.test(phone)) {
+        this.setCustomValidity('เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลัก');
+      } else {
+        this.setCustomValidity('');
+      }
+    });
+  </script>
+
+  <style>
+    .required {
+      color: #e74c3c;
+    }
+    
+    .error-message {
+      background-color: #fee;
+      color: #c33;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #fcc;
+    }
+    
+    .success-message {
+      background-color: #efe;
+      color: #060;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border: 1px solid #cfc;
+      text-align: center;
+    }
+
+    .btn-login {
+      display: inline-block;
+      background-color: #27ae60;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .btn-login:hover {
+      background-color: #219a52;
+    }
+  </style>
 </body>
 </html>

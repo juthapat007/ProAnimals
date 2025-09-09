@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จัดการประเภทสัตว์</title>
+  <%- include('../partials/link') %>
+</head>
+<body >
+<div class="container">
+  <%- include('../partials/header_admin') %>
+
+  <div class="filter-buttons" id="filterButtons">
+
+    <button class="filter-btn " onclick="location.href='/admin/manage_pet_type'">
+      <i class="fas fa-dog"></i> จัดการประเภทสัตว์
+    </button>
+
+    <button class="filter-btn" onclick="location.href='/admin/manage_service_pet'">
+      <i class="fas fa-concierge-bell"></i> จัดการบริการ
+    </button>
+  </div>
+  <br>
+
+  <h1><i class="fas fa-dog"></i> จัดการประเภทสัตว์</h1>
+
+  <!-- ฟอร์มเพิ่ม/แก้ไข -->
+  <form id="petTypeForm" action="/admin/manage_pet_type/add" method="POST" class="mb-3" style="display:flex; gap:10px;">
+    <input type="hidden" id="type_id" name="type_id">
+    <input type="text" id="type" name="type" placeholder="ชื่อประเภทสัตว์" class="form-control" required>
+    <button type="submit" id="submitBtn" class="btn btn-success">
+      <i class="fas fa-plus-circle"></i> เพิ่มประเภท
+    </button>
+  </form>
+
+  <!-- ตารางประเภทสัตว์ -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>ประเภทสัตว์</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% types.forEach(t => { %>
+        <tr id="row-<%= t.type_id %>" onclick="fillForm('<%= t.type_id %>', '<%= t.type %>')">
+          <td><%= t.type_id %></td>
+          <td><%= t.type %></td>
+          <td>
+            <form action="/admin/manage_pet_type/delete" method="POST" onsubmit="return confirm('ยืนยันการลบ <%= t.type %>?')">
+              <input type="hidden" name="type_id" value="<%= t.type_id %>">
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash-alt"></i> ลบ
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+</div>
+
+<script>
+function fillForm(id, type) {
+  document.getElementById("type_id").value = id;
+  document.getElementById("type").value = type;
+
+  const form = document.getElementById("petTypeForm");
+  form.action = "/admin/manage_pet_type/update";
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.innerHTML = '<i class="fas fa-save"></i> อัพเดตประเภท';
+  submitBtn.classList.remove("btn-success");
+  submitBtn.classList.add("btn-primary");
+}
+</script>
+</body>
+</html>

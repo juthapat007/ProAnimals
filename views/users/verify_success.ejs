@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ยืนยันอีเมล</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body { font-family: Arial; text-align: center; padding: 50px; background: #f4f4f4; }
+  .card { background: white; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .success { color: green; }
+  .error { color: red; }
+  a.button { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border-radius: 5px; text-decoration: none; }
+  a.button:hover { background: #0056b3; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="<%= success ? 'success' : 'error' %>"><%= message %></h2>
+    <% if(success) { %>
+      <a href="/index.html" class="button">เข้าสู่ระบบ</a>
+    <% } else { %>
+      <a href="/" class="button">กลับไปหน้าแรก</a>
+    <% } %>
+  </div>
+</body>
+</html>

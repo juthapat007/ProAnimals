@@ -46,6 +46,7 @@
             <th>วันที่</th>
             <th>เวลา</th>
             <th>สถานะ</th>
+            <th>การชำระเงิน</th>
             <th>เคส</th>
             <th>ชำระเงิน</th>
           </tr>
@@ -70,6 +71,7 @@
       <td><%= moment(booking.booking_date).format('DD/MM/YYYY') %></td>
       <td><%= booking.time_booking %></td>
       <td><%= booking.status %></td>
+            <td><%= booking.pay_status %></td>
       <td><%= booking.booking_id %></td>
       <td>
 <button class="btn-info" 

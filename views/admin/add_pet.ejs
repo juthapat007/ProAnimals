@@ -2,211 +2,401 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ไชปราการสัตวแพทย์ - คิวการรักษา</title>
+  <title>ไชปราการสัตวแพทย์ - เพิ่มสัตว์เลี้ยง</title>
   <meta name="viewport" content="width=900, initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/output.css">
-  <!-- <style>
-
-    .form-container {
-      background: #fff;
+  <%- include('../partials/link') %>
+  <style>
+    .container {
       max-width: 1200px;
-      margin: 30px auto;
-      border-radius: 16px;
-      box-shadow: 0 0 10px #e7e7e7;
-      padding: 24px 32px 32px 32px;
-      border: 1.5px solid #f8d9e3;
-      position: relative;
+      margin: 0 auto;
+      padding: 20px;
     }
-    .form-group {
-      margin-bottom: 16px;
+
+    .customer-info {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #e9ecef;
     }
-    .form-row {
+
+    .existing-pets {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 2px solid #2196f3;
+    }
+
+    .pet-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
       display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border: 1px solid #ddd;
     }
-    .form-row input, .form-row select {
+
+    .pet-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ddd;
+    }
+
+    .pet-info {
       flex: 1;
     }
-    label {
-      font-size: 1em;
-      color: #e57399;
-      margin-bottom: 5px;
-      display: block;
+
+    .pet-name {
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
     }
-    input[type="text"], input[type="email"], input[type="tel"], select {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #e7e7e7;
-      font-size: 1em;
-      background: #fdf6f8;
-      margin-bottom: 0;
-      box-sizing: border-box;
+
+    .pet-details {
+      color: #666;
+      font-size: 14px;
+      margin-top: 5px;
     }
-    input[type="file"] {
-      width: 100%;
-      padding: 8px 0;
-      font-size: 1em;
-    }
-    .pet-image-box {
-      border: 1.5px dashed #f8d9e3;
-      border-radius: 8px;
-      background: #fdf6f8;
-      padding: 12px;
-      text-align: center;
-      color: #bdbdbd;
-      margin-bottom: 18px;
-    }
-    .submit-btn {
-      width: 100%;
-      padding: 12px 0;
-      font-size: 1.1em;
-      color: #fff;
+
+    .delete-pet-btn {
+      background: #dc3545;
+      color: white;
       border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-pet-btn:hover {
+      background: #c82333;
+    }
+
+    .add-pet-form {
+      background: #fff3e0;
+      padding: 20px;
       border-radius: 8px;
-      background: linear-gradient(90deg, #f9a2b7, #f7b6c7);
-      cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
-    }
-    .submit-btn:hover {
-      background: linear-gradient(90deg, #f7b6c7, #f9a2b7);
+      border: 2px solid #ff9800;
+      margin-bottom: 20px;
     }
 
-    /* ไอคอน */
-    .icons {
+    .file-upload {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      text-align: center;
+      border: 2px dashed #ddd;
+      cursor: pointer;
+    }
+
+    .file-upload:hover {
+      border-color: #007bff;
+      background: #f0f8ff;
+    }
+
+
+    .alert {
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .btn-group {
       display: flex;
-      gap: 16px;
-    }
-    .icons svg {
-      width: 28px;
-      height: 28px;
-      cursor: pointer;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
     }
 
-    /* เมนูดรอปดาวน์ */
-    .dropdown-menu {
-      position: absolute;
-      top: 65px;
-      right: 32px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      list-style: none;
-      padding: 8px 0;
-      margin: 0;
-      display: none;
-      z-index: 999;
-    }
-    .dropdown-menu li {
-      padding: 10px 20px;
-      cursor: pointer;
-      white-space: nowrap;
-      color: #f48fb1;
-      font-weight: 500;
-    }
-    .dropdown-menu li:hover {
-      background: #ffe4ec;
+
+    .no-pets {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 20px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .form-row {
         flex-direction: column;
       }
+      
+      .pet-card {
+        flex-direction: column;
+        text-align: center;
+      }
     }
-    
-  </style> -->
+  </style>
 </head>
 <body>
-  <div class="container" style="width: 1200px;">
-  <%- include('../partials/header_admin') %>
+  <div class="container">
+    <%- include('../partials/header_admin') %>
 
-    <form method="post" action="/add_pet" enctype="multipart/form-data">
-      <div class="form-group">
-        <strong>เพิ่มข้อมูลสัตว์ที่เข้ารักษา</strong>
-        <br>
-        
-        <div class="form-row" style="justify-content: space-between;">
-
-            <p><strong>รหัสลูกค้า:</strong> <%= cusId %></p>
-            <input type="hidden" name="cus_id" value="<%= cusId %>">
-            <p><strong>ชื่อ-นามสกุล:</strong> <%= customer.cus_name %></p>
-            <p><strong>Email:</strong> <%= customer.cus_email %></p>
-            <p><strong>เบอร์โทร:</strong> <%= customer.cus_phon %></p>
-        </div>
+    <!-- แสดง Alert Messages -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error">
+        <% if (error === 'missing_data') { %>
+          ❌ กรุณากรอกข้อมูลให้ครบถ้วน
+        <% } else if (error === 'customer_not_found') { %>
+          ❌ ไม่พบข้อมูลลูกค้า
+        <% } else if (error === 'duplicate_pet_name') { %>
+          ❌ ลูกค้าคนนี้มีสัตว์เลี้ยงชื่อนี้อยู่แล้ว
+        <% } else if (error === 'database_error') { %>
+          ❌ เกิดข้อผิดพลาดในฐานข้อมูล
+        <% } else { %>
+          ❌ เกิดข้อผิดพลาดในระบบ
+        <% } %>
       </div>
+    <% } %>
 
+    <!-- <% if (typeof success !== 'undefined' && success === 'pet_added') { %> -->
+      <div class="alert alert-success">
+        ✅ เพิ่มสัตว์เลี้ยง 
+        <!-- "<%= typeof pet_name !== 'undefined' ? decodeURIComponent(pet_name) : '' %>"  -->
+        เรียบร้อยแล้ว
+      </div>
+    <!-- <% } %> -->
+
+    <!-- ข้อมูลลูกค้า -->
+    <div class="customer-info">
+      <strong>ข้อมูลเจ้าของสัตว์เลี้ยง</strong>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+        <p><strong>รหัสลูกค้า:</strong> <%= cusId %></p>
+        <p><strong>ชื่อ-นามสกุล:</strong> <%= customer.cus_name %></p>
+        <p><strong>Email:</strong> <%= customer.cus_email %></p>
+        <p><strong>เบอร์โทร:</strong> <%= customer.cus_phon %></p>
+      </div>
+    </div>
+
+    <!-- รายการสัตว์เลี้ยงที่มีอยู่ -->
+    <div class="existing-pets">
+      <!-- <h3>สัตว์เลี้ยงที่มีอยู่แล้ว (<%= existingPets ? existingPets.length : 0 %> ตัว)</h3> -->
+      <div id="pets-container">
+        <% if (existingPets && existingPets.length > 0) { %>
+          <% existingPets.forEach(function(pet) { %>
+            <div style="display: flex; justify-content: ;">
+              <div class="pet-card" id="pet-<%= pet.pet_id %>" onclick="goToPetService('<%= pet.pet_id %>', '<%= cusId %>')" style="cursor: pointer; transition: background-color 0.2s;">
+    <% if (pet.img) { %>
+      <img src="/uploads/<%= pet.img %>" alt="<%= pet.pet_name %>" class="pet-image">
+    <% } else { %>
+      <div class="pet-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
+        <i class="fas fa-paw"></i>
+      </div>
+    <% } %>
+    
+    <div class="pet-info">
+      <div class="pet-name"><%= pet.pet_name %></div>
+      <div class="pet-details">
+        เพศ: <%= pet.pet_gender %> | ประเภท: <%= pet.type || 'ไม่ระบุ' %>
+      </div>
+      <div style="margin-top: 8px; font-size: 12px; color: #007bff;">
+        <i class="fas fa-stethoscope"></i> คลิกเพื่อจัดการบริการ
+      </div>
+    </div>
+            <button type="button" class="btn-delete" 
+        onclick="event.stopPropagation(); deletePet('<%= pet.pet_id %>', '<%= pet.pet_name %>')">
+  <i class="fas fa-trash"></i> ลบ
+</button>
+
+              
+            </div>
+            
+</div>
+
+          <% }); %>
+        <% } else { %>
+          <div class="no-pets">
+            ยังไม่มีสัตว์เลี้ยงในระบบ
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- ฟอร์มเพิ่มสัตว์เลี้ยงใหม่ -->
+    <div class="add-pet-form">
+      <h3>เพิ่มสัตว์เลี้ยงใหม่</h3>
       
-      <div class="form-row">
-  <input type="text" name="pet_type" placeholder="ชื่อสัตว์เลี้ยง เช่น มะลิ" required>
-  <select name="pet_gender" required>
-          <option value="">--กรุณาเลือกเพศ--</option>
-          <option value="ผู้">ผู้</option>
-          <option value="เมีย">เมีย</option>
-        </select>
-</div>
+      <form method="post" action="/admin/add_pet" enctype="multipart/form-data" id="add-pet-form">
+        <input type="hidden" name="cus_id" value="<%= cusId %>">
+        <div style="display: flex; ">
+          <div class="form-group">
+            <label for="pet_name">ชื่อสัตว์เลี้ยง</label>
+            <input type="text" name="pet_name" id="pet_name" 
+                   placeholder="เช่น มะลิ, บอล, นางฟ้า" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="pet_gender">เพศ</label>
+            <select name="pet_gender" id="pet_gender" required>
+              <option value="">กรุณาเลือกเพศ</option>
+              <option value="ผู้">ผู้</option>
+              <option value="เมีย">เมีย</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="pet_type">ประเภทสัตว์</label>
+            <select name="pet_type" id="pet_type" required>
+              <option value="">กรุณาเลือกประเภท</option>
+              <% types.forEach(function(type) { %>
+                <option value="<%= type.type %>"><%= type.type %></option>
+              <% }); %>
+            </select>
+          </div>
+          </div>
 
 
-      <div class="form-row">
-        <select name="pet_type" required>
-    <option value="">--กรุณาเลือกประเภทสัตว์--</option>
-    <% types.forEach(type => { %>
-      <option value="<%= type.type %>"><%= type.type %></option>
-    <% }); %>
-  </select>
-      </div>
+        <!-- อัปโหลดรูป -->
+        <div class="file-upload" onclick="document.getElementById('pet_image').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>คลิกเพื่อเลือกรูปสัตว์เลี้ยง</p>
+          <input type="file" name="pet_image" id="pet_image" accept="image/*" style="display:none;">
+        </div>
+        
+        <div style="text-align: center;">
+          <img id="preview" src="" alt="ตัวอย่างรูป" class="preview-image" style="display:none;">
+        </div>
 
+        <button type="submit" class="btn-primary" style="width: 100%; height: 60px;">
+        ถัดไป <i class="fas fa-arrow-right"></i> 
+      </button><br><br>
+      <button type="button" class="btn-cancel" style="width: 100%; height: 60px;" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i>  ย้อนกลับ
+      </button>
+      
+      </form>
+    </div>
 
-<div class="pet-image-box">
-  <label for="pet_image"><i class="fas fa-cloud-upload-alt"></i> เลือกรูปสัตว์เลี้ยง</label>
-  <input type="file" name="pet_image" id="pet_image" accept="image/*" style="display:none;">
-  <center>
-  <div style="margin-top:10px;">
-    <img id="preview" src="" alt="ตัวอย่างรูป" style="max-width:200px; display:none; border:1px solid #ccc; padding:5px; border-radius:8px;">
-  </div></center>
-</div>
-<button class="submit-btn" >บันทึก</button>
+  </div>
 
-<!-- <style>
-.upload-label {
-  display: inline-block;
-  background: var(--primary);
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s ease;
-}
-.upload-label:hover {
-  background: var(--secondary);
-}
-</style> -->
-
-<script>
-document.getElementById('pet_image').addEventListener('change', function(event) {
-  const file = event.target.files[0];
-  const preview = document.getElementById('preview');
-  
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      preview.src = e.target.result;
-      preview.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  } else {
-    preview.src = '';
-    preview.style.display = 'none';
+  <style>
+  .pet-card:hover {
+    background-color: #f0f8ff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
   }
-});
-</script>
+</style>
+  <script>
+     function goToPetService(petId, cusId) {
+    window.location.href = `/admin/pet_service?pet_id=${petId}&cus_id=${cusId}`;
+  }
+    // Preview รูปภาพ
+    document.getElementById('pet_image').addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('preview');
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = '';
+        preview.style.display = 'none';
+      }
+    });
+
+    // ฟังก์ชันลบสัตว์เลี้ยง
+        // ฟังก์ชันลบสัตว์เลี้ยง
+    async function deletePet(petId, petName) {
+      if (!confirm(`คุณต้องการลบ "${petName}" ออกจากระบบหรือไม่?\n\nหมายเหตุ: หากมีประวัติการจองจะไม่สามารถลบได้`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/admin/add_pet/remove/${petId}?cus_id=<%= cusId %>`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // ลบ card ออกจากหน้าจอ
+          const petCard = document.getElementById(`pet-${petId}`);
+          if (petCard) {
+            petCard.remove();
+          }
+
+          // อัปเดตจำนวนที่แสดง
+          const petsContainer = document.getElementById('pets-container');
+          const remainingPets = petsContainer.querySelectorAll('.pet-card').length;
+          
+          if (remainingPets === 0) {
+            petsContainer.innerHTML = '<div class="no-pets">ยังไม่มีสัตว์เลี้ยงในระบบ</div>';
+          }
+
+          // อัปเดตหัวข้อ
+          const heading = document.querySelector('.existing-pets h3');
+          if (heading) {
+            heading.textContent = `สัตว์เลี้ยงที่มีอยู่แล้ว (${remainingPets} ตัว)`;
+          }
+
+          alert(result.message);
+        } else {
+          alert(`ลบไม่สำเร็จ: ${result.message}`);
+        }
+
+      } catch (error) {
+        console.error('Error deleting pet:', error);
+        alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+      }
+    }
+
+    // ตรวจสอบก่อนส่งฟอร์ม
+    document.getElementById('add-pet-form').addEventListener('submit', function(e) {
+      const petName = document.getElementById('pet_name').value.trim();
+      const petGender = document.getElementById('pet_gender').value;
+      const petType = document.getElementById('pet_type').value;
+
+      if (!petName || !petGender || !petType) {
+        e.preventDefault();
+        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+        return;
+      }
+
+      if (!confirm(`ยืนยันการเพิ่มสัตว์เลี้ยง "${petName}" หรือไม่?`)) {
+        e.preventDefault();
+      }
+    });
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 500);
+      });
+    }, 5000);
+  </script>
 
 </body>
 </html>

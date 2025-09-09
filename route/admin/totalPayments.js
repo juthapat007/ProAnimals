@@ -56,10 +56,11 @@ router.get('/', requireLogin, async (req, res) => {
       FROM medication
       ORDER BY medicine_name ASC
     `);
+// ส่วนที่ต้องแก้ไขในไฟล์ totalPayments.js
 
-    // ✅ ดึงยาที่จ่ายแล้ว
+// ✅ ดึงยาที่จ่ายแล้ว - แก้ไขส่วนนี้
 const [treatmentRows] = await pool.query(`
-  SELECT pay_status, payment
+  SELECT treatment_id, pay_status, payment
   FROM treatment_history
   WHERE booking_id = ?
   LIMIT 1
@@ -68,12 +69,13 @@ const [treatmentRows] = await pool.query(`
 let currentPayment = 'ค้างชำระ'; // default
 let paymentDone = false;           // default
 let dispensedMeds = [];  // ประกาศตัวแปรก่อน
+
 if (treatmentRows.length > 0) {
   const treatmentId = treatmentRows[0].treatment_id;
   currentPayment = treatmentRows[0].payment;
   paymentDone = treatmentRows[0].pay_status === 'ชำระแล้ว';
 
-  // ดึงยาที่จ่ายแล้ว
+  // ดึงยาที่จ่ายแล้ว - ใช้ query เดียวกันกับ medication_order.js
   const [dispensedResult] = await pool.query(`
     SELECT
       d.dispens_id,
@@ -93,18 +95,23 @@ if (treatmentRows.length > 0) {
   dispensedMeds = dispensedResult;
 }
 
+// คำนวณยอดรวมยาที่จ่ายแล้ว
+let totalDispensed = 0;
+if (dispensedMeds && dispensedMeds.length > 0) {
+  dispensedMeds.forEach(d => totalDispensed += parseFloat(d.total_price));
+}
 
 res.render('admin/total_pay', {
   booking,
   medications,
   dispensedMeds,
-  paymentOptions,  // ✅ จาก ENUM
+  totalDispensed, // ✅ เพิ่มตัวแปรนี้
+  paymentOptions,
   currentPayment,
   paymentDone,
   admin_name: req.session.user_name,
   admin_id: req.session.admin_id
 });
-
 
 
   } catch (err) {

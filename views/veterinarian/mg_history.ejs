@@ -1,350 +1,441 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แก้ไขประวัติการรักษา</title>
-            <%- include('../partials/link') %>
-
-    <style>
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-        }
-                    .form-row {
-                flex-direction: column;
-                align-items: flex-start;
-                margin-bottom: 18px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            }
-    </style>
+       <%- include('../partials/link') %>
 </head>
+
+
 <body>
-    <div class="container">
-        <!-- Header -->
-        <%- include('../partials/header_vet') %>
+      <div class="container">
+    <!-- Header -->
+    <%- include('../partials/header_vet',{ vetId: vetId }) %>
 
-
+    <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Alert Messages -->
-        <div id="alertSuccess" class="alert alert-success"></div>
-        <div id="alertError" class="alert alert-error"></div>
-
-        <!-- Section: ระบบจัดการประวัติการรักษา -->
-        <div class="section-title">ระบบจัดการประวัติการรักษา</div>
-        <div class="form-section" id="mainForm">
-            <!-- Status Badge -->
-            <% if (hasExistingHistory) { %>
-                <div class="status-badge status-completed">
-                    ✅ เคสนี้บันทึกข้อมูลการรักษาเรียบร้อยแล้ว
-                </div>
-            <% } else { %>
-                <div class="status-badge status-pending">
-                    ⏳ รอบันทึกข้อมูลการรักษา
-                </div>
-            <% } %>
-
-            <div style="margin-bottom:20px;" class="pet-info">
-                <div class="light-pink">
-                    <strong >ID เคส:</strong> <%= booking.booking_id %>
-                </div>
+        <div id="alertError" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span id="errorText"></span>
             </div>
+        </div>
 
-            <!-- ใช้ onclick แทน form -->
-            <div id="historyForm">
-                <div style="display: flex; justify-content: space-between;">
-                    <div class="form-row">
-                        <span><strong style="margin-left:20px;">ชื่อสัตว์เลี้ยง:</strong> <%= booking.pet_name %></span>
-                        <span><strong>ประเภทสัตว์เลี้ยง:</strong> <%= booking.pet_type_name %></span>
-                        
-                        <span><strong style="margin-left:20px;">เจ้าของ:</strong> <%= booking.owner_name %></span>
-                        
-                        <span><div class="form-label">น้ำหนัก (กก.) : <span class="form-required">*</span></div><input type="number" step="0.1" class="form-input" id="weight" style="width:100px;" required></span>
-                    </div>
+        <div id="alertSuccess" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span id="successText"></span>
+            </div>
+        </div>
 
-                    <div class="form-row">
-                        <span><strong style="margin-left:20px;">บริการที่เลือก:</strong> <%= booking.service_name %></span>
-                        <span><strong style="margin-left:20px;">วันที่นัดหมาย:</strong> <%= new Date(booking.booking_date).toLocaleDateString('th-TH') %></span>
-                        <span><strong style="margin-left:20px;">ประเภทลูกค้า:</strong> <%= booking.customer_type %></span>
-                    </div>
-
-                    <div class="form-row">
-                        <span><strong class="form-label">วันที่รักษา : </strong><%= today %></span>
-                        <span><strong class="form-label" style="width:120px;">สถานะการรักษา : </strong><%=booking.status %></span>
-                    </div>
-                </div>
-                
-                
-
-                <div class="form-row">
-                    <div class="form-label">การวิจัย/ตรวจพิเศษ :</div>
-                    <input type="text" id="research" style="width:320px;" placeholder="ถ้ามี">
-                </div>
-
-                <div class="form-row" style="align-items:flex-start;">
-                    <div class="form-label">รายละเอียดการรักษา : <span class="form-required">*</span></div>
-                </div>
-                <div class="form-row" style="align-items:flex-start;">
-                    <textarea class="form-textarea" id="treatment_details" required 
-          placeholder="กรุณากรอกรายละเอียดการรักษา..."></textarea>
-                </div>
-                
-
-                <div class="form-footer">
-                    <span class="doctor-info">สัตวแพทย์ : <%= vetName %></span>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-cancel" onclick="goBack()">ยกเลิก</button>
-                        <button type="button" class="btn btn-save" id="saveBtn" onclick="saveHistory()" <%= hasExistingHistory ? 'disabled' : '' %>>
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Treatment Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-primary to-secondary text-white p-6">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold flex items-center gap-3">
+                                <i class="fas fa-clipboard-list"></i>
+                                ระบบจัดการประวัติการรักษา
+                            </h2>
                             <% if (hasExistingHistory) { %>
-                                ✅ บันทึกข้อมูลเสร็จสิ้น
+                                <div class="btn-success">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    <span>บันทึกข้อมูลเสร็จสิ้น</span>
+                                </div>
                             <% } else { %>
-                                บันทึกข้อมูล
+                                <div class="status-badge px-4 py-2 rounded-full text-sm font-medium bg-white/20">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>รอบันทึกข้อมูลการรักษา</span>
+                                </div>
                             <% } %>
-                        </button>
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <!-- Case Info -->
+                        <div class="bg-light-pink/50 rounded-lg p-4 mb-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-hashtag text-primary"></i>
+                                <span class="font-semibold text-primary">ID เคส:</span>
+                                <span class="font-bold"><%= booking.booking_id %></span>
+                            </div>
+                        </div>
+
+                        <!-- Pet Information Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-paw text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">ชื่อสัตว์เลี้ยง</span>
+                                        <div class="font-semibold"><%= booking.pet_name %></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-dog text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">ประเภทสัตว์เลี้ยง</span>
+                                        <div class="font-semibold"><%= booking.pet_type_name %></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-user text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">เจ้าของ</span>
+                                        <div class="font-semibold"><%= booking.owner_name %></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-stethoscope text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">บริการที่เลือก</span>
+                                        <div class="font-semibold"><%= booking.service_name %></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-calendar text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">วันที่นัดหมาย</span>
+                                        <div class="font-semibold"><%= new Date(booking.booking_date).toLocaleDateString('th-TH') %></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-tag text-primary w-5"></i>
+                                    <div>
+                                        <span class="text-sm text-gray-600">ประเภทลูกค้า</span>
+                                        <div class="font-semibold"><%= booking.customer_type %></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Treatment Form -->
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-weight text-primary mr-2"></i>
+                                        น้ำหนัก (กก.) <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="number" step="0.1" id="weight" 
+                                           <% if (hasExistingHistory && histories.length > 0) { %>
+                                               value="<%= histories[0].pet_weight_kg || '' %>"
+                                           <% } %>
+                                           <%= hasExistingHistory ? 'disabled' : '' %>
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors <%= hasExistingHistory ? 'bg-gray-100' : '' %>">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar-check text-primary mr-2"></i>
+                                        วันที่รักษา
+                                    </label>
+                                    <input type="text" value="<%= today %>" readonly 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-notes-medical text-primary mr-2"></i>
+                                    รายละเอียดการรักษา <span class="text-red-500">*</span>
+                                </label>
+                                <textarea id="treatment_details" rows="4" 
+                                          placeholder="กรุณากรอกรายละเอียดการรักษา..."
+                                          <%= hasExistingHistory ? 'disabled' : '' %>
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors <%= hasExistingHistory ? 'bg-gray-100' : '' %>"><% if (hasExistingHistory && histories.length > 0) { %><%= histories[0].treatment_details || '' %><% } %></textarea>
+                            </div>
+
+                            <!-- Doctor Info & Actions -->
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                <div class="flex items-center gap-2 text-gray-600">
+                                    <i class="fas fa-user-md text-primary"></i>
+                                    <span>สัตวแพทย์: <%= vetName %></span>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="goBack()" 
+                                            class="btn-cancel">
+                                        <i class="fas fa-arrow-left mr-2"></i>
+                                        ยกเลิก
+                                    </button>
+                                    <button id="saveBtn" onclick="saveHistory()" class="btn-info"
+                                            <%= hasExistingHistory ? 'disabled' : '' %>
+                                            class="px-6 py-2 <%= hasExistingHistory ? 'bg-green-500' : 'bg-gradient-to-r from-primary to-secondary hover:shadow-lg transform hover:scale-105' %> text-white rounded-lg transition-all duration-200 <%= hasExistingHistory ? 'cursor-not-allowed' : '' %>">
+                                        <i class="fas fa-<%= hasExistingHistory ? 'check' : 'save' %> mr-2"></i>
+                                        <span id="saveText"><%= hasExistingHistory ? 'บันทึกเสร็จสิ้น' : 'บันทึกข้อมูล' %></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden sticky top-4">
+                    <div class="bg-gradient-to-r from-info/80 to-info text-white p-6">
+                        <h3 class="text-lg font-semibold flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
+                            ข้อมูลสรุป
+                        </h3>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <div class="text-center">
+                            <img 
+  src="<%= booking.img ? '/uploads/' + booking.img : '/images/no-pet.png' %>" 
+  alt="pet" 
+  class="image-preview"
+/>
+
+
+
+
+
+                            <h4 class="font-semibold text-lg"><%= booking.pet_name %></h4>
+                            <p class="text-gray-600 text-sm"><%= booking.pet_type_name %></p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">สถานะ:</span>
+                                <span class="font-medium <%= booking.status === 'เสร็จสิ้น' ? 'text-green-600' : 'text-orange-600' %>">
+                                    <%= booking.status %>
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">บริการ:</span>
+                                <span class="font-medium text-sm"><%= booking.service_name %></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">เวลานัด:</span>
+                                <span class="font-medium"><%= booking.time_booking %></span>
+                            </div>
+                            <% if (hasExistingHistory && histories.length > 0) { %>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">น้ำหนัก:</span>
+                                <span class="font-medium"><%= histories[0].pet_weight_kg %> กก.</span>
+                            </div>
+                            <% } %>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ส่วนของตารางแสดงประวัติการรักษา -->
-        <div class="section-title">รายการประวัติการรักษา</div>
-        <div class="overflow-x-auto rounded-lg shadow">
-        <div class="table-section">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ลำดับ</th>
-                        <th>ชื่อสัตว์เลี้ยง</th>
-                        <th>น้ำหนัก (กก.)</th>
-                        <th>วันที่รักษา</th>
-                        <th>บริการ</th>
-                        <th>สัตวแพทย์</th>
-                        <th>สถานะ</th>
-                        <th>ประเภทลูกค้า</th>
-                        <th>รายละเอียดการรักษา</th>
-                        <th>จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (histories && histories.length > 0) { %>
-                        <% histories.forEach((h) => { %>
-                        <tr>
-                            <td><%= h.treatment_id %></td>
-                            <td><%= h.pet_name || booking.pet_name %></td>
-                            <td><%= h.weight || '-' %> กก.</td>
-                            <td><%= new Date(h.treatment_date).toLocaleDateString('th-TH') %></td>
-                            <td><%= h.service_name || booking.service_name %></td>
-                            <td><%= h.vet_name %></td>
-                            <td><%= booking.status %></td>
-                            <td><%= h.customer_type || booking.customer_type || '-' %></td>
-                            <td class="treatment-detail">
-                                <%= h.treatment_details || '-' %>
-                            </td>
-                            <td>
-                                <button type="button" 
-  class="btn-edit"
-  onclick="editHistory(<%= h.treatment_id %>)">
-  แก้ไข
-</button>
+        <!-- History Table -->
+        <div class="mt-8">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-primary to-secondary text-white p-6">
+                    <h2 class="text-xl font-semibold flex items-center gap-3">
+                        <i class="fas fa-history"></i>
+                        รายการประวัติการรักษา
+                    </h2>
+                </div>
 
-<a href="/veterinarian/order_medication/<%= h.treatment_id %>" 
-   class="btn-info">
-  จ่ายยา
-</a>
-
-    
-</td>
-                        </tr>
-                        <% }) %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="10" style="text-align: center; padding: 20px; color: #999;">
-                                ยังไม่มีประวัติการรักษา
-                            </td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">ลำดับ</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">สัตว์เลี้ยง</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">น้ำหนัก</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">วันที่รักษา</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">บริการ</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">สัตวแพทย์</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">สถานะ</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">ประเภทลูกค้า</th>
+                                <th class="px-4 py-4 text-left text-sm font-semibold text-gray-600">รายละเอียด</th>
+                                <th class="px-4 py-4 text-center text-sm font-semibold text-gray-600">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <% if (histories && histories.length > 0) { %>
+                                <% histories.forEach((h, index) => { %>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-4 text-sm font-medium">#<%= h.treatment_id %></td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fas fa-paw text-primary"></i>
+                                            <%= h.pet_name || booking.pet_name %>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <%= h.pet_weight_kg ? h.pet_weight_kg + ' กก.' : '-' %>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <%= new Date(h.treatment_date).toLocaleDateString('th-TH') %>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <%= h.service_name || booking.service_name %>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <%= h.vet_name %>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <span class="px-2 py-1 text-xs rounded-full <%= booking.status === 'เสร็จสิ้น' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800' %>">
+                                            <%= booking.status %>
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm">
+                                        <%= h.customer_type || booking.customer_type || '-' %>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm max-w-xs">
+                                        <div class="truncate" title="<%= h.treatment_details || '-' %>">
+                                            <%= h.treatment_details || '-' %>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <div class="flex justify-center gap-2">
+                                            <a href="/veterinarian/edit_history/<%= h.treatment_id %>" 
+                                               class="p-2 bg-edit text-white rounded-lg hover:bg-yellow-500 transition-colors"
+                                               title="แก้ไข">
+                                                <i class="fas fa-edit text-sm"></i>
+                                            </a>
+                                            <a href="/veterinarian/order_medication/<%= h.treatment_id %>" 
+                                               class="p-2 bg-info text-white rounded-lg hover:bg-blue-500 transition-colors"
+                                               title="จ่ายยา">
+                                                <i class="fas fa-pills text-sm"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="10" class="px-4 py-12 text-center text-gray-500">
+                                        <i class="fas fa-clipboard-list text-4xl mb-4 opacity-30"></i>
+                                        <div>ยังไม่มีประวัติการรักษา</div>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        </div>
+    </div>
     </div>
 
     <script>
-let isSaving = false;
-const hasExistingHistory = <%= hasExistingHistory ? 'true' : 'false' %>;
+        let isSaving = false;
+        const hasExistingHistory = <%= hasExistingHistory ? 'true' : 'false' %>;
 
-// ฟังก์ชันสำหรับบันทึกประวัติ
-async function saveHistory() {
-    if (isSaving || hasExistingHistory) return;
-    
-    const weight = document.getElementById('weight').value;
-    const research = document.getElementById('research').value;
-    const treatment_details = document.getElementById('treatment_details').value;
-    
-    // ตรวจสอบข้อมูลที่จำเป็น
-    if (!weight || !treatment_details) {
-        showAlert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน', 'error');
-        return;
-    }
-    
-    // เริ่มสถานะการบันทึก
-    isSaving = true;
-    const saveBtn = document.getElementById('saveBtn');
-    const originalText = saveBtn.innerHTML;
-    
-    // เปลี่ยนปุ่มเป็นสถานะ loading
-    saveBtn.disabled = true;
-    saveBtn.classList.add('btn-loading');
-    saveBtn.innerHTML = 'กำลังบันทึก...';
-    
-    const data = {
-        booking_id: <%= booking.booking_id %>,
-        weight: weight,
-        research: research,
-        treatment_details: treatment_details
-    };
-    
-    try {
-        const response = await fetch('/veterinarian/mg_history/save', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showAlert('บันทึกประวัติการรักษาเรียบร้อยแล้ว', 'success');
-            updateFormToCompleted();
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-        } else {
-            showAlert('เกิดข้อผิดพลาด: ' + result.message, 'error');
-            resetSaveButton(saveBtn, originalText);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showAlert('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
-        resetSaveButton(saveBtn, originalText);
-    }
-}
-
-// ฟังก์ชันรีเซ็ตปุ่มบันทึก
-function resetSaveButton(saveBtn, originalText) {
-    isSaving = false;
-    saveBtn.disabled = false;
-    saveBtn.classList.remove('btn-loading');
-    saveBtn.innerHTML = originalText;
-}
-
-// ฟังก์ชันอัพเดทฟอร์มเป็นสถานะเสร็จสิ้น
-function updateFormToCompleted() {
-    const saveBtn = document.getElementById('saveBtn');
-    const form = document.getElementById('mainForm');
-    
-    saveBtn.classList.remove('btn-loading');
-    saveBtn.classList.add('completed');
-    saveBtn.innerHTML = '✅ บันทึกข้อมูลเสร็จสิ้น';
-    saveBtn.disabled = true;
-    
-    document.getElementById('weight').disabled = true;
-    document.getElementById('research').disabled = true;
-    
-    form.classList.add('disabled');
-    
-    const statusBadge = document.querySelector('.status-badge');
-    if (statusBadge) {
-        statusBadge.className = 'status-badge status-completed';
-        statusBadge.innerHTML = '✅ เคสนี้บันทึกข้อมูลการรักษาเรียบร้อยแล้ว';
-    }
-}
-
-// ฟังก์ชันสำหรับกลับหน้าหลัก
-function goHome() {
-    window.location.href = '/veterinarian/pet_order';
-}
-
-// ฟังก์ชันสำหรับกลับหน้าที่แล้ว
-function goBack() {
-    window.history.back();
-}
-
-// ฟังก์ชันสำหรับแก้ไขประวัติ
-function editHistory(treatmentId) {
-    console.log('Edit clicked, ID:', treatmentId);
-    if (!treatmentId) {
-        alert('No treatment ID found');
-        return;
-    }
-    window.location.href = `/veterinarian/mg_history/edit/${treatmentId}`;
-}
-
-function Medication(treatmentId) {
-    console.log('Medication clicked, ID:', treatmentId);
-    if (!treatmentId) {
-        alert('No treatment ID found');
-        return;
-    }
-    window.location.href = `/veterinarian/order_medication/${treatmentId}`;
-}
-// ฟังก์ชันแสดง Alert
-function showAlert(message, type) {
-    const alertElement = document.getElementById(type === 'success' ? 'alertSuccess' : 'alertError');
-    if (alertElement) {
-        alertElement.textContent = message;
-        alertElement.style.display = 'block';
-        
-        setTimeout(() => {
-            alertElement.style.display = 'none';
-        }, 5000);
-    } else {
-        // Fallback ถ้าไม่มี alert element
-        alert(message);
-    }
-}
-
-// Auto-fill ข้อมูลจากประวัติที่มีอยู่
-<% if (hasExistingHistory && histories.length > 0) { %>
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        const latestHistory = <%= JSON.stringify(histories[0]) %>;
-        if (latestHistory) {
-            const weightInput = document.getElementById('weight');
-            const treatmentInput = document.getElementById('treatment_details');
+        // Save History Function - ใช้ API ที่มีอยู่
+        async function saveHistory() {
+            if (isSaving || hasExistingHistory) return;
             
-            if (weightInput && latestHistory.weight) {
-                weightInput.value = latestHistory.weight;
+            const weight = document.getElementById('weight').value;
+            const treatment_details = document.getElementById('treatment_details').value;
+            
+            // Validation
+            if (!weight || !treatment_details) {
+                showAlert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน', 'error');
+                return;
             }
-            if (treatmentInput && latestHistory.treatment_details) {
-                treatmentInput.value = latestHistory.treatment_details;
+            
+            // Start saving state
+            isSaving = true;
+            const saveBtn = document.getElementById('saveBtn');
+            const saveText = document.getElementById('saveText');
+            const originalText = saveText.innerHTML;
+            
+            // Update button to loading state
+            saveBtn.disabled = true;
+            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            saveText.innerHTML = 'กำลังบันทึก...';
+            
+            const data = {
+                booking_id: <%= booking.booking_id %>,
+                weight: weight,
+                treatment_details: treatment_details
+            };
+            
+            try {
+                const response = await fetch('/veterinarian/mg_history/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('บันทึกประวัติการรักษาเรียบร้อยแล้ว', 'success');
+                    updateFormToCompleted();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAlert('เกิดข้อผิดพลาด: ' + result.message, 'error');
+                    resetSaveButton(saveBtn, originalText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+                resetSaveButton(saveBtn, originalText);
             }
         }
-    } catch (error) {
-        console.error('Error loading history data:', error);
-    }
-});
-<% } %>
 
-// เพิ่ม Event Listener สำหรับ Debug
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded successfully');
-    
-    // ตรวจสอบว่า elements มีอยู่หรือไม่
-    const requiredElements = ['weight', 'treatment_details', 'alertSuccess', 'alertError'];
-    requiredElements.forEach(id => {
-        const element = document.getElementById(id);
-        if (!element) {
-            console.warn(`Element with ID '${id}' not found`);
+        // Reset Save Button
+        function resetSaveButton(saveBtn, originalText) {
+            isSaving = false;
+            saveBtn.disabled = false;
+            saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('saveText').innerHTML = originalText;
         }
-    });
-});
-</script>
+
+        // Update Form to Completed
+        function updateFormToCompleted() {
+            const saveBtn = document.getElementById('saveBtn');
+            const saveText = document.getElementById('saveText');
+            
+            saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            saveBtn.classList.remove('bg-gradient-to-r', 'from-primary', 'to-secondary');
+            saveBtn.classList.add('bg-green-500');
+            saveBtn.disabled = true;
+            saveText.innerHTML = '<i class="fas fa-check mr-2"></i>บันทึกเสร็จสิ้น';
+            
+            document.getElementById('weight').disabled = true;
+            document.getElementById('treatment_details').disabled = true;
+        }
+
+        // Go Back Function
+        function goBack() {
+            window.history.back();
+        }
+
+        // Show Alert Function
+        function showAlert(message, type) {
+            const alertElement = document.getElementById(type === 'success' ? 'alertSuccess' : 'alertError');
+            const textElement = document.getElementById(type === 'success' ? 'successText' : 'errorText');
+            
+            if (alertElement && textElement) {
+                textElement.textContent = message;
+                alertElement.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    alertElement.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Medical History Management System loaded');
+            console.log('Has existing history:', hasExistingHistory);
+        });
+    </script>
+
 </body>
 </html>

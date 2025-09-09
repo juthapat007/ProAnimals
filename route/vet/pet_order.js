@@ -108,4 +108,18 @@ router.post('/booking/:booking_id/status', requireLogin, async (req, res) => {
   }
 });
 
+// รับ bookingId มาเก็บใน session
+router.post('/setBookingId', requireLogin, (req, res) => {
+  const { bookingId } = req.body;
+  if (!bookingId) {
+    return res.status(400).json({ success: false, message: "ไม่มี bookingId" });
+  }
+
+  req.session.bookingId = bookingId;
+  console.log("💾 Set session bookingId:", bookingId);
+
+  res.json({ success: true });
+});
+
+
 export default router;

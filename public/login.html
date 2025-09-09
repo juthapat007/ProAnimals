@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>เข้าสู่ระบบ</title>
+<style>
+  body { font-family: Arial; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .login-card { background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+  input { width: 100%; padding: 10px; margin: 10px 0; }
+  button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #0056b3; }
+  .error { color: red; margin: 10px 0; }
+</style>
+</head>
+<body>
+  <div class="login-card">
+    <h2>เข้าสู่ระบบ</h2>
+    <form id="loginForm">
+      <input type="email" name="access_email" placeholder="อีเมล" required>
+      <input type="password" name="access_pwd" placeholder="รหัสผ่าน" required>
+      <div class="error" id="errorMsg"></div>
+      <button type="submit">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+
+<script>
+const form = document.getElementById('loginForm');
+const errorMsg = document.getElementById('errorMsg');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorMsg.textContent = '';
+
+  const formData = new FormData(form);
+  const payload = Object.fromEntries(formData.entries());
+
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+
+  if(!data.success) {
+    errorMsg.textContent = data.message;
+  } else {
+    window.location.href = data.redirect;
+  }
+});
+
+</script>
+</body>
+</html>

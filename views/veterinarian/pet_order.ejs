@@ -5,123 +5,21 @@
   <title>รายละเอียดสัตว์เลี้ยงของลูกค้า</title>
   <%- include('../partials/link') %>
 
-  <style>
-
-/* Booking Card */
-/* .pet-card {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background: #fff;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-} */
-
-/* Pet ID + image */
-.pet-id {
-  flex: 1 1 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-weight: bold;
-}
-
-.pet-id img {
-  margin-top: 0.5rem;
-  max-width: 150px;
-  border-radius: 10px;
-  object-fit: cover;
-}
-
-.pet-info {
-  flex: 2 1 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.pet-row {
-  display: grid;
-  grid-template-columns: 140px 1fr 140px 1fr; 
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.pet-row strong {
-  color: #333;
-}
-
-.pet-row span {
-  color: #555;
-}
-
-.pet-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  justify-content: flex-end;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  font-weight: bold;
-  transition: background 0.2s;
-}
-/* =========================
-   📱 Responsive
-   ========================= */
-@media (max-width: 768px) {
-  .pet-card {
-    flex-direction: column;
-  }
-
-  .pet-row {
-    grid-template-columns: 1fr 1fr; /* แค่ label-value */
-  }
-
-  .pet-row strong {
-    text-align: right;
-  }
-
-  .pet-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .btn {
-    width: 100%;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .pet-row {
-    grid-template-columns: 1fr; /* ซ้อนกันทุกตัว */
-  }
-
-  .pet-row strong {
-    text-align: left;
-  }
-}
-
-    </style>
 
 </head>
 <body>
 <div class="container">
   <%- include('../partials/header_vet') %>
+  <p>รหัสคุณหมอ: <%= vetId %></p>
+
+
   
   <h2>รายละเอียดสัตว์เลี้ยงของลูกค้า</h2>
   
   <!-- Date Filter -->
-  <div class="filter-date">
-    <form method="get" action="/veterinarian/pet_order">
-      <label for="SelectDate">เลือกวันที่:</label>
+  <div class="filter-date" style="display: flex;" >
+    <form method="get" action="/veterinarian/pet_order" >
+      <span for="SelectDate">เลือกวันที่: </span>
       <input 
         class="date-input-wrapper" 
         type="date" 
@@ -136,7 +34,7 @@
   <!-- Booking Cards -->
   <% if (bookings && bookings.length > 0) { %>
     <% bookings.forEach((pet) => { %>
-      <div class="pet-card" style="display: flex;">
+      <div  style="display: flex;">
         <div class="pet-id">ID เคส : <%= pet.booking_id %>
               <img src="<%= pet.pet_image ? '/uploads/' + pet.pet_image : '/images/no-pet.png' %>" class="image-preview" alt="pet"></div>
 
@@ -171,9 +69,9 @@
           </div>
 
           <div style="display: flex; justify-content: flex-end;" >
-            <button type="button" class="btn btn-history" onclick="goToHistory(<%= pet.booking_id %>)">
-              จัดการประวัติ
-            </button>
+            <button type="button" class="btn btn-info" onclick="goToHistory(<%= pet.booking_id %>)">
+  จัดการประวัติ
+</button>
             <div style="padding-left: 5px;"></div>
             <button type="button" class="btn btn-edit" onclick="updateStatus(<%= pet.booking_id %>, document.getElementById('status<%= pet.booking_id %>').value)">
               อัพเดทสถานะ
@@ -192,9 +90,27 @@
 <script>
   
 // ฟังก์ชันสำหรับไปหน้าจัดการประวัติ - แก้ไข URL ให้ถูกต้อง
-function goToHistory(bookingId) {
-    window.location.href = `/veterinarian/mg_history/${bookingId}`;
+async function goToHistory(bookingId) {
+    try {
+        const response = await fetch('/veterinarian/pet_order/setBookingId', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bookingId })
+});
+
+
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = '/veterinarian/mg_history';
+        } else {
+            alert('เกิดข้อผิดพลาด: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('ไม่สามารถเปิดหน้าประวัติการรักษาได้');
+    }
 }
+
 
 // ฟังก์ชันสำหรับอัพเดทสถานะ
 async function updateStatus(bookingId, status) {

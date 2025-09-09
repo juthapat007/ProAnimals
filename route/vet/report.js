@@ -38,7 +38,13 @@ router.get("/", async (req, res) => {
     const data = rows.map(r => r.total);
 
     // ✅ ต้องส่ง type ไปด้วย
-    res.render("veterinarian/report", { labels, data, type });
+    res.render('veterinarian/report', {
+  type: req.query.type || 'week',
+  labels: labels,
+  data: data,
+  vetId: req.session.vet_id // หรือค่าที่คุณใช้
+});
+
 
   } catch (err) {
     console.error(err);

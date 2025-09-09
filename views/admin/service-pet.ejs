@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>จัดการบริการ</title>
+
+<%- include('../partials/link') %>  
+</head>
+<body class="p-4">
+<div class="container">
+  <%- include('../partials/header_admin') %>
+
+  <div class="filter-buttons" id="filterButtons">
+<div >
+    <button class="filter-btn " onclick="location.href='/admin/manage_pet_type'">
+      <i class="fas fa-dog"></i> จัดการประเภทสัตว์
+    </button>
+</div>
+    <button class="filter-btn" style="color: #FF9AA2;" onclick="location.href='/admin/manage_service_pet'">
+      <i class="fas fa-concierge-bell"></i> จัดการบริการ
+    </button>
+
+  </div>
+  <br>
+
+
+<div id="petType" class="tab-content">
+  <h1><i class="fas fa-concierge-bell"></i> จัดการบริการ</h1>
+
+  <!-- ฟอร์มเพิ่ม/แก้ไข -->
+  <form id="serviceForm" action="/admin/manage_service_pet/add" method="POST" class="mb-3">
+    <div style="display: flex;">
+    <input type="hidden" id="service_id" name="service_id">
+
+      <input type="text" id="service_type" name="service_type" placeholder="ชื่อบริการ" class="form-control" required>
+ 
+      <input type="number" id="service_price" name="service_price" placeholder="ราคา" class="form-control" required>
+
+    <input type="text" id="service_time" name="service_time" class="form-control" placeholder="เช่น 2 ชั่วโมง" required>
+<button type="submit" id="submitBtn" class="btn btn-success">
+      <i class="fas fa-plus-circle"></i> เพิ่มบริการ
+    </button>
+</div>
+  </form>
+
+  <!-- ตารางบริการ -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>รหัส</th>
+        <th>ชื่อบริการ</th>
+        <th>ราคา</th>
+        <th>เวลา</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+<tbody>
+      <% services.forEach(s => { %>
+        <tr id="row-<%= s.service_id %>" onclick="fillForm('<%= s.service_id %>', '<%= s.service_type %>', '<%= s.service_price %>', '<%= s.service_time %>')">
+          <td><%= s.service_id %></td>
+          <td><%= s.service_type %></td>
+          <td><%= s.service_price %></td>
+          <td><%= s.service_time %></td>
+          <td>
+            <form action="/admin/manage_service_pet/delete" method="POST" onsubmit="return confirm('ยืนยันการลบ <%= s.service_type %>?')">
+              <input type="hidden" name="service_id" value="<%= s.service_id %>">
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash-alt"></i> ลบ
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+
+  </table>
+</div>
+
+<div id="serviceType" class="tab-content" style="display:none;">
+  <h1><i class="fas fa-concierge-bell"></i> จัดการบริการ</h1>
+
+  <!-- ฟอร์มเพิ่ม/แก้ไข -->
+  <form id="serviceForm" action="/admin/manage_service_pet/add" method="POST" class="mb-3">
+    <div style="display: flex;">
+    <input type="hidden" id="service_id" name="service_id">
+
+      <input type="text" id="service_type" name="service_type" placeholder="ชื่อบริการ" class="form-control" required>
+ 
+      <input type="number" id="service_price" name="service_price" placeholder="ราคา" class="form-control" required>
+
+    <input type="text" id="service_time" name="service_time" class="form-control" placeholder="เช่น 2 ชั่วโมง" required>
+<button type="submit" id="submitBtn" class="btn btn-success">
+      <i class="fas fa-plus-circle"></i> เพิ่มบริการ
+    </button>
+</div>
+  </form>
+
+  <!-- ตารางบริการ -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>รหัส</th>
+        <th>ชื่อบริการ</th>
+        <th>ราคา</th>
+        <th>เวลา</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+<tbody>
+      <% services.forEach(s => { %>
+        <tr id="row-<%= s.service_id %>" onclick="fillForm('<%= s.service_id %>', '<%= s.service_type %>', '<%= s.service_price %>', '<%= s.service_time %>')">
+          <td><%= s.service_id %></td>
+          <td><%= s.service_type %></td>
+          <td><%= s.service_price %></td>
+          <td><%= s.service_time %></td>
+          <td>
+            <form action="/admin/manage_service_pet/delete" method="POST" onsubmit="return confirm('ยืนยันการลบ <%= s.service_type %>?')">
+              <input type="hidden" name="service_id" value="<%= s.service_id %>">
+              <button type="submit" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash-alt"></i> ลบ
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+
+  </table>
+  </div>
+</div>
+
+
+  <script>
+function fillForm(id, type, price, time) {
+  document.getElementById("service_id").value = id;
+  document.getElementById("service_type").value = type;
+  document.getElementById("service_price").value = price;
+  document.getElementById("service_time").value = time;
+
+  document.getElementById("serviceForm").action = "/admin/manage_service_pet/update";
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.innerHTML = '<i class="fas fa-save"></i> อัพเดตบริการ';
+  submitBtn.classList.remove("btn-success");
+  submitBtn.classList.add("btn-primary");
+}
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById(tabId).style.display = 'block';
+}
+  </script>
+
+</body>
+</html>

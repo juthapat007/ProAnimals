@@ -3,7 +3,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getPoolPromise } from './config/db.js';
 import bcrypt from 'bcrypt';
-import multer from 'multer';
 import session from 'express-session';
 import moment from 'moment-timezone';
 import dayjs from "dayjs";
@@ -15,11 +14,14 @@ const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+
 const app = express();
 
 // Middleware สำหรับรับ JSON และ form
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // สำหรับ parse JSON
+app.use(express.urlencoded({ extended: true })); // สำหรับ parse form data
+
 
 // ตั้งค่า session - เพิ่มเวลา timeout
 app.use(session({
@@ -58,9 +60,12 @@ import selectTimeRoter from './route/users/select_time.js';
 import confirmRouter from './route/users/confirm.js';
 import successRouter from './route/users/success.js';
 app.use('/users/success', successRouter);
-
-
 app.use('/users/confirm', confirmRouter);
+
+import forgotPasswordRouter from './route/users/forgot-password.js';
+app.use('/users/forgot-password', forgotPasswordRouter);
+import resetPasswordRouter from './route/users/reset-password.js';
+app.use('/users/reset-password', resetPasswordRouter);
 
 import selectPetRouter from "./route/users/select_pet.js";
 app.use("/users/select_pet", selectPetRouter);
@@ -77,9 +82,26 @@ import queueRoutes from "./route/users/queue.js";
 app.use("/users/queue", queueRoutes);
 
 
+
+
+import petTypeRouter from "./route/admin/pet_type.js";
+app.use("/admin/manage_pet_type", petTypeRouter);
+
+import servicePetRouter from "./route/admin/service-pet.js";
+// ✅ กำหนด path /admin/manage_service_pet
+app.use("/admin/manage_service_pet", servicePetRouter);
+
+
 import totalPayRouter from './route/admin/totalPayments.js'; 
 import contactCusRouter from './route/admin/customerContact.js'; 
 import addPetRouter from './route/admin/add_pet.js'; 
+
+import petServiceRoutes from "./route/admin/petService.js";
+
+// ✅ เส้นทาง admin
+app.use("/admin/pet_service", petServiceRoutes);
+
+
 
 
 import petOrderRoutes from './route/vet/pet_order.js';
@@ -89,8 +111,8 @@ import medicationHistoryRoutes from "./route/vet/medicationHistory.js";
 import manageMedicationRoutes from "./route/vet/manageMedication.js";
 import reportRoutes from "./route/vet/report.js";
 import workDayRoutes from "./route/vet/workDays.js";
-
-
+import editHistoryRouter from "./route/vet/editHistory.js";
+import managePermissionRouter from "./route/vet/managePermission.js";
 
 
 
@@ -110,7 +132,7 @@ app.use('/users', registerRoter);
 app.use('/users', selectTimeRoter);
 
 
-
+// เพิ่ม route สำหรับ pet service
 app.use('/admin/total_pay', totalPayRouter);
 app.use('/admin/contact_customer', contactCusRouter);
 app.use('/admin/add_pet', addPetRouter);
@@ -123,13 +145,53 @@ app.use("/veterinarian/medication_history", medicationHistoryRoutes);
 app.use("/veterinarian/manage_medication", manageMedicationRoutes);
 app.use("/veterinarian/report", reportRoutes);
 app.use("/veterinarian/work_days", workDayRoutes);
+app.use("/veterinarian/edit_history", editHistoryRouter);
+app.use("/veterinarian/mg_permission", managePermissionRouter);
 
 
-app.get("/go-workdays", (req, res) => {
-  res.redirect("/veterinarian/work_days"); // 👍 ใช้ได้
+app.get("/users/verify-email", async (req, res) => {
+  const { token } = req.query;
+  const pool = getPoolPromise(); // ใช้ pool ปกติ
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT email FROM email_verification WHERE token = ?",
+      [token]
+    );
+
+    if (rows.length === 0) {
+      return res.render('users/verify', {
+        success: false,
+        message: "❌ ลิงก์ยืนยันไม่ถูกต้อง หรือหมดอายุแล้ว"
+      });
+    }
+
+    const email = rows[0].email;
+
+    // อัปเดตสถานะยืนยันในตาราง customer
+    await pool.query(
+      "UPDATE customer SET email_verified = 1 WHERE cus_email = ?",
+      [email]
+    );
+
+    // ลบ token ทิ้ง
+    await pool.query(
+      "DELETE FROM email_verification WHERE token = ?",
+      [token]
+    );
+
+    res.render('users/verify_success', {
+  success: true,
+  message: '✅ ยืนยันอีเมลสำเร็จแล้ว! ตอนนี้คุณสามารถเข้าสู่ระบบได้'
 });
-
-
+  } catch (err) {
+    console.error("Verify error:", err);
+    res.render('users/verify_success', {
+  success: false,
+  message: '❌ ลิงก์ยืนยันไม่ถูกต้อง หรือหมดอายุแล้ว'
+});
+  }
+});
 
 
 // หน้าแรก
@@ -209,33 +271,39 @@ app.post('/login', async (req, res) => {
     req.session.user_email = user.access_email;
     req.session.access_type = user.access_type;
 
-    // console.log(`✅ Login successful for ${email}, type: ${user.access_type}`);
+    console.log(`✅ Login successful for ${email}, type: ${user.access_type}`);
 
     // 4️⃣ แยก flow ตาม access_type
     let redirectUrl = '/';
     
     if (user.access_type === 'customer') {
       console.log("👥 Processing customer flow...");
-      
-      const [custResults] = await pool.query(
-        'SELECT cus_name, cus_id FROM customer WHERE cus_email = ?', 
-        [email]
-      );
-      
-      // console.log("📊 Customer results:", custResults);
-      
-      if (!custResults || custResults.length === 0) {
-        console.log("❌ No customer data found");
-        return res.status(404).json({ 
-          success: false, 
-          message: 'ไม่พบข้อมูลลูกค้าในระบบ' 
-        });
-      }
+      // หลังจากดึงข้อมูล customer
+const [custResults] = await pool.query(
+  'SELECT cus_name, cus_id, email_verified FROM customer WHERE cus_email = ?',
+  [email]
+);
 
-      req.session.user_name = custResults[0].cus_name;
-      req.session.cus_id = custResults[0].cus_id;
-      redirectUrl = '/users/main';
-      
+if (!custResults || custResults.length === 0) {
+  return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลลูกค้าในระบบ' });
+}
+
+const customer = custResults[0];
+
+// ✅ เช็ค email_verified
+if (customer.email_verified !== 1) {
+  return res.status(403).json({
+    success: false,
+    message: '❌ กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ'
+    
+  });
+}
+
+// ถ้า verified = 1 จึงสร้าง session
+req.session.user_name = customer.cus_name;
+req.session.cus_id = customer.cus_id;
+redirectUrl = '/users/main';
+
     } else if (user.access_type === 'admin') {
       // console.log("👨‍💼 Processing admin flow...");
       
@@ -318,6 +386,7 @@ app.post('/login', async (req, res) => {
 //====================================================
 // ===== OTHER ROUTES =====
 //====================================================
+
 app.get('/users/main', requireLogin, (req, res) => {
   if (req.session.access_type !== 'customer') {
     return res.redirect('/');
@@ -381,38 +450,16 @@ app.post('/booking', requireLogin, async (req, res) => {
   }
 });
 
-// แสดงหน้า register.ejs
-app.get('/users/register', (req, res) => {
-  res.render('users/register', { error: null });
-});
 
-app.post('/users/register', async (req, res) => {
-  const pool = getPool(req.body.email); // เลือก DB pool ตาม email
-  const { email, password, name } = req.body;
+// หน้า HTML
+// หน้า HTML
+app.get('/admin/manage_service_pet', (req, res) => {
+  // ตรวจสอบสิทธิ์ admin
+  if (!req.session.user_email) return res.redirect('/login');
 
-  if (!email || !password || !name) {
-    return res.status(400).render('users/register', { error: "กรุณากรอกข้อมูลให้ครบ" });
-  }
-
-  try {
-    // เข้ารหัสรหัสผ่านก่อนเก็บ
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    pool.query(
-      `INSERT INTO customer (cus_email, cus_pwd, cus_name) VALUES (?, ?, ?)`,
-      [email, hashedPassword, name],
-      (err) => {
-        if (err) {
-          console.error("DB Error:", err);
-          return res.status(500).render('users/register', { error: "ไม่สามารถสมัครได้" });
-        }
-        res.redirect('/login'); // สมัครสำเร็จให้ไปหน้า login
-      }
-    );
-  } catch (err) {
-    console.error("Register error:", err);
-    res.status(500).render('users/register', { error: "เกิดข้อผิดพลาด" });
-  }
+  res.render('admin/manage_service_pet', {
+    user: req.session.user_email
+  });
 });
 
 
@@ -421,6 +468,7 @@ app.post('/users/register', async (req, res) => {
 //                                     veterinarian
 // 
 // =====================================================================================================================
+
 
 
 // Logout route

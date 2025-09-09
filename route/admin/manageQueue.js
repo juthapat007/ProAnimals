@@ -181,18 +181,20 @@ router.post('/update', requireLogin, async (req, res) => {
 async function getBookingsByDate(pool, date) {
   const sql = `
     SELECT 
-      booking.booking_id, 
-      booking.time_booking, 
-      booking.booking_date,
-      booking.service_id, 
-      booking.status,
-      pet.pet_name, 
-      customer.cus_email, 
-      customer.cus_name, 
-      customer.cus_phon
-    FROM booking
-    INNER JOIN customer ON booking.cus_id = customer.cus_id
-    INNER JOIN pet ON booking.pet_id = pet.pet_id
+    booking.booking_id,
+    booking.time_booking,
+    booking.booking_date,
+    booking.service_id,
+    booking.status,
+    pet.pet_name,
+    customer.cus_email,
+    customer.cus_name,
+    customer.cus_phon,
+    treatment_history.pay_status
+FROM booking
+INNER JOIN customer ON booking.cus_id = customer.cus_id
+INNER JOIN pet ON booking.pet_id = pet.pet_id
+LEFT JOIN treatment_history ON booking.booking_id = treatment_history.booking_id
     WHERE DATE(booking.booking_date) = ?
     ORDER BY booking.time_booking ASC;
   `;

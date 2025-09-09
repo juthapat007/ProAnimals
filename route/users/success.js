@@ -15,21 +15,23 @@ router.get('/', requireLogin, async (req, res) => {
 
     const pool = getPoolPromise(req.session.user_email);
     
-    // ดึงข้อมูลการจองที่เพิ่งสร้าง
+    // ✅ แก้ไข column name ให้ตรงกับฐานข้อมูล
     const [bookingRows] = await pool.query(
       `SELECT 
           b.booking_id,
           b.booking_date,
-          b.booking_time,
+          b.time_booking,
           b.status,
           p.pet_name,
           c.cus_name,
           st.service_type,
-          st.service_price
+          st.service_price,
+          v.vet_name
        FROM booking b
        JOIN pet p ON b.pet_id = p.pet_id
        JOIN customer c ON b.cus_id = c.cus_id
        JOIN service_type st ON b.service_id = st.service_id
+       LEFT JOIN veterinarian v ON b.vet_id = v.vet_id
        WHERE b.booking_id = ? AND b.cus_id = ?`,
       [booking_id, req.session.cus_id]
     );
@@ -47,7 +49,7 @@ router.get('/', requireLogin, async (req, res) => {
       year: "numeric"
     });
 
-    const formattedTime = booking.booking_time + " น.";
+    const formattedTime = booking.time_booking + " น.";
 
     res.render("users/success", {
       booking_id: booking.booking_id,
@@ -57,14 +59,16 @@ router.get('/', requireLogin, async (req, res) => {
       customerName: booking.cus_name,
       serviceType: booking.service_type,
       servicePrice: booking.service_price,
+      vetName: booking.vet_name || 'ยังไม่ระบุ',
       status: booking.status
     });
 
   } catch (err) {
-    console.error('Success page error:', err);
+    console.error('❌ Success page error:', err);
     res.status(500).send("เกิดข้อผิดพลาดในระบบ");
   }
 });
+
 // POST /users/success
 router.post('/', requireLogin, async (req, res) => {
   try {
@@ -73,14 +77,17 @@ router.post('/', requireLogin, async (req, res) => {
 
     const pool = getPoolPromise(req.session.user_email);
 
+    // ✅ แก้ไข column name ให้ตรงกับฐานข้อมูล
     const [bookingRows] = await pool.query(
       `SELECT 
-          b.booking_id, b.booking_date, b.booking_time, b.status,
-          p.pet_name, c.cus_name, st.service_type, st.service_price
+          b.booking_id, b.booking_date, b.time_booking, b.status,
+          p.pet_name, c.cus_name, st.service_type, st.service_price,
+          v.vet_name
        FROM booking b
        JOIN pet p ON b.pet_id = p.pet_id
        JOIN customer c ON b.cus_id = c.cus_id
        JOIN service_type st ON b.service_id = st.service_id
+       LEFT JOIN veterinarian v ON b.vet_id = v.vet_id
        WHERE b.booking_id = ? AND b.cus_id = ?`,
       [booking_id, req.session.cus_id]
     );
@@ -91,7 +98,7 @@ router.post('/', requireLogin, async (req, res) => {
 
     const booking = bookingRows[0];
     const formattedDate = new Date(booking.booking_date).toLocaleDateString("th-TH");
-    const formattedTime = booking.booking_time + " น.";
+    const formattedTime = booking.time_booking + " น.";
 
     res.render("users/success", {
       booking_id: booking.booking_id,
@@ -101,6 +108,7 @@ router.post('/', requireLogin, async (req, res) => {
       customerName: booking.cus_name,
       serviceType: booking.service_type,
       servicePrice: booking.service_price,
+      vetName: booking.vet_name || 'ยังไม่ระบุ',
       status: booking.status
     });
 
