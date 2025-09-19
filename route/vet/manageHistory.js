@@ -201,7 +201,7 @@ WHERE b.booking_id = ?
       hasExistingHistory,
       today,
       vetName: booking.vet_name,
-      vetId: actualVetId
+      vetId: req.session.vet_id // หรือค่าที่คุณใช้
     });
 
   } catch (err) {

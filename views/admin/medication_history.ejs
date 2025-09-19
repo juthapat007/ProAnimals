@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการจ่ายยา</title>
+  <%- include('../partials/link') %>
+</head>
+<body >
+  <div class="container">
+    <%- include('../partials/header_admin') %>
+
+    <br>
+<h1 class="header text-2xl font-bold mb-2 flex text-text items-center justify-center">
+        <i class=" fas fa-pills mr-2 text-primary2"></i> ประวัติการจ่ายยา
+      </h1><br>
+
+    <div class="overflow-x-auto shadow-lg rounded-lg">
+  <table class="w-full min-w-[800px] border-collapse text-left bg-white rounded-lg">
+    <thead>
+      <tr>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#86c26b]">รหัสการรักษา</th>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#9fd87f]">จำนวนยา</th>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#b1e08f]">รหัสยา</th>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#bfe692]">ชื่อยา</th>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#d5f0b3]">ราคา</th>
+        <th class="px-6 py-4 text-lg font-semibold text-gray-800 bg-[#e9fad1]">รูปแบบบรรจุภัณฑ์</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (medications.length > 0) { %>
+        <% medications.forEach(function(item, i){ %>
+          <tr class="<%= i % 2 === 0 ? 'bg-gray-50' : 'bg-white' %> hover:bg-green-50 transition">
+            <td class="px-6 py-3"><%= item.treatment_id %></td>
+            <td class="px-6 py-3"><%= item.quantity %></td>
+            <td class="px-6 py-3"><%= item.medication_id %></td>
+            <td class="px-6 py-3"><%= item.medicine_name %></td>
+            <td class="px-6 py-3"><%= item.medicine_price %></td>
+            <td class="px-6 py-3"><%= item.medicine_package %></td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="px-6 py-4 text-center text-gray-500">❌ ไม่พบข้อมูล</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+  </div>
+</body>
+</html>

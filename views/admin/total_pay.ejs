@@ -5,334 +5,155 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>คำนวดค่าบริการ - ไชยปราการสัตวแพทย์</title>
     <%- include('../partials/link') %>
-  <style>
 
-    .booking-info {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #e9ecef;
-    }
-    
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding: 5px 0;
-    }
-    
-    .info-label {
-      font-weight: bold;
-      color: #555;
-    }
-    
-    .service-summary {
-      background: #e3f2fd;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #2196f3;
-    }
-    
-    .medicine-section {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #ddd;
-    }
-    
-    .total-summary {
-      background: #e8f5e8;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #4caf50;
-    }
-    
-    .payment-form {
-      background: #fff3e0;
-      padding: 20px;
-      border-radius: 8px;
-      border: 2px solid #ff9800;
-    }
-    
-    .dropdown {
-      position: absolute;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 1000;
-      width: 100%;
-    }
-    
-    .dropdown div {
-      padding: 8px 12px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .dropdown div:hover {
-      background: #f0f0f0;
-    }
-    
-    .medicine-item {
-      background: #f9f9f9;
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    
-    .form-group input,
-    .form-group select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
 
-    .dispensed-medicines {
-      background: #f0f8f0;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #4caf50;
-    }
-  </style>
 </head>
 
 <body>
   <div class="container" style="width: 80%">
     <%- include('../partials/header_admin') %>
+<center>
+    <strong class="text-2xl ">
+    <i class="fas fa-calculator text-primary2"></i>  คำนวนเงินที่ต้องชำระ
+  </strong>
+  </center>
 
     <!-- บริการหลัก -->
-    <div class="service-summary">
-      <b>บริการหลัก</b><br />
-      บริการที่เลือก: <span id="service-name"><%= booking.service_name || 'ตรวจสุขภาพ' %></span><br>
-      ราคา: <span id="service-price" data-price="<%= booking.service_price || 0 %>">
-        <%= (booking.service_price || 0).toFixed(2) %> บาท
-      </span>
-    </div>
+    <div class="container  rounded-xl shadow-md p-6 mb-6">
+  <h2 class="text-2xl font-bold text-text flex items-center mb-3">
+     บริการหลัก
+  </h2>
+  <p class="mb-1">บริการที่เลือก: 
+    <span class="font-semibold text-gray-700" id="service-name"><%= booking.service_name || 'ตรวจสุขภาพ' %></span>
+  </p>
+  <p>ราคา: 
+    <span class="font-semibold text-green-600" id="service-price" data-price="<%= booking.service_price || 0 %>">
+      ฿<%= (booking.service_price || 0).toFixed(2) %>
+    </span>
+  </p>
+</div>
 
     <!-- ยาที่จ่ายแล้ว -->
-    <div class="dispensed-medicines">
-      <h4>รายการจ่ายยา</h4>
+<div class="bg-green-50 rounded-xl shadow-md p-6 mb-6">
+  <h2 class="text-2xl font-bold text-text ">
+
+        <i class="fas fa-pills text-primary2"></i>  รายการจ่ายยา
+      </h2>
       <div id="dispensed-list">
         <% if (dispensedMeds && dispensedMeds.length > 0) { %>
-          <div class="table-responsive">
-            <table class="table table-sm align-middle">
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse rounded-lg overflow-hidden">
               <thead>
-                <tr>
-                  <th>ยา</th>
-                  <th>บรรจุภัณฑ์</th>
-                  <th class="text-end">ราคา/หน่วย</th>
-                  <th class="text-center">จำนวน</th>
-                  <th class="text-end">รวม</th>
-                  <th></th>
+                <tr class="bg-green-600 text-white text-left">
+                  <th class="tb-g1">ชื่อยา</th>
+                  <th class="tb-g2">บรรจุภัณฑ์</th>
+                  <th class="tb-g3">ราคา/หน่วย</th>
+                  <th class="tb-g4">จำนวน</th>
+                  <th class="tb-g5">รวม</th>
                 </tr>
               </thead>
               <tbody>
                 <% let medicineTotal = 0; %>
                 <% dispensedMeds.forEach(function(d){ %>
                   <% medicineTotal += parseFloat(d.total_price); %>
-                  <tr data-dispens-id="<%= d.dispens_id %>">
-                    <td><%= d.medicine_name %></td>
-                    <td><small class="text-muted"><%= d.medicine_package %></small></td>
-                    <td class="text-end">฿<%= (+d.medicine_price).toFixed(2) %></td>
-                    <td class="text-center"><%= d.quantity %></td>
-                    <td class="text-end">฿<%= (+d.total_price).toFixed(2) %></td>
-                    <td class="text-end">
-                      <button type="button" class="btn btn-sm btn-outline-danger"
-                              onclick="removeDispens('<%= d.dispens_id %>')">ลบ</button>
-                    </td>
+                  <tr class="bg-white border-b">
+                    <td class="px-4 py-3"><%= d.medicine_name %></td>
+                    <td class="px-4 py-3"><%= d.medicine_package %></td>
+                    <td class="px-4 py-3 text-right">฿<%= (+d.medicine_price).toFixed(2) %></td>
+                    <td class="px-4 py-3 text-center"><%= d.quantity %></td>
+                    <td class="px-4 py-3 text-right">฿<%= (+d.total_price).toFixed(2) %></td>
+                    
                   </tr>
                 <% }) %>
               </tbody>
               <tfoot>
-                <tr style="font-weight: bold;">
-                  <td colspan="4" class="text-end">รวมค่ายา:</td>
-                  <td class="text-end">฿<%= medicineTotal.toFixed(2) %></td>
+                <tr class="font-bold bg-gray-100">
+                  <td colspan="4" class="px-4 py-3 text-right">รวมค่ายา:</td>
+                  <td class="px-4 py-3 text-right text-green-700">฿<%= medicineTotal.toFixed(2) %></td>
                   <td></td>
                 </tr>
               </tfoot>
             </table>
           </div>
         <% } else { %>
-          <div class="text-muted">ยังไม่มีรายการยาที่จ่าย</div>
+          <p class="text-gray-500 italic">ยังไม่มีรายการยาที่จ่าย</p>
         <% } %>
       </div>
     </div>
 
-    <!-- เพิ่มยาใหม่ -->
-    <h3 class="text-lg font-bold mb-3">เพิ่มยาและอุปกรณ์การแพทย์</h3>
-    <form id="medicine-form" onsubmit="return false;" class="w-full p-4 bg-white rounded-xl shadow-md">
-      <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
-
-        <!-- Search -->
-        <div class="md:col-span-2 relative">
-          <input type="text" 
-                 id="med_search" 
-                 placeholder="ค้นหารหัสหรือชื่อยา" 
-                 autocomplete="off"
-                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-          <div id="med_dropdown" class="dropdown absolute left-0 right-0 bg-white border rounded-lg mt-1 shadow-lg hidden"></div>
-        </div>
-
-        <!-- จำนวน -->
-        <div>
-          <input type="number" 
-                 id="med_num" 
-                 placeholder="จำนวน" 
-                 min="1" 
-                 value="1"
-                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-        </div>
-
-        <!-- บรรจุภัณฑ์ -->
-        <div>
-          <input type="text" 
-                 id="med_unit" 
-                 value="บรรจุภัณฑ์" 
-                 disabled
-                 class="w-full border rounded-lg px-3 py-2 bg-gray-200 text-gray-500 cursor-not-allowed" />
-        </div>
-
-        <!-- ราคา/หน่วย -->
-        <div>
-          <input type="text" 
-                 id="med_price" 
-                 value="ราคา/หน่วย" 
-                 disabled
-                 class="w-full border rounded-lg px-3 py-2 bg-gray-200 text-gray-500 cursor-not-allowed" />
-        </div>
-
-        <!-- ปุ่มเพิ่ม -->
-          <button type="button"
-                  onclick="addMedicine()"
-                  class="btn-info">
-            เพิ่ม
-          </button>
-
-        <!-- รวมราคา -->
-        <div class="flex items-center font-bold text-gray-700">
-          รวม: <span class="total-price text-blue-600 ml-2" id="med_total">0.00</span> บาท
-        </div>
-
-      </div>
-    </form>
-
-    <!-- รายการยาที่เลือกเพิ่ม -->
-    <div class="medicine-section">
-      <div id="selected-medicines">
-        <h4>รายการยาที่เลือกเพิ่ม:</h4>
-        <div id="medicine-list"></div>
-      </div>
-    </div>
-
     <!-- สรุปยอดรวม -->
-    <div class="total-summary">
-      <h3>สรุปค่าใช้จ่าย</h3>
-      <div class="info-row">
-        <span>ค่าบริการหลัก:</span>
-        <span id="summary-service-price"><%= (booking.service_price || 0).toFixed(2) %> บาท</span>
-      </div>
-      <div class="info-row">
-        <span>ค่ายาที่จ่ายแล้ว:</span>
-        <span id="summary-dispensed-price">
-          <% let totalDispensed = 0; %>
-          <% if (dispensedMeds && dispensedMeds.length > 0) { %>
-            <% dispensedMeds.forEach(d => totalDispensed += parseFloat(d.total_price)); %>
-          <% } %>
-          <%= totalDispensed.toFixed(2) %> บาท
-        </span>
-      </div>
-      <div class="info-row">
-        <span>ค่ายาและอุปกรณ์เพิ่ม:</span>
-        <span id="summary-medicine-price">0.00 บาท</span>
-      </div>
-      <hr>
-      <div class="info-row" style="font-size: 18px; font-weight: bold; color: #2e7d32;">
-        <span>ยอดรวมทั้งสิ้น:</span>
-        <span id="summary-total-price"><%= ((booking.service_price || 0) + totalDispensed).toFixed(2) %> บาท</span>
+<div class="bg-edit/40 border border-color-edit rounded-xl shadow-md p-6 mb-6">
+  <h2 class="text-2xl font-bold text-text mb-3">สรุปค่าใช้จ่าย</h2>
+      <div class="space-y-2">
+        <div class="flex justify-between">
+          <span>ค่าบริการหลัก:</span>
+          <span id="summary-service-price"><%= (booking.service_price || 0).toFixed(2) %> บาท</span>
+        </div>
+        <div class="flex justify-between">
+          <span>ค่ายาที่จ่ายแล้ว:</span>
+          <span id="summary-dispensed-price"><%= totalDispensed.toFixed(2) %> บาท</span>
+        </div>
+        <div class="flex justify-between">
+          <span>ค่ายาและอุปกรณ์เพิ่ม:</span>
+          <span id="summary-medicine-price">0.00 บาท</span>
+        </div>
+        <hr class="my-2">
+        <div class="flex justify-between text-lg font-bold text-green-700">
+          <span>ยอดรวมทั้งสิ้น:</span>
+          <span id="summary-total-price"><%= ((booking.service_price || 0) + totalDispensed).toFixed(2) %> บาท</span>
+        </div>
       </div>
     </div>
 
     <!-- ฟอร์มชำระเงิน -->
-    <div class="payment-form">
-      <h3>บันทึกการชำระเงิน</h3>
-      <form id="payment-form" action="/admin/total_pay" method="POST">
+<div class="bg-info/70 rounded-xl shadow-md p-6">
+  <h2 class="text-2xl font-bold text-text mb-3">บันทึกการชำระเงิน <span class="text-red">*</span></h2>
+ 
+      <form id="payment-form" action="/admin/total_pay" method="POST" class="space-y-4">
         <input type="hidden" name="booking_id" value="<%= booking.booking_id %>">
         <input type="hidden" name="medications" id="medications-data" value="[]">
-        
-        <div class="form-group">
-          <label for="payment_amount">จำนวนเงินที่รับชำระ (บาท):</label>
-          <input type="number" 
-                 id="payment_amount" 
-                 name="payment_amount" 
+
+        <div>
+          <label for="payment_amount" class="font-semibold">จำนวนเงินที่รับชำระ (บาท):</label>
+          <input type="number" id="payment_amount" name="payment_amount" 
                  value="<%= ((booking.service_price || 0) + totalDispensed).toFixed(2) %>" 
-                 min="0" 
-                 step="0.01" 
-                 required>
-        </div>
-        
-        <div class="form-group">
-          <label for="payment_method">วิธีการชำระเงิน:</label>
-          <select id="payment_method" name="payment_method" required>
-  <option value="">-- เลือกวิธีการชำระ --</option>
-  <% paymentOptions.forEach(pm => { %>
-    <option value="<%= pm %>" <%= currentPayment === pm ? 'selected' : '' %>>
-      <%= pm %>
-    </option>
-  <% }) %>
-</select>
-
-<% if (paymentDone) { %>
-  <div class="text-green-600 font-bold mt-2">
-    ✅ คุณได้ชำระเงินแล้ว
-  </div>
-<% } %>
-        </div>
-        
-        <div class="form-group">
-          <label for="payment_note">หมายเหตุการชำระเงิน:</label>
-          <input type="text" 
-                 id="payment_note" 
-                 name="payment_note" 
-                 placeholder="เช่น เงินทอน, หมายเลขอ้างอิง">
+                 min="0" step="0.01" required
+                 class="form-info">
         </div>
 
-        <div class="btn-group">
-          <button class="btn-cancel" type="button" onclick="goBack()">ย้อนกลับ</button>
-          <button class="btn-success" type="submit">บันทึกการชำระเงิน</button>
+        <div>
+          <label for="payment_method" class="font-semibold">วิธีการชำระเงิน:</label>
+          <select id="payment_method" name="payment_method" required
+                  class="form-info">
+            <option value="">-- เลือกวิธีการชำระ --</option>
+            <% paymentOptions.forEach(pm => { %>
+              <option value="<%= pm %>" <%= currentPayment === pm ? 'selected' : '' %>><%= pm %></option>
+            <% }) %>
+          </select>
+          <% if (paymentDone) { %>
+            <p class="text-green-600 font-bold mt-2">✅ คุณได้ชำระเงินแล้ว</p>
+          <% } %>
+        </div>
+
+        <div>
+          <label for="payment_note" class="font-semibold">หมายเหตุการชำระเงิน:</label>
+          <input type="text" id="payment_note" name="payment_note" 
+                 placeholder="เช่น เงินทอน, หมายเลขอ้างอิง"
+                 class="form-info">
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-4">
+          <button type="button" onclick="goBack()"
+                  class="btn btn-cancel">
+             ย้อนกลับ
+          </button>
+          <button type="submit"
+                  class="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700">
+                  <i class="fas fa-save"></i>
+             บันทึกการชำระเงิน
+          </button>
         </div>
       </form>
-    </div>
-
-    <div id="success" style="display:none;" class="success-msg">
-      ✅ บันทึกข้อมูลสำเร็จ!
     </div>
   </div>
   </div>
@@ -477,11 +298,16 @@
     }
 
     // ย้อนกลับ
-    function goBack() {
-      if (confirm('คุณต้องการย้อนกลับหรือไม่? ข้อมูลที่ยังไม่ได้บันทึกจะหายไป')) {
-        window.location.href = '/admin/mg_queue';
-      }
-    }
+function goBack() {
+  if (confirm('คุณต้องการย้อนกลับหรือไม่? ข้อมูลที่ยังไม่ได้บันทึกจะหายไป')) {
+    // ซ่อนข้อความ success ก่อน
+    // const successMsg = document.getElementById('success');
+    // if (successMsg) successMsg.style.display = 'none';
+
+    window.location.href = '/admin/mg_queue';
+  }
+}
+
 
     // ลบยาที่จ่ายแล้ว
     async function removeDispens(dispensId) {

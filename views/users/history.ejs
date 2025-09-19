@@ -2,201 +2,123 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ประวัติการรักษา - ไชยปราการสัตวแพทย์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <%- include('../partials/link') %>
-  <style>
-    .history-container {
-      margin-top: 20px;
-    }
-    
-    .history-title {
-      color: var(--primary-color);
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    
-    .no-history {
-      text-align: center;
-      padding: 30px;
-      background-color: var(--light-gray);
-      border-radius: var(--border-radius);
-      margin: 30px 0;
-      color: var(--text-color);
-    }
-    
-    .history-card {
-      background-color: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      padding: 20px;
-      margin-bottom: 20px;
-      transition: var(--transition);
-    }
-    
-    .history-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .pet-name {
-      font-weight: 600;
-      color: var(--primary-color);
-      font-size: 1.2rem;
-    }
-    
-    .treatment-date {
-      color: var(--text-color);
-      font-size: 0.9rem;
-    }
-    
-    .history-details {
-      margin-top: 15px;
-    }
-    
-    .detail-row {
-      display: flex;
-      margin-bottom: 10px;
-    }
-    
-    .detail-label {
-      font-weight: 500;
-      color: var(--text-color);
-      min-width: 120px;
-    }
-    
-    .detail-value {
-      color: var(--text-color);
-      flex: 1;
-    }
-    
-    .status-completed {
-      display: inline-block;
-      padding: 3px 8px;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 12px;
-      font-size: 0.8rem;
-    }
-    
-    .status-pending {
-      display: inline-block;
-      padding: 3px 8px;
-      background-color: #FFC107;
-      color: #333;
-      border-radius: 12px;
-      font-size: 0.8rem;
-    }
-    
-    .filter-section {
-      background-color: white;
-      padding: 15px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      margin-bottom: 20px;
-    }
-    
-    .filter-title {
-      font-weight: 500;
-      margin-bottom: 10px;
-      color: var(--primary-color);
-    }
-  </style>
+
 </head>
-<body>
-  <div class="container">
-    <%- include('../partials/header') %>
-    
-    <div class="welcome">
-      <br>ประวัติการรักษาสัตว์เลี้ยงของคุณ<br>
+<body class=" from-gray-50 to-gray-100 p-6">
+
+<div class="container max-w-5xl mx-auto">
+  
+  <!-- Header -->
+  <%- include('../partials/header') %>
+
+  <!-- Title -->
+  <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3 justify-center">
+    <i class="fas fa-history text-primary2"></i>
+    ประวัติการรักษาสัตว์เลี้ยงของคุณ
+  </h1>
+
+  <% if (history.length === 0) { %>
+    <div class="text-center p-6 bg-white border border-gray-200 rounded-xl shadow">
+      <i class="fas fa-exclamation-circle text-4xl text-gray-400 mb-3"></i>
+      <p class="text-gray-500 text-lg">ไม่พบประวัติการรักษา</p>
     </div>
-    
-    <div class="history-container">
-      
-      <% if (history.length === 0) { %>
-        <div class="no-history">
-          <p>ไม่พบประวัติการรักษา</p>
-        </div>
-      <% } else { %>
-        <% history.forEach(record => { %>
-          <div class="history-card">
-            <div class="history-header">
-              <span class="pet-name"><%= record.pet_name %></span>
-              <span class="treatment-date"><%= new Date(record.treatment_date).toLocaleDateString('th-TH') %></span>
+  <% } else { %>
+
+    <div class="space-y-6 max-h-[600px] overflow-y-auto pr-2">
+      <% history.forEach(record => { %>
+        <div class="bg-white rounded-xl shadow hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden">
+          
+          <!-- Header -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-b2 px-6 py-4">
+            <div class="flex items-center gap-3 mb-2 sm:mb-0">
+              <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                <i class="fas fa-paw text-green-600"></i>
+              </div>
+              <span class="font-bold text-xl text-text"><%= record.pet_name %></span>
             </div>
-            
-            <div class="history-details">
-              <div class="detail-row">
-                <span class="detail-label">บริการ:</span>
-                <span class="detail-value"><%= record.service_type %></span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">สัตวแพทย์:</span>
-                <span class="detail-value"><%= record.vet_name %></span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">น้ำหนัก:</span>
-                <span class="detail-value"><%= record.pet_weight_kg %> กก.</span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">สถานะ:</span>
-                <span class="detail-value">
-                  <% if (record.treatment_status === 'Completed') { %>
-                    <span class="status-completed">เสร็จสิ้น</span>
-                  <% } else { %>
-                    <span class="status-pending">รอดำเนินการ</span>
-                  <% } %>
-                </span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">รายละเอียด:</span>
-                <span class="detail-value"><%= record.treatment_details %></span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">ประเภทลูกค้า:</span>
-                <span class="detail-value">
-                  <% 
-                  const cus_type = record.cus_type.replace(/[‘’]/g, '');
-                  %>
-                  <%= cus_type === 'walkin' ? 'Walk-in' : 'จองล่วงหน้า' %>
-                </span>
-              </div>
+            <div class="flex items-center gap-2 text-gray-700">
+              <i class="fas fa-calendar-alt w-4 h-4"></i>
+              <span class="font-medium">
+                <%= new Date(record.treatment_date).toLocaleDateString('th-TH', { year:'numeric', month:'long', day:'numeric' }) %>
+              </span>
             </div>
           </div>
-        <% }); %>
-      <% } %>
-    </div>
-  </div>
 
-  <!-- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const hamburger = document.querySelector(".hamburger");
-      const dropdown = document.querySelector(".dropdown");
-      
-      hamburger.addEventListener("click", function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle("show");
-      });
-      
-      document.addEventListener('click', function() {
-        dropdown.classList.remove("show");
-      });
-    });
-  </script> -->
+          <!-- Details -->
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+              <!-- บริการ -->
+              <div>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <i class="fas fa-stethoscope text-blue-500"></i> บริการ
+                </h3>
+                <p class="text-gray-700 ml-7"><%= record.service_type %></p>
+              </div>
+
+              <!-- สัตวแพทย์ -->
+              <div>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <i class="fas fa-user-md text-green-500"></i> สัตวแพทย์
+                </h3>
+                <p class="text-gray-700 ml-7"><%= record.vet_name %></p>
+              </div>
+
+              <!-- น้ำหนัก -->
+              <div>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <i class="fas fa-weight text-purple-500"></i> น้ำหนัก
+                </h3>
+                <p class="text-gray-700 ml-7"><%= record.pet_weight_kg.toFixed(2) %> กก.</p>
+              </div>
+
+              <!-- สถานะ -->
+              <div>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <i class="fas fa-tasks text-yellow-500"></i> สถานะ
+                </h3>
+                <div class="ml-7">
+                  <% if (record.treatment_status === 'Completed') { %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 border border-green-200">
+                      <i class="fas fa-check-circle mr-1"></i> เสร็จสิ้น
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700 border border-yellow-200">
+                      <i class="fas fa-hourglass-half mr-1"></i> รอดำเนินการ
+                    </span>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- ประเภทลูกค้า -->
+              <div>
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                  <i class="fas fa-users text-indigo-500"></i> ประเภทลูกค้า
+                </h3>
+                <p class="text-gray-700 ml-7">
+                  <% const cus_type = record.cus_type.replace(/[‘’]/g, ''); %>
+                  <%= cus_type === 'walkin' ? 'Walk-in' : 'จองล่วงหน้า' %>
+                </p>
+              </div>
+            </div>
+
+            <!-- รายละเอียด -->
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <i class="fas fa-file-alt text-gray-600"></i> รายละเอียดการรักษา
+              </h3>
+              <p class="text-gray-700 leading-relaxed"><%= record.treatment_details %></p>
+            </div>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
 </body>
 </html>

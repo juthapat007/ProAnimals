@@ -1,79 +1,157 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
-  <title>จัดการประเภทสัตว์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการ Service & Pet Type</title>
   <%- include('../partials/link') %>
 </head>
-<body >
-<div class="container">
-  <%- include('../partials/header_admin') %>
 
-  <div class="filter-buttons" id="filterButtons">
+<body>
+  <div class="container ">
+    <%- include('../partials/header_admin') %><br>
 
-    <button class="filter-btn " onclick="location.href='/admin/manage_pet_type'">
-      <i class="fas fa-dog"></i> จัดการประเภทสัตว์
-    </button>
+      <!-- Tabs -->
+      <div class=" flex flex-wrap gap-4">
+        <button class="tab-btn" onclick="window.location.href='/admin/manage_service_pet'">
+          <i class="fas fa-concierge-bell mr-2"></i>Service Type
+        </button>
+        <button class="tab-btn active" onclick="window.location.href='/admin/manage_pet_type'">
+          <i class="fas fa-paw mr-2"></i>Pet Type
+        </button>
+      </div>
 
-    <button class="filter-btn" onclick="location.href='/admin/manage_service_pet'">
-      <i class="fas fa-concierge-bell"></i> จัดการบริการ
-    </button>
+      <!-- Header -->
+      <div class="text-start mb-8">
+        <h1 class="header text-xl text-text mb-2"><i class="fas fa-paw text-primary2 mr-3"></i>จัดการประเภทสัตว์</h1>
+        <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
+      </div>
+
+      <!-- Form -->
+      <div class="bg-white rounded-2xl shadow-xl p-4 mb-2 border-2 border-primary/20">
+        <form id="petForm" action="/admin/manage_pet_type/add" method="POST" class="space-y-4">
+          <input type="hidden" id="type_id" name="type_id">
+          <div class="flex flex-col sm:flex-row gap-2 items-end">
+            <div class="flex-1">
+              <label class="block text-lg font-medium text-text mb-2">ชื่อประเภทสัตว์</label>
+              <div style="width: 100%;">
+                <input type="text" id="type" name="type" placeholder="กรอกชื่อประเภทสัตว์" class="form-info" required>
+              </div>
+            </div>
+            <button type="submit" id="petSubmit"
+              class="btn-add px-6 py-3 rounded-lg font-semibold hover:scale-105 hover:shadow-lg">
+              <i class="fas fa-plus mr-2"></i>เพิ่ม
+            </button>
+            <button class="btn-delete px-6 py-3 rounded-lg font-semibold hover:scale-105 " id="petDel" type="button"
+              onclick="deletePet()">
+              <i class="fas fa-trash mr-1"></i>ลบ
+            </button>
+
+
+          </div>
+        </form>
+      </div><br>
+
+      <!-- Table -->
+         <h3 class="text-lg font-semibold flex items-center text-text">
+            <i class="fas fa-list text-primary mr-2"></i>รายการประเภทสัตว์
+          </h3><br>
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-primary/20">
+     
+        <div class="overflow-x-auto">
+          <table class="booking-table w-full text-center">
+            <thead>
+              <tr>
+                <th class="tb-b1"><i class="fas fa-hashtag mr-2"></i>ID</th>
+                <th class="tb-b2"><i class="fas fa-paw mr-2"></i>ประเภทสัตว์</th>
+
+            </thead>
+            <tbody>
+              <% types.forEach((t,i)=>{ %>
+                <tr class="clickable-row <%= i%2===0?'bg-gray-50':'bg-white' %>"
+                  onclick="editPet('<%= t.type_id %>','<%= t.type %>')">
+                  <td class="px-6 py-4 font-medium text-text">
+                    <span class="bg-primary/10 text-text text-lg">
+                      <%= t.type_id %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 flex items-center justify-center">
+                    <i class="fas fa-paw text-primary mr-2"></i>
+                    <span class="font-medium text-text">
+                      <%= t.type %>
+                    </span>
+                  </td>
+
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <% if(types.length===0){ %>
+          <div class="text-center py-12 text-gray-500">
+            <i class="fas fa-paw text-6xl mb-4"></i>
+            <p>ยังไม่มีข้อมูลประเภทสัตว์</p>
+            <p class="text-gray-400">เริ่มต้นด้วยการเพิ่มประเภทสัตว์ใหม่</p>
+          </div>
+          <% } %>
+      </div>
   </div>
-  <br>
 
-  <h1><i class="fas fa-dog"></i> จัดการประเภทสัตว์</h1>
+  <script>
+    function editPet(id, type) {
+      const form = document.getElementById("petForm");
+      document.getElementById("type_id").value = id;
+      document.getElementById("type").value = type;
+      const btn = document.getElementById("petSubmit");
+      btn.innerHTML = '<i class="fas fa-edit mr-2"></i>อัพเดต';
+      btn.className = 'btn-edit px-6 py-3 rounded-lg font-semibold hover:scale-105 hover:shadow-lg';
+      form.action = "/admin/manage_pet_type/update";
+      document.getElementById("type").scrollIntoView({ behavior: 'smooth' }); document.getElementById("type").focus();
+      document.getElementById("type").classList.add('ring-2', 'ring-edit', 'ring-opacity-50');
+      setTimeout(() => { document.getElementById("type").classList.remove('ring-2', 'ring-edit', 'ring-opacity-50'); }, 2000);
+    }
 
-  <!-- ฟอร์มเพิ่ม/แก้ไข -->
-  <form id="petTypeForm" action="/admin/manage_pet_type/add" method="POST" class="mb-3" style="display:flex; gap:10px;">
-    <input type="hidden" id="type_id" name="type_id">
-    <input type="text" id="type" name="type" placeholder="ชื่อประเภทสัตว์" class="form-control" required>
-    <button type="submit" id="submitBtn" class="btn btn-success">
-      <i class="fas fa-plus-circle"></i> เพิ่มประเภท
-    </button>
-  </form>
+    function resetForm() {
+      const form = document.getElementById("petForm");
+      form.reset(); document.getElementById("type_id").value = '';
+      const btn = document.getElementById("petSubmit");
+      btn.innerHTML = '<i class="fas fa-plus mr-2"></i>เพิ่ม';
+      btn.className = 'btn-info px-6 py-3 rounded-lg font-semibold hover:scale-105 hover:shadow-lg';
+      form.action = "/admin/manage_pet_type/add";
+    }
 
-  <!-- ตารางประเภทสัตว์ -->
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>ประเภทสัตว์</th>
-        <th>การจัดการ</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% types.forEach(t => { %>
-        <tr id="row-<%= t.type_id %>" onclick="fillForm('<%= t.type_id %>', '<%= t.type %>')">
-          <td><%= t.type_id %></td>
-          <td><%= t.type %></td>
-          <td>
-            <form action="/admin/manage_pet_type/delete" method="POST" onsubmit="return confirm('ยืนยันการลบ <%= t.type %>?')">
-              <input type="hidden" name="type_id" value="<%= t.type_id %>">
-              <button type="submit" class="btn btn-danger btn-sm">
-                <i class="fas fa-trash-alt"></i> ลบ
-              </button>
-            </form>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') resetForm(); });
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('tbody tr').forEach((r, i) => {
+        r.style.opacity = '0'; r.style.transform = 'translateY(20px)';
+        setTimeout(() => { r.style.transition = 'all 0.3s ease'; r.style.opacity = '1'; r.style.transform = 'translateY(0)'; }, i * 50);
+      });
+    });
 
-</div>
+    function deletePet() {
+      const typeId = document.getElementById("type_id").value;
+      if (!typeId) {
+        alert("กรุณาเลือกประเภทสัตว์ที่ต้องการลบก่อน")
+        return;
+      }
+      if (confirm("คุณแน่ใจต้องการลบประเภทสัตว์นี้?")) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/admin/manage_pet_type/delete";
 
-<script>
-function fillForm(id, type) {
-  document.getElementById("type_id").value = id;
-  document.getElementById("type").value = type;
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "type_id";
+        input.value = typeId;
+        form.appendChild(input);
 
-  const form = document.getElementById("petTypeForm");
-  form.action = "/admin/manage_pet_type/update";
+        document.body.appendChild(form);
+        form.submit();
 
-  const submitBtn = document.getElementById("submitBtn");
-  submitBtn.innerHTML = '<i class="fas fa-save"></i> อัพเดตประเภท';
-  submitBtn.classList.remove("btn-success");
-  submitBtn.classList.add("btn-primary");
-}
-</script>
+      }
+    }
+  </script>
 </body>
+
 </html>

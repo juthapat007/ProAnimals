@@ -128,15 +128,7 @@ router.post('/save_medications_batch', requireLogin, async (req, res) => {
       const stock = parseInt(stockRes[0].stock_quantity);
       if (q > stock) { errors.push(`${name}: สต็อกไม่พอ (เหลือ ${stock}, ต้องการ ${q})`); continue; }
 
-      // อนุญาตให้จ่ายซ้ำยาตัวเดิมได้หรือไม่? (ตัวอย่างนี้ "อนุญาต")
-      // ถ้าต้องการ "ไม่อนุญาต" ให้ปลดคอมเมนต์บล็อกนี้
-      /*
-      const [exists] = await conn.query(
-        'SELECT 1 FROM dispens WHERE treatment_id = ? AND medication_id = ? LIMIT 1',
-        [treatment_id, id]
-      );
-      if (exists.length > 0) { errors.push(`${name}: ถูกจ่ายไปแล้วสำหรับการรักษานี้`); continue; }
-      */
+      
 
       valid.push({ medication_id: id, quantity: q, medicine_name: name });
     }
@@ -148,25 +140,32 @@ router.post('/save_medications_batch', requireLogin, async (req, res) => {
       return res.json({ success: false, message: 'ไม่มียาที่สามารถบันทึกได้' });
     }
 
-    await conn.beginTransaction();
+await conn.beginTransaction();
 
-    try {
-      for (const it of valid) {
-        await conn.query(
-          `INSERT INTO dispens (treatment_id, medication_id, quantity, dispens_date)
-           VALUES (?, ?, ?, CURDATE())`,
-          [treatment_id, it.medication_id, it.quantity]
-        );
-        await conn.query(
-          `UPDATE medication SET stock_quantity = stock_quantity - ? WHERE medication_id = ?`,
-          [it.quantity, it.medication_id]
-        );
-      }
-      await conn.commit();
-    } catch (txErr) {
-      await conn.rollback();
-      throw txErr;
-    }
+try {
+  // อัปเดต stock ของทุกยา
+  for (const it of valid) {
+    await conn.query(
+      `UPDATE medication SET stock_quantity = stock_quantity - ? WHERE medication_id = ?`,
+      [it.quantity, it.medication_id]
+    );
+  }
+
+  // insert dispens ทีหลัง
+  for (const it of valid) {
+    await conn.query(
+      `INSERT INTO dispens (treatment_id, medication_id, quantity, dispens_date)
+       VALUES (?, ?, ?, CURDATE())`,
+      [treatment_id, it.medication_id, it.quantity]
+    );
+  }
+
+  await conn.commit();
+} catch (txErr) {
+  await conn.rollback();
+  throw txErr;
+}
+
 
     return res.json({
       success: true,

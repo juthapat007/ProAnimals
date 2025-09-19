@@ -1,402 +1,270 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <title>ไชปราการสัตวแพทย์ - เพิ่มสัตว์เลี้ยง</title>
-  <meta name="viewport" content="width=900, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <%- include('../partials/link') %>
-  <style>
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .customer-info {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #e9ecef;
-    }
-
-    .existing-pets {
-      background: #e3f2fd;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 2px solid #2196f3;
-    }
-
-    .pet-card {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      border: 1px solid #ddd;
-    }
-
-    .pet-image {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ddd;
-    }
-
-    .pet-info {
-      flex: 1;
-    }
-
-    .pet-name {
-      font-weight: bold;
-      font-size: 16px;
-      color: #333;
-    }
-
-    .pet-details {
-      color: #666;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-
-    .delete-pet-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .delete-pet-btn:hover {
-      background: #c82333;
-    }
-
-    .add-pet-form {
-      background: #fff3e0;
-      padding: 20px;
-      border-radius: 8px;
-      border: 2px solid #ff9800;
-      margin-bottom: 20px;
-    }
-
-    .file-upload {
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      text-align: center;
-      border: 2px dashed #ddd;
-      cursor: pointer;
-    }
-
-    .file-upload:hover {
-      border-color: #007bff;
-      background: #f0f8ff;
-    }
-
-
-    .alert {
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
-
-    .alert-success {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-    }
-
-    .alert-error {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-
-    .no-pets {
-      text-align: center;
-      color: #666;
-      font-style: italic;
-      padding: 20px;
-    }
-
-    @media (max-width: 768px) {
-      .form-row {
-        flex-direction: column;
-      }
-      
-      .pet-card {
-        flex-direction: column;
-        text-align: center;
-      }
-    }
-  </style>
 </head>
-<body>
+
+<body >
   <div class="container">
-    <%- include('../partials/header_admin') %>
 
-    <!-- แสดง Alert Messages -->
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div class="alert alert-error">
-        <% if (error === 'missing_data') { %>
-          ❌ กรุณากรอกข้อมูลให้ครบถ้วน
-        <% } else if (error === 'customer_not_found') { %>
-          ❌ ไม่พบข้อมูลลูกค้า
-        <% } else if (error === 'duplicate_pet_name') { %>
-          ❌ ลูกค้าคนนี้มีสัตว์เลี้ยงชื่อนี้อยู่แล้ว
-        <% } else if (error === 'database_error') { %>
-          ❌ เกิดข้อผิดพลาดในฐานข้อมูล
-        <% } else { %>
-          ❌ เกิดข้อผิดพลาดในระบบ
-        <% } %>
-      </div>
-    <% } %>
-
-    <!-- <% if (typeof success !== 'undefined' && success === 'pet_added') { %> -->
-      <div class="alert alert-success">
-        ✅ เพิ่มสัตว์เลี้ยง 
-        <!-- "<%= typeof pet_name !== 'undefined' ? decodeURIComponent(pet_name) : '' %>"  -->
-        เรียบร้อยแล้ว
-      </div>
-    <!-- <% } %> -->
-
-    <!-- ข้อมูลลูกค้า -->
-    <div class="customer-info">
-      <strong>ข้อมูลเจ้าของสัตว์เลี้ยง</strong>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-        <p><strong>รหัสลูกค้า:</strong> <%= cusId %></p>
-        <p><strong>ชื่อ-นามสกุล:</strong> <%= customer.cus_name %></p>
-        <p><strong>Email:</strong> <%= customer.cus_email %></p>
-        <p><strong>เบอร์โทร:</strong> <%= customer.cus_phon %></p>
-      </div>
-    </div>
-
-    <!-- รายการสัตว์เลี้ยงที่มีอยู่ -->
-    <div class="existing-pets">
-      <!-- <h3>สัตว์เลี้ยงที่มีอยู่แล้ว (<%= existingPets ? existingPets.length : 0 %> ตัว)</h3> -->
-      <div id="pets-container">
-        <% if (existingPets && existingPets.length > 0) { %>
-          <% existingPets.forEach(function(pet) { %>
-            <div style="display: flex; justify-content: ;">
-              <div class="pet-card" id="pet-<%= pet.pet_id %>" onclick="goToPetService('<%= pet.pet_id %>', '<%= cusId %>')" style="cursor: pointer; transition: background-color 0.2s;">
-    <% if (pet.img) { %>
-      <img src="/uploads/<%= pet.img %>" alt="<%= pet.pet_name %>" class="pet-image">
-    <% } else { %>
-      <div class="pet-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
-        <i class="fas fa-paw"></i>
-      </div>
-    <% } %>
+    <!-- Header -->
     
-    <div class="pet-info">
-      <div class="pet-name"><%= pet.pet_name %></div>
-      <div class="pet-details">
-        เพศ: <%= pet.pet_gender %> | ประเภท: <%= pet.type || 'ไม่ระบุ' %>
-      </div>
-      <div style="margin-top: 8px; font-size: 12px; color: #007bff;">
-        <i class="fas fa-stethoscope"></i> คลิกเพื่อจัดการบริการ
-      </div>
-    </div>
-            <button type="button" class="btn-delete" 
-        onclick="event.stopPropagation(); deletePet('<%= pet.pet_id %>', '<%= pet.pet_name %>')">
-  <i class="fas fa-trash"></i> ลบ
-</button>
 
-              
+      <!-- ✅ Alert Messages -->
+      <% if (typeof error !=='undefined' && error) { %>
+        <div class="alert alert-error mb-4">
+          <% if (error==='missing_data' ) { %>
+            ❌ กรุณากรอกข้อมูลให้ครบถ้วน
+            <% } else if (error==='customer_not_found' ) { %>
+              ❌ ไม่พบข้อมูลลูกค้า
+              <% } else if (error==='duplicate_pet_name' ) { %>
+                ❌ ลูกค้าคนนี้มีสัตว์เลี้ยงชื่อนี้อยู่แล้ว
+                <% } else if (error==='database_error' ) { %>
+                  ❌ เกิดข้อผิดพลาดในฐานข้อมูล
+                  <% } else { %>
+                    ❌ เกิดข้อผิดพลาดในระบบ
+                    <% } %>
+        </div>
+        <% } %>
+        
+
+          <% if (typeof success !=='undefined' && success==='pet_added' ) { %>
+            <div class="alert alert-success mb-4">
+              ✅ เพิ่มสัตว์เลี้ยง
+              "<%= typeof pet_name !=='undefined' ? decodeURIComponent(pet_name) : '' %>"
+                เรียบร้อยแล้ว
             </div>
-            
+            <% } %>
+            <%- include('../partials/header_admin') %>
+
+              <!-- ✅ Customer Info -->
+
+              <div class="container">
+               <center>
+                  <i class="fas fa-paw text-primary2 text-2xl"></i><strong class="text-xl  text-text">   เลือกสัตว์เลี้ยงที่ต้องการ</strong>
+                               
+              
+                </center><br>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <p><strong>รหัสลูกค้า:</strong>
+                    <%= cusId %>
+                  </p>
+                  <p><strong>ชื่อ-นามสกุล:</strong>
+                    <%= customer.cus_name %>
+                  </p>
+                  <p><strong>Email:</strong>
+                    <%= customer.cus_email %>
+                  </p>
+                  <p><strong>เบอร์โทร:</strong>
+                    <%= customer.cus_phon %>
+                  </p>
+                </div>
+              <br>
+              </div><br>
+
+              <!-- ✅ Existing Pets -->
+              <div class="existing-pets mb-6">
+                <h3 class="text-md font-semibold mb-3">สัตว์เลี้ยงที่มีอยู่แล้ว (<%= existingPets ? existingPets.length
+                    : 0 %> ตัว)</h3>
+                <div id="pets-container" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <% if (existingPets && existingPets.length> 0) { %>
+                    <% existingPets.forEach(function(pet) { %>
+                      <div
+                        class="form-info relative group cursor-pointer hover:-translate-y-1 hover:shadow-lg transition"
+                        id="pet-<%= pet.pet_id %>" onclick="goToPetService('<%= pet.pet_id %>', '<%= cusId %>')">
+                        <% if (pet.img) { %> <img src="/uploads/<%= pet.img %>" alt="<%= pet.pet_name %>"
+                            class="w-[150px] h-[150px] object-cover rounded-lg mb-3 mx-auto">
+                          <% } else { %>
+                            <div
+                              class="w-[150px] h-[150px] bg-gray-100 flex items-center justify-center text-gray-500 rounded-lg mx-auto">
+                              <i class="fas fa-paw text-3xl"></i> </div>
+                            <% } %>
+
+
+                              </table>
+                              <div class="pet-info">
+                                <div class="pet-name font-bold text-primary2">
+                                  <%= pet.pet_name %>
+                                </div>
+                                <div class="pet-details text-sm text-gray">
+                                  เพศ: <%= pet.pet_gender %> | ประเภท: <%= pet.type || 'ไม่ระบุ' %>
+                                </div>
+                                <div class="text-xs text-info mt-2">
+                                  <i class="fas fa-stethoscope"></i> คลิกเพื่อจัดการบริการ
+                                </div>
+                              </div>
+
+                              <!-- Delete Button -->
+                              <button type="button" class="btn-delete absolute top-2 right-2 px-3 py-1 rounded-custom"
+                                onclick="event.stopPropagation(); deletePet('<%= pet.pet_id %>', '<%= pet.pet_name %>')">
+                                <i class="fas fa-trash"></i>
+                              </button>
+                      </div>
+                      <% }); %>
+                        <% } else { %>
+                          <div class="no-pets text-center text-gray italic">
+                            ยังไม่มีสัตว์เลี้ยงในระบบ
+                          </div>
+                          <% } %>
+                </div>
+              </div>
+
+              <!-- ✅ Add Pet Form -->
+              <div class="form-info add-pet-form ">
+                <h3 class="text-lg font-semibold mb-4">เพิ่มสัตว์เลี้ยงใหม่</h3>
+
+                <form method="post" action="/admin/add_pet" enctype="multipart/form-data" id="add-pet-form"
+                  class="space-y-5">
+                  <input type="hidden" name="cus_id" value="<%= cusId %>">
+
+                <div class="grid md:grid-cols-3 gap-4">
+  <!-- ชื่อสัตว์เลี้ยง -->
+  <div >
+    <label for="pet_name">ชื่อสัตว์เลี้ยง</label>
+    <input 
+      type="text" 
+      class="form-input" 
+      name="pet_name" 
+      id="pet_name"
+      placeholder="เช่น มะลิ, บอล, นางฟ้า" 
+      required>
+  </div>
+
+  <!-- เพศ -->
+  <div>
+    <label for="pet_gender">เพศ</label>
+    <select 
+      class="form-input" 
+      name="pet_gender" 
+      id="pet_gender" 
+      required>
+      
+      <option  value="">กรุณาเลือกเพศ</option>
+      <option value="ผู้">ผู้</option>
+      <option value="เมีย">เมีย</option>
+     
+    </select>
+  </div>
+
+  <!-- ประเภทสัตว์ -->
+  <div >
+    <label for="pet_type">ประเภทสัตว์</label>
+    <select 
+      class="form-input " 
+      name="pet_type" 
+      id="pet_type" 
+      required>
+      <option  value="">กรุณาเลือกประเภท</option>
+      <% types.forEach(function(type) { %>
+        <option class="form-info" value="<%= type.type %>">
+          <%= type.type %>
+        </option>
+      <% }); %>
+    </select>
+  </div>
 </div>
 
-          <% }); %>
-        <% } else { %>
-          <div class="no-pets">
-            ยังไม่มีสัตว์เลี้ยงในระบบ
-          </div>
-        <% } %>
-      </div>
-    </div>
 
-    <!-- ฟอร์มเพิ่มสัตว์เลี้ยงใหม่ -->
-    <div class="add-pet-form">
-      <h3>เพิ่มสัตว์เลี้ยงใหม่</h3>
-      
-      <form method="post" action="/admin/add_pet" enctype="multipart/form-data" id="add-pet-form">
-        <input type="hidden" name="cus_id" value="<%= cusId %>">
-        <div style="display: flex; ">
-          <div class="form-group">
-            <label for="pet_name">ชื่อสัตว์เลี้ยง</label>
-            <input type="text" name="pet_name" id="pet_name" 
-                   placeholder="เช่น มะลิ, บอล, นางฟ้า" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="pet_gender">เพศ</label>
-            <select name="pet_gender" id="pet_gender" required>
-              <option value="">กรุณาเลือกเพศ</option>
-              <option value="ผู้">ผู้</option>
-              <option value="เมีย">เมีย</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="pet_type">ประเภทสัตว์</label>
-            <select name="pet_type" id="pet_type" required>
-              <option value="">กรุณาเลือกประเภท</option>
-              <% types.forEach(function(type) { %>
-                <option value="<%= type.type %>"><%= type.type %></option>
-              <% }); %>
-            </select>
-          </div>
-          </div>
+                  <!-- Upload Image -->
+                  <div
+                    class="file-upload border-2 border-dashed border-primary2 rounded-custom p-6 text-center cursor-pointer hover:bg-light-pink transition"
+                    onclick="document.getElementById('pet_image').click()">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-primary2"></i>
+                    <p class="mt-2 text-gray">คลิกเพื่อเลือกรูปสัตว์เลี้ยง</p>
+                    <input type="file" name="pet_image" id="pet_image" accept="image/*" class="hidden">
+                  </div>
 
+                  <div class="text-center">
+                    <img id="preview" src="" alt="ตัวอย่างรูป"
+                      class="preview-image mx-auto rounded-lg shadow-md hidden max-h-48">
+                  </div>
 
-        <!-- อัปโหลดรูป -->
-        <div class="file-upload" onclick="document.getElementById('pet_image').click()">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <p>คลิกเพื่อเลือกรูปสัตว์เลี้ยง</p>
-          <input type="file" name="pet_image" id="pet_image" accept="image/*" style="display:none;">
-        </div>
-        
-        <div style="text-align: center;">
-          <img id="preview" src="" alt="ตัวอย่างรูป" class="preview-image" style="display:none;">
-        </div>
-
-        <button type="submit" class="btn-primary" style="width: 100%; height: 60px;">
-        ถัดไป <i class="fas fa-arrow-right"></i> 
-      </button><br><br>
-      <button type="button" class="btn-cancel" style="width: 100%; height: 60px;" onclick="window.history.back()">
-        <i class="fas fa-arrow-left"></i>  ย้อนกลับ
-      </button>
-      
-      </form>
-    </div>
+                  <!-- Buttons -->
+                  <div class="grid sm:grid-cols-2 gap-4">
+                    <button type="button" class="btn-cancel w-full py-3" onclick="window.history.back()">
+                      <i class="fas fa-arrow-left mr-2"></i> ย้อนกลับ
+                    </button>
+                    <button type="submit" class="btn-primary w-full py-3">
+                      บันทึกข้อมูล <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
 
   </div>
 
-  <style>
-  .pet-card:hover {
-    background-color: #f0f8ff !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-  }
-</style>
   <script>
-     function goToPetService(petId, cusId) {
-    window.location.href = `/admin/pet_service?pet_id=${petId}&cus_id=${cusId}`;
-  }
-    // Preview รูปภาพ
-    document.getElementById('pet_image').addEventListener('change', function(event) {
+    // ไปหน้า service
+    function goToPetService(petId, cusId) {
+      window.location.href = `/admin/pet_service?pet_id=${petId}&cus_id=${cusId}`;
+    }
+
+    // Preview รูป
+    document.getElementById('pet_image').addEventListener('change', function (event) {
       const file = event.target.files[0];
       const preview = document.getElementById('preview');
-      
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = e => {
           preview.src = e.target.result;
-          preview.style.display = 'block';
+          preview.classList.remove('hidden');
         };
         reader.readAsDataURL(file);
       } else {
         preview.src = '';
-        preview.style.display = 'none';
+        preview.classList.add('hidden');
       }
     });
 
-    // ฟังก์ชันลบสัตว์เลี้ยง
-        // ฟังก์ชันลบสัตว์เลี้ยง
+    // ลบสัตว์เลี้ยง
     async function deletePet(petId, petName) {
-      if (!confirm(`คุณต้องการลบ "${petName}" ออกจากระบบหรือไม่?\n\nหมายเหตุ: หากมีประวัติการจองจะไม่สามารถลบได้`)) {
-        return;
-      }
-
+      if (!confirm(`คุณต้องการลบ "${petName}" ออกจากระบบหรือไม่?\n\nหมายเหตุ: หากมีประวัติการจองจะไม่สามารถลบได้`)) return;
       try {
-        const response = await fetch(`/admin/add_pet/remove/${petId}?cus_id=<%= cusId %>`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-
+        const response = await fetch(`/admin/add_pet/remove/${petId}?cus_id=<%= cusId %>`, { method: 'DELETE' });
         const result = await response.json();
-
         if (result.success) {
-          // ลบ card ออกจากหน้าจอ
-          const petCard = document.getElementById(`pet-${petId}`);
-          if (petCard) {
-            petCard.remove();
-          }
-
-          // อัปเดตจำนวนที่แสดง
+          document.getElementById(`pet-${petId}`)?.remove();
           const petsContainer = document.getElementById('pets-container');
-          const remainingPets = petsContainer.querySelectorAll('.pet-card').length;
-          
-          if (remainingPets === 0) {
-            petsContainer.innerHTML = '<div class="no-pets">ยังไม่มีสัตว์เลี้ยงในระบบ</div>';
+          if (petsContainer.querySelectorAll('.pet-card').length === 0) {
+            petsContainer.innerHTML = '<div class="no-pets text-center text-gray italic">ยังไม่มีสัตว์เลี้ยงในระบบ</div>';
           }
-
-          // อัปเดตหัวข้อ
-          const heading = document.querySelector('.existing-pets h3');
-          if (heading) {
-            heading.textContent = `สัตว์เลี้ยงที่มีอยู่แล้ว (${remainingPets} ตัว)`;
-          }
-
           alert(result.message);
         } else {
           alert(`ลบไม่สำเร็จ: ${result.message}`);
         }
-
       } catch (error) {
         console.error('Error deleting pet:', error);
         alert('เกิดข้อผิดพลาดในการลบข้อมูล');
       }
     }
 
-    // ตรวจสอบก่อนส่งฟอร์ม
-    document.getElementById('add-pet-form').addEventListener('submit', function(e) {
+    // validate form
+    document.getElementById('add-pet-form').addEventListener('submit', function (e) {
       const petName = document.getElementById('pet_name').value.trim();
       const petGender = document.getElementById('pet_gender').value;
       const petType = document.getElementById('pet_type').value;
-
       if (!petName || !petGender || !petType) {
         e.preventDefault();
         alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-        return;
-      }
-
-      if (!confirm(`ยืนยันการเพิ่มสัตว์เลี้ยง "${petName}" หรือไม่?`)) {
+      } else if (!confirm(`ยืนยันการเพิ่มสัตว์เลี้ยง "${petName}" หรือไม่?`)) {
         e.preventDefault();
       }
     });
 
-    // Auto-hide alerts after 5 seconds
-    setTimeout(function() {
-      const alerts = document.querySelectorAll('.alert');
-      alerts.forEach(alert => {
+    // Auto-hide alerts
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(alert => {
         alert.style.transition = 'opacity 0.5s';
         alert.style.opacity = '0';
-        setTimeout(() => {
-          if (alert.parentNode) {
-            alert.parentNode.removeChild(alert);
-          }
-        }, 500);
+        setTimeout(() => alert.remove(), 500);
       });
     }, 5000);
   </script>
-
 </body>
+
 </html>

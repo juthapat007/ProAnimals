@@ -58,62 +58,58 @@
 </head>
 <body>
 
-<div class="container">
-  <%- include('../partials/header_vet',{ vetId: vetId }) %>
+<div class="container ">
+  <%- include('../partials/header_vet',{ vetId: vetId }) %><br>
 
-      <div style="display: flex; justify-content: space-between;">
-        <h1><i class="fas fa-pills mr-2"></i> จัดการข้อมูลยา</h1>
-      
+      <div class="container border border-gray-200  py-3" style=" display: flex; justify-content: space-between;">
+        
+        <div class="flex items-center gap-2">
+    <i class="fas fa-pills text-2xl text-primary2"></i>
+    <h2 class="text-xl font-bold text-text">
+      จัดการข้อมูลยา
+    </h2>
+  </div>
 
     <!-- Search -->
-    <div class="flex flex-col md:flex-row justify-end items-center gap-3 my-6">
-  <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อยา..." 
-    onkeypress="handleKeyPress(event)"
-    class="w-full md:w-1/3 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-
-  <button type="button" onclick="searchDrug()" 
-    class="btn-info">
-    <i class="fas fa-search mr-2"></i> ค้นหา
-  </button>
-
-  <button type="button" onclick="clearSearch()" 
-    class="btn-cancel">
-    <i class="fas fa-times mr-2"></i> ล้าง
-  </button>
-</div>
+  <input  type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อยา..." 
+    oninput="searchDrug()"
+    class="w-60 from-info flex flex-col md:flex-row justify-end items-center gap-3 my-6  border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
 
 
-    </div>
+
+    </div><br>
 
     <!-- ฟอร์มเพิ่ม/แก้ไขยา -->
-    <!-- ฟอร์มเพิ่ม/แก้ไขยา -->
-<form id="medForm" action="/veterinarian/manage_medication/add" method="POST">
+<form id="medForm" class="bg-gradient-to-br from-accent to-white p-6 rounded-2xl shadow-custom border border-primary/20 mb-8" action="/veterinarian/manage_medication/add" method="POST">
   <!-- ใช้ตอนแก้ไขเท่านั้น -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
   <input type="hidden" id="medication_id" name="medication_id">
-  <input type="text"class="form-row" id="medicine_name" name="medicine_name" placeholder="ชื่อยา" required>
-  <input type="number" class="form-row" id="stock_quantity" name="stock_quantity" placeholder="จำนวน" required>
-  <input type="text" class="form-row" id="medicine_package" name="medicine_package" placeholder="บรรจุภัณฑ์" required>
-  <input type="number" class="form-row" step="0.01" id="medicine_price" name="medicine_price" placeholder="ราคา" required>
+  <input type="text"class="form-info" id="medicine_name" name="medicine_name" placeholder="ชื่อยา" required>
+  <input type="number" class="form-info" id="stock_quantity" name="stock_quantity" placeholder="จำนวน" required>
+  <input type="text" class="form-info" id="medicine_package" name="medicine_package" placeholder="บรรจุภัณฑ์" required>
+  <input type="number" class="form-info" step="0.01" id="medicine_price" name="medicine_price" placeholder="ราคา" required>
 
+  <!-- <button type="submit" id="submitBtn" class="btn-success">เพิ่มยา</button> -->
   <button type="submit" id="submitBtn" class="btn-success">เพิ่มยา</button>
+</div>
 </form>
 
 
     <!-- ตารางยา -->
-    <div class="overflow-x-auto rounded-lg shadow">
-      <table class="w-full border border-gray-200">
-        <thead class="bg-add">
-          <tr>
-            <th>รหัสยา</th>
-            <th>ชื่อ</th>
-            <th>จำนวน</th>
-            <th>บรรจุภัณฑ์</th>
-            <th>ราคา</th>
-            <th>การจัดการ</th>
-          </tr>
-        </thead>
-        <tbody id="medTableBody">
-          <% medications.forEach(m => { %>
+<div class="overflow-x-auto rounded-lg shadow">
+  <table class="w-full border border-gray-200">
+    <thead class="table-header-green">
+      <tr>
+        <th>รหัสยา</th>
+        <th>ชื่อ</th>
+        <th>จำนวน</th>
+        <th>บรรจุภัณฑ์</th>
+        <th>ราคา</th>
+        <th>การจัดการ</th>
+      </tr>
+    </thead>
+    <tbody id="medTableBody">
+      <% medications.forEach(m => { %>
           <tr id="row-<%= m.medication_id %>" 
               onclick="fillForm('<%= m.medication_id %>', '<%= m.medicine_name %>', '<%= m.stock_quantity %>', '<%= m.medicine_package %>', '<%= m.medicine_price %>')" 
               class="cursor-pointer odd:bg-white even:bg-gray-50 hover:bg-blue-50 transition">
@@ -127,7 +123,7 @@
               <form action="/veterinarian/manage_medication/delete" method="POST" onsubmit="return confirm('ยืนยันการลบยา <%= m.medicine_name %>?')">
                 <input type="hidden" name="medication_id" value="<%= m.medication_id %>">
                 <button type="submit" 
-                  class="btn-delete">
+                  class="btn btn-delete">
                   <i class="fas fa-trash-alt mr-1"></i> ลบ
                 </button>
               </form>
@@ -165,55 +161,31 @@
   <script>
     // ฟังก์ชันค้นหายาจากชื่อ
     function searchDrug() {
-      const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
-      const rows = document.querySelectorAll('#medTableBody tr');
-      let found = false;
-      
-      // กรองแถวในตาราง
-      rows.forEach(row => {
-        const medicineName = row.querySelector('.medicine-name').textContent.toLowerCase();
-        if (medicineName.includes(keyword)) {
-          row.classList.remove('hidden-row');
-          found = true;
-        } else {
-          row.classList.add('hidden-row');
-        }
-      });
-      
-      // แสดงข้อความเมื่อไม่พบผลลัพธ์
-      const noResults = document.getElementById('noResults');
-      if (!found && keyword !== '') {
-        noResults.classList.remove('hidden');
-      } else {
-        noResults.classList.add('hidden');
-      }
-      
-      // รีเซ็ตฟอร์มเมื่อค้นหา
-      resetForm();
+  const keyword = document.getElementById("searchInput").value.toLowerCase().trim();
+  const rows = document.querySelectorAll('#medTableBody tr');
+  let found = false;
+  
+  rows.forEach(row => {
+    const medicineName = row.querySelector('.medicine-name').textContent.toLowerCase();
+    if (medicineName.includes(keyword)) {
+      row.classList.remove('hidden-row');
+      found = true;
+    } else {
+      row.classList.add('hidden-row');
     }
-    
-    ฟังก์ชันล้างการค้นหา
-    function clearSearch() {
-      document.getElementById("searchInput").value = '';
-      
-      // แสดงทุกแถว
-      const rows = document.querySelectorAll('#medTableBody tr');
-      rows.forEach(row => {
-        row.classList.remove('hidden-row');
-      });
-      
-      // ซ่อนข้อความไม่พบผลลัพธ์
-      document.getElementById('noResults').classList.add('hidden');
-    }
-    
-    // ฟังก์ชันกด Enter เพื่อค้นหา
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        searchDrug();
-        event.preventDefault(); // ป้องกันการส่งฟอร์ม
-      }
-    }
+  });
 
+  // แสดงข้อความไม่พบผลลัพธ์
+  const noResults = document.getElementById('noResults');
+  if (!found && keyword !== '') {
+    noResults.classList.remove('hidden');
+  } else {
+    noResults.classList.add('hidden');
+  }
+
+  // รีเซ็ตฟอร์มเมื่อค้นหา
+  resetForm();
+}
     // ฟังก์ชันใส่ค่าในฟอร์มเมื่อกดแถว
     function fillForm(id, name, qty, pkg, price) {
       document.getElementById("medication_id").value = id;

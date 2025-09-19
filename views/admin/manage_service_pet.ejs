@@ -1,276 +1,181 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>จัดการ Service & Pet Type</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จัดการ Service</title>
 <%- include('../partials/link') %>
 </head>
-<body>
-  <div class="container">
-    <%- include('../partials/header_admin') %>
-    <div class="header">
-      <h1><i class="fas fa-cogs"></i> จัดการ Service & Pet Type</h1>
-      <p style="margin-top: 10px; opacity: 0.9;">ระบบจัดการข้อมูลบริการและประเภทสัตว์เลี้ยง</p>
+<body >
+<div class="container ">
+<%- include('../partials/header_admin') %><br>
+
+<!-- Tabs -->
+<div class="flex flex-wrap gap-4">
+  <button class="tab-btn active" onclick="location.href='/admin/manage_service_pet'"><i class="fas fa-concierge-bell mr-2"></i>Service Type</button>
+  <button class="tab-btn" onclick="location.href='/admin/manage_pet_type'"><i class="fas fa-paw mr-2"></i>Pet Type</button>
+</div>
+
+<!-- Header -->
+<div class="text-center mb-8">
+  <h1 class="header text-xl text-text mb-2"><i class="fas fa-concierge-bell text-primary2 mr-3"></i>จัดการ Service</h1>
+  <div class="w-20 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
+</div>
+
+<!-- Form -->
+<!-- Form -->
+<div class="bg-white rounded-2xl shadow-xl p-4 mb-8 border-2 border-primary/20">
+  <form id="serviceForm" action="/admin/manage_service_pet/add" method="POST" class="space-y-4">
+    <input type="hidden" id="service_id" name="service_id">
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Input 1 -->
+      <div>
+        <label class="block text-lg font-medium text-text mb-2">ชื่อบริการ</label>
+        <input type="text" id="service_type" name="service_type" placeholder="กรอกชื่อบริการ" required
+          class="form-input w-full px-4 py-2 border-2 border-primary/30 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300">
+      </div>
+
+      <!-- Input 2 -->
+      <div>
+        <label class="block text-lg font-medium text-text mb-2">ราคา (บาท)</label>
+        <input type="number" id="service_price" name="service_price" placeholder="0" min="0" required
+          class="form-input w-full px-4 py-2 border-2 border-primary/30 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300">
+      </div>
+
+      <!-- Input 3 -->
+      <div>
+        <label class="block text-lg font-medium text-text mb-2">ระยะเวลา</label>
+        <input type="text" id="service_time" name="service_time" placeholder="เช่น 30 นาที" required
+          class="form-input w-full px-4 py-2 border-2 border-primary/30 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300">
+      </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="tab-nav">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('service')">
-          <i class="fas fa-concierge-bell"></i> Service Type
-        </button>
-        <button class="tab-btn" onclick="switchTab('pet')">
-          <i class="fas fa-paw"></i> Pet Type
-        </button>
-      </div>
-    </div>
+    <!-- ปุ่ม -->
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="submit" id="serviceSubmit"
+        class="btn btn-add">
+        <i class="fas fa-plus "></i> เพิ่ม
+      </button>
 
-    <!-- Service Type Section -->
-    <div id="service-section" class="tab-content active">
-      <div class="stats-card">
-        <div class="stats-number" id="serviceCount">4</div>
-        <div class="stats-label">บริการทั้งหมด</div>
-      </div>
-      
-      <div class="info-card">
-        <div class="section-header">
-          <h3><i class="fas fa-concierge-bell"></i> จัดการ Service Type</h3>
-          <button class="btn-success">
-            <i class="fas fa-plus"></i> เพิ่มบริการใหม่
-          </button>
-        </div>
-        
-        <div class="table-responsive">
-          <table class="modern-table">
-            <thead>
-              <tr>
-                <th><i class="fas fa-hashtag"></i> ID</th>
-                <th><i class="fas fa-concierge-bell"></i> ชื่อบริการ</th>
-                <th><i class="fas fa-money-bill-wave"></i> ราคา (บาท)</th>
-                <th><i class="fas fa-clock"></i> เวลาใช้บริการ</th>
-                <th><i class="fas fa-cogs"></i> จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="serviceTable">
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <button type="button" onclick="resetForm()"
+        class="btn btn-cancel">
+        <i class="fas fa-times "></i> ยกเลิก
+      </button>
+
+      <button type="submit"
+        class="btn btn-delete"
+        onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?')">
+        <i class="fas fa-trash "></i> ลบ
+      </button>
     </div>
+  </form>
+</div>
+
+
+
+<!-- Table -->
+  <h3 class="text-lg font-semibold flex items-center text-text"><i class="fas fa-list text-primary2 mr-2"></i>รายการบริการ</h3>
+ <br>
+<div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-primary/20">
+ 
+      <div class="overflow-x-auto shadow-lg rounded-lg">
+    <table class="w-full min-w-[800px] border-collapse text-left bg-white rounded-lg">
+      <thead>
+        <tr>
+          <th class="tb-p1">ID</th>
+          <th class="tb-p2">ชื่อบริการ</th>
+          <th class="tb-p3">ราคา</th>
+          <th class="tb-p4">เวลา</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% services.forEach((s,i)=>{ %>
+          <tr class="clickable-row <%= i%2===0?'bg-gray-50':'bg-white' %>" onclick="editService('<%= s.service_id %>','<%= s.service_type %>','<%= s.service_price %>','<%= s.service_time %>')">
+            <td class="px-4 py-4"><span class="bg-primary/10 text-text px-2 py-1 rounded-full text-lg"><%= s.service_id %></span></td>
+            <td class="px-4 py-4 flex items-center "><span class="font-medium text-text"><%= s.service_type %></span></td>
+            <td class="px-4 py-4"><span class="bg-success/10 text-success font-semibold px-3 py-1 rounded-full">฿<%= Number(s.service_price).toLocaleString() %></span></td>
+            <td class="px-4 py-4"><span class="bg-info/10 text-info font-medium px-3 py-1 rounded-full"><i class="fas fa-clock mr-1"></i><%= s.service_time %></span></td>
+            
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
   </div>
-
+  <% if(services.length===0){ %>
+    <div class="text-center py-12 text-gray-500">
+      <i class="fas fa-concierge-bell text-6xl mb-4"></i>
+      <p>ยังไม่มีข้อมูลบริการ</p>
+      <p class="text-gray-400">เริ่มต้นด้วยการเพิ่มบริการใหม่</p>
+    </div>
+  <% } %>
+</div>
+</div>
 <script>
-/* Utilities */
-function timeToMinutes(timeStr) {
-  if (!timeStr) return 0;
-  const parts = timeStr.split(':').map(Number);
-  if (parts.length < 2) return 0;
-  return parts[0] * 60 + parts[1];
-}
-function minutesToTime(minutes) {
-  const h = Math.floor(minutes/60).toString().padStart(2,'0');
-  const m = (minutes%60).toString().padStart(2,'0');
-  return `${h}:${m}:00`;
-}
-
-/* ถ้าหน้าคุณมี showNotification อยู่แล้ว จะเรียกมัน — ถ้าไม่มี ให้ fallback เป็น alert */
-function notify(msg, type='info') {
-  if (typeof showNotification === 'function') {
-    showNotification(msg, type === 'error' ? 'warning' : (type === 'success' ? 'success' : 'info'));
-  } else {
-    alert(msg);
-  }
-}
-
-/* ฟังชั่น โหลด Service Types (ปรับปรุงการดีบักและแสดงข้อความจาก server) */
-async function loadServiceTypes() {
-  const url = '/admin/manage_service_pet/service-type/list';
-  console.log('[loadServiceTypes] fetching', url);
-  try {
-    const res = await fetch(url, { credentials: 'same-origin' }); // ส่ง cookie ถ้าใช้ session
-    console.log('[loadServiceTypes] response status', res.status);
-    const contentType = res.headers.get('content-type') || '';
-    console.log('[loadServiceTypes] content-type', contentType);
-
-    // ถ้า response ไม่ ok -> อ่าน text และโชว์
-    if (!res.ok) {
-      const txt = await res.text();
-      console.error('[loadServiceTypes] non-OK response', res.status, txt);
-      notify(`Server error ${res.status}: ดู console/server logs`, 'error');
-      document.getElementById('serviceTable').innerHTML =
-        '<tr><td colspan="5" class="no-data">เกิดข้อผิดพลาดในการโหลดข้อมูล (ดู console)</td></tr>';
-      return;
+    function editService(id, type, price, time) {
+      document.getElementById("service_id").value = id;
+      document.getElementById("service_type").value = type;
+      document.getElementById("service_price").value = price;
+      document.getElementById("service_time").value = time;
+      
+      const btn = document.getElementById("serviceSubmit");
+      btn.innerHTML = '<i class="fas fa-edit mr-2"></i>อัพเดต';
+      btn.className = 'btn btn-edit';
+      document.getElementById("serviceForm").action = "/admin/manage_service_pet/update";
+      
+      // Scroll to form and highlight
+      document.getElementById("serviceForm").scrollIntoView({ behavior: 'smooth' });
+      document.getElementById("service_type").focus();
+      
+      // Add a subtle animation to show it's in edit mode
+      const inputs = document.querySelectorAll('#serviceForm input[type="text"], #serviceForm input[type="number"]');
+      inputs.forEach(input => {
+        input.classList.add('ring-2', 'ring-edit', 'ring-opacity-50');
+        setTimeout(() => {
+          input.classList.remove('ring-2', 'ring-edit', 'ring-opacity-50');
+        }, 2000);
+      });
     }
 
-    // อ่านเป็น text ก่อน แล้วพยายาม parse เป็น JSON (เพื่อดีบักกรณี server ส่ง HTML)
-    const text = await res.text();
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch (e) {
-      console.error('[loadServiceTypes] invalid JSON from server:', text);
-      notify('ไม่ได้รับข้อมูลที่ถูกต้องจากเซิร์ฟเวอร์ (ไม่ใช่ JSON)', 'error');
-      document.getElementById('serviceTable').innerHTML =
-        '<tr><td colspan="5" class="no-data">ข้อมูลผิดรูปแบบ (ไม่ใช่ JSON)</td></tr>';
-      return;
+    // Reset form function
+    function resetForm() {
+      document.getElementById("serviceForm").reset();
+      document.getElementById("service_id").value = '';
+      const btn = document.getElementById("serviceSubmit");
+      btn.innerHTML = '<i class="fas fa-plus mr-2"></i>เพิ่ม';
+      btn.className = 'btn btn-add ';
+      document.getElementById("serviceForm").action = "/admin/manage_service_pet/add";
     }
 
-    // ตรวจสอบฟิลด์ success / data
-    if (!json.success) {
-      console.error('[loadServiceTypes] api returned success=false', json);
-      notify('เกิดข้อผิดพลาดจาก API: ' + (json.message || 'ไม่ทราบสาเหตุ'), 'error');
-      document.getElementById('serviceTable').innerHTML =
-        `<tr><td colspan="5" class="no-data">${json.message || 'เกิดข้อผิดพลาด'}</td></tr>`;
-      return;
-    }
-
-    const rows = Array.isArray(json.data) ? json.data : [];
-    if (rows.length === 0) {
-      document.getElementById('serviceTable').innerHTML =
-        '<tr><td colspan="5" class="no-data"><i class="fas fa-info-circle"></i> ไม่มีข้อมูลบริการ</td></tr>';
-      document.getElementById('serviceCount').textContent = 0;
-      return;
-    }
-
-    // สร้าง table rows
-    let html = '';
-    rows.forEach(s => {
-      const minutes = timeToMinutes(s.service_time);
-      const price = (s.service_price === null || s.service_price === undefined) ? 0 : Number(s.service_price);
-      // escape simple quotes for inline onclick
-      const safeName = String(s.service_type).replace(/'/g, "\\'");
-      html += `<tr>
-        <td><span class="id-badge">${s.service_id}</span></td>
-        <td><strong class="service-name">${safeName}</strong></td>
-        <td><span class="price-badge">${price.toLocaleString()}</span></td>
-        <td><span class="time-badge">${minutes}</span></td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn-edit" onclick="editService(${s.service_id}, '${safeName}', ${price}, ${minutes})">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-delete" onclick="deleteService(${s.service_id})">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>`;
+    // Add ESC key to reset form
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        resetForm();
+      }
     });
 
-    document.getElementById('serviceTable').innerHTML = html;
-    document.getElementById('serviceCount').textContent = rows.length;
-    console.log('[loadServiceTypes] loaded', rows.length, 'rows');
-  } catch (err) {
-    console.error('[loadServiceTypes] fetch error', err);
-    notify('ไม่สามารถเชื่อมต่อไปยังเซิร์ฟเวอร์: ' + err.message, 'error');
-    document.getElementById('serviceTable').innerHTML =
-      '<tr><td colspan="5" class="no-data">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>';
-  }
-}
-
-/* ฟังก์ชันโหลด Pet Type (คล้ายกัน) */
-async function loadPetTypes() {
-  const url = '/admin/manage_service_pet/pet-type/list';
-  try {
-    const res = await fetch(url, { credentials: 'same-origin' });
-    if (!res.ok) {
-      const t = await res.text(); console.error('pet-type non-ok', res.status, t);
-      document.getElementById('petTable').innerHTML =
-        '<tr><td colspan="3" class="no-data">เกิดข้อผิดพลาดในการโหลดประเภทสัตว์</td></tr>';
-      return;
-    }
-    const json = await res.json();
-    if (!json.success) {
-      console.error('pet-type api failed', json);
-      document.getElementById('petTable').innerHTML =
-        `<tr><td colspan="3" class="no-data">${json.message || 'เกิดข้อผิดพลาด'}</td></tr>`;
-      return;
-    }
-    const rows = json.data || [];
-    if (rows.length === 0) {
-      document.getElementById('petTable').innerHTML =
-        '<tr><td colspan="3" class="no-data"><i class="fas fa-info-circle"></i> ไม่มีข้อมูลประเภทสัตว์</td></tr>';
-      return;
-    }
-    let html = '';
-    rows.forEach(p => {
-      const safe = String(p.type).replace(/'/g, "\\'");
-      html += `<tr>
-        <td><span class="id-badge">${p.type_id}</span></td>
-        <td><strong class="pet-type-name">${safe}</strong></td>
-        <td>
-          <div class="action-buttons">
-            <button class="btn-edit" onclick="editPet(${p.type_id}, '${safe}')">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn-delete" onclick="deletePet(${p.type_id})">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </td>
-      </tr>`;
+    // Format price input
+    document.getElementById('service_price').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/,/g, '');
+      if (!isNaN(value) && value !== '') {
+        e.target.value = Number(value).toLocaleString();
+      }
     });
-    document.getElementById('petTable').innerHTML = html;
-  } catch (err) {
-    console.error('loadPetTypes error', err);
-    document.getElementById('petTable').innerHTML =
-      '<tr><td colspan="3" class="no-data">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>';
-  }
-}
 
-/* deleteService ตัวอย่าง (จะเรียก API ลบ) */
-async function deleteService(id) {
-  if (!confirm('คุณต้องการลบบริการนี้หรือไม่?')) return;
-  try {
-    const res = await fetch(`/admin/manage_service_pet/service-type/delete/${id}`, {
-      method: 'POST',
-      credentials: 'same-origin'
+    // Add smooth animations
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animate table rows
+      const rows = document.querySelectorAll('tbody tr');
+      rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          row.style.transition = 'all 0.3s ease';
+          row.style.opacity = '1';
+          row.style.transform = 'translateY(0)';
+        }, index * 50);
+      });
     });
-    const text = await res.text();
-    let json;
-    try { json = JSON.parse(text); } catch(e){
-      console.error('deleteService invalid json', text);
-      notify('ลบไม่สำเร็จ (response ไม่ใช่ JSON)', 'error'); return;
-    }
-    if (json.success) {
-      notify(json.message || 'ลบเรียบร้อย', 'success');
-      loadServiceTypes();
-    } else {
-      notify('ลบไม่สำเร็จ: ' + (json.message || ''), 'error');
-    }
-  } catch (err) {
-    console.error('deleteService error', err);
-    notify('เกิดข้อผิดพลาดในการลบ: ' + err.message, 'error');
-  }
-}
-
-/* stubs สำหรับ edit/add modal (ถ้าคุณมี modal อยู่แล้ว ให้ใช้งานแทน) */
-let editingServiceId = null;
-let editingPetId = null;
-function addService(){ notify('เปิดฟอร์มเพิ่ม (ยังไม่เชื่อม modal)', 'info'); }
-function editService(id,name,price,minutes){ notify(`เปิดฟอร์มแก้ไข ${name} (ID:${id})`, 'info'); }
-function addPet(){ notify('เปิดฟอร์มเพิ่มประเภทสัตว์', 'info'); }
-function editPet(id,type){ notify(`แก้ไขประเภท ${type} (ID:${id})`, 'info'); }
-function deletePet(id){
-  if (!confirm('ลบประเภทสัตว์?')) return;
-  notify('เรียก API ลบ (เพิ่ม implementation ได้)', 'info');
-}
-
-/* เรียกโหลดเมื่อพร้อม (หนึ่งครั้ง) */
-document.addEventListener('DOMContentLoaded', function() {
-  loadServiceTypes();
-  loadPetTypes();
-});
-</script>
-
-
+  </script>
 </body>
 </html>

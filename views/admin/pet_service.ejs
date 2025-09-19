@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>จองบริการ - <%= pets.pet_name %>
+  </title>
+  <%- include('../partials/link') %>
+</head>
+
+<body>
+  <div class="container">
+
+    <%- include('../partials/header_admin') %>
+
+
+      <br>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+        <!-- Owner Info -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden sticky top-4">
+          <div class="bg-gradient-to-r from-primary2/80 to-primary2 text-white p-6">
+            <h3 class="text-lg text-text font-semibold flex items-center gap-2 sh">
+              <i class="fas fa-user"></i>
+              เจ้าของ
+            </h3>
+          </div><br>
+          <div style="padding-left: 5%;">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div><strong> ชื่อ:</strong> <span class="text-text">
+                  <%= customer.cus_name %>
+                </span></div>
+              <div><strong> Email:</strong> <span class="text-text">
+                  <%= customer.cus_email %>
+                </span></div>
+              <div><strong> เบอร์โทร:</strong> <span class="text-text">
+                  <%= customer.cus_phon %>
+                </span></div>
+            </div>
+          </div><br>
+        </div>
+
+
+
+        <!-- Pet Info -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden sticky top-4">
+          <div class="bg-gradient-to-r from-info/80 to-info text-white p-6">
+            <h3 class="text-lg text-text font-semibold flex items-center gap-2 sh">
+              <i class="fas fa-info-circle"></i>
+              ข้อมูลสัตว์เลี้ยง
+            </h3>
+          </div>
+
+
+
+          <% pets.forEach(function(pet) { %>
+            <br>
+            <div style="padding-left: 5%;">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 ">
+                <strong class="font-bold text-text">ชื่อ: <span class="font-normal text-text">
+                    <%= pet.pet_name %>
+                      </p></strong>
+                <strong class="font-bold text-text">ประเภท: <span class="font-normal text-text">
+                    <%= pet.pet_type_name || 'ไม่ระบุ' %>
+                  </span></strong>
+                <strong class="font-bold text-text">เพศ: <span class="font-normal text-text">
+                    <%= pet.pet_gender %>
+                  </span></strong>
+              </div>
+            </div><br>
+            <% }); %>
+        </div>
+      </div>
+
+
+
+
+      <!-- Alerts -->
+      <% if (error) { %>
+        <div class="error-message mb-4">❌ <%= error %>
+        </div>
+        <% } %>
+          <% if (success) { %>
+            <div class="success-message mb-4">✅ <%= success %>
+            </div>
+            <% } %>
+
+              <!-- Booking Form -->
+              <div class="info-card border-primary2 mb-6 p-6 rounded-lg shadow-custom">
+                <form method="get" action="/admin/confirm_AM" id="bookingForm" class="space-y-5">
+                  <input type="hidden" name="pet_id" value="<%= pets[0].pet_id %>">
+
+                  <input type="hidden" name="cus_id" value="<%= customer.cus_id %>">
+                  <input type="hidden" name="slot" id="selectedTime">
+
+                  <input type="hidden" name="vet_id" id="selectedVetId">
+
+                  <!-- Service -->
+                  <!-- Service Selection -->
+                  <h3 class="text-lg font-semibold">เลือกบริการ <span class="text-red">*</span></h3>
+                  <div class="grid gap-3 md:grid-cols-2">
+                    <% services.forEach(s=> { %>
+                      <label
+                        class="form-info cursor-pointer flex items-center gap-3 p-3 border-2 rounded-lg hover:bg-light-pink transition">
+                        <input type="radio" name="service_id" value="<%= s.service_id %>" onchange="updateService()">
+                        <div>
+                          <strong class="text-red text-lg">
+                            <%= s.service_type %>
+                          </strong><br>
+                          <span>
+                            <%= s.service_price.toLocaleString() %> บาท
+                          </span>
+                        </div>
+                      </label>
+                      <% }) %>
+                  </div>
+
+                  <!-- Date Picker -->
+                  <h3 class="text-lg font-semibold mt-4">เลือกวันที่ <span class="text-red">*</span></h3>
+                  <div class="relative">
+                    <input type="text" id="bookingDate" name="date" placeholder="เลือกวันที่..."
+                      class="border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none w-full" />
+                    <span
+                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary2 text-lg cursor-pointer">
+                      <i class="fas fa-calendar-alt"></i>
+                    </span>
+                  </div>
+                  <div id="loadingMessage" class="text-sm text-gray my-2">กำลังโหลดวันที่ที่ให้บริการ...</div>
+                  <div id="errorMessage" class="text-red-500 text-sm my-2 hidden"></div>
+
+                  <!-- แสดงข้อความแนะนำ -->
+                  <div id="instructionMessage" class="text-sm text-blue-600 my-2">
+                    📌 เลือกประเภทบริการและวันที่เพื่อดูเวลาที่ว่าง
+                  </div>
+
+                  <!-- ปุ่มดูเวลาที่ว่าง -->
+                  <div id="timeSelectionSection" class="hidden mt-4">
+                    <div class="flex items-center gap-1 mb-2">
+                      <strong class="text-lg">เลือกเวลา</strong><span class="text-red">*</span>
+                    </div>
+
+                    <button type="button" id="showTimeBtn" onclick="showAvailableTimes()"
+                      class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                      <i class="fas fa-clock"></i>
+                      ดูเวลาที่ว่าง
+                    </button>
+                    <!-- แสดงเวลาที่เลือก -->
+
+                  </div>
+
+                  <!-- Modal เลือกเวลา -->
+                  <div id="timeModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+                    <div class="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
+                      
+                      <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+                        <i class="fas fa-clock text-primary"></i>
+                        เลือกเวลา
+                      </h3>
+                      <!-- Loading state -->
+                      <div id="timeModalLoading" class="text-center py-8 hidden">
+                        <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+                        <p>กำลังโหลดเวลาที่ว่าง...</p>
+                      </div>
+                      <!-- container สำหรับปุ่มเวลา -->
+                      <div id="timeSlotsContainer" class="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto"></div>
+                      <!-- ปุ่ม action -->
+                      <div class="flex justify-end gap-2 mt-6">
+                        <button type="button" onclick="closeTimeModal()"
+                          class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors">
+                          ยกเลิก
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <script src="/js/calendar_booking.js"></script>
+</body>
+
+</html>

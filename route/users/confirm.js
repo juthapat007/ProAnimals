@@ -3,6 +3,7 @@ import express from 'express';
 import { getPoolPromise } from '../../config/db.js';
 import { requireLogin } from '../../middleware/auth.js';
 
+
 const router = express.Router();
 
 // GET /users/confirm (แสดง preview เฉย ๆ ไม่ควรเรียกตรง ๆ)
@@ -63,7 +64,7 @@ router.post("/", requireLogin, async (req, res) => {
       date,
       time,
       formattedDate,
-      formattedTime,
+  formattedTime: time + " น.",
       cus_id,
       pet_id,
       service_id

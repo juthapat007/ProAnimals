@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการรักษา</title>
+  <%- include('../partials/link') %>
+</head>
+<body >
+  <div class="container">
+    <%- include('../partials/header_admin') %><br>
+<h1 class="header text-2xl font-bold mb-2 flex text-text items-center justify-center">
+        <i class=" fas fa-history text-primary2 mr-2"></i> ประวัติการรักษา
+      </h1><br>
+      
+
+    <div class="overflow-x-auto shadow-lg rounded-lg">
+      <table class="w-full min-w-[1000px] border-collapse text-left bg-white rounded-lg">
+        <thead>
+          <tr>
+            <th class="tb-b1">ID</th>
+            <th class="tb-b2">น้ำหนักสัตว์ (kg)</th>
+            <th class="tb-b3">วันที่รักษา</th>
+            <th class="tb-b4">รายละเอียด</th>
+            <th class="tb-b5">สัตวแพทย์ (ID)</th>
+            <th class="tb-b6">สถานะการจ่ายเงิน</th>
+            <th class="tb-b7 ">ยอดชำระ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (treatments.length > 0) { %>
+            <% treatments.forEach(function(item, i){ %>
+              <tr class="<%= i % 2 === 0 ? 'bg-gray-50' : 'bg-white' %> hover:bg-green-50 transition">
+                <td class="px-6 py-3"><%= item.treatment_id %></td>
+                <td class="px-6 py-3"><%= item.pet_weight_kg %></td>
+                <td class="px-6 py-3"><%= item.treatment_date.toISOString().slice(0,10) %></td>
+                <td class="px-6 py-3"><%= item.treatment_details %></td>
+                <td class="px-6 py-3"><%= item.vet_id %></td>
+                <td class="px-4 py-3 border-b border-gray-200 text-center <%= item.pay_status === 'ชำระแล้ว' ? 'bg-green-200 text-green-800 font-semibold' : item.pay_status === 'ค้างชำระ' ? 'bg-red-200 text-red-800 font-semibold' : '' %>">
+        <%= item.pay_status %>
+      </td>
+                <td class="px-6 py-3"><%= item.payment %></td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="8" class="px-6 py-4 text-center text-gray-500">❌ ไม่พบข้อมูล</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

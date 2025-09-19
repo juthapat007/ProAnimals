@@ -1,21 +1,37 @@
 <!-- views/partials/header.ejs -->
-<div class="header" style="display: flex; color: #FF9AA2; justify-content: space-between; align-items: center;">
-  <h1>ไชยปราการสัตวแพทย์</h1>
+<div class="header flex justify-between items-center px-5 py-2 border-b-2 border-primary2">
+  <h1 class="text-xl font-bold text-primary2">ไชยปราการสัตวแพทย์</h1>
 
-  <div class="menu">
-    <i class="fa-solid fa-house" onclick="window.location.href='/users/main'"></i>
-    <i class="fas fa-user" onclick="window.location.href='/users/edit_person'"></i>
-    <div class="hamburger" onclick="toggleDropdown()">
-      <i class="fas fa-bars"></i>
-    </div>
+  <div class="menu relative flex items-center gap-4">
+    <!-- หน้าแรก -->
+    <i class="fa-solid fa-house text-lg cursor-pointer text-primary2 hover:text-pink-400"
+       onclick="window.location.href='/users/main'"></i>
 
-    <div class="dropdown" id="dropdownMenu">
-      <a href="/users/history"><i class="fas fa-history"></i> ประวัติการรักษา</a>
-      <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')">
-  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-</a>
+    <!-- แก้ไขข้อมูลผู้ใช้ -->
+    <i class="fas fa-user-cog text-lg cursor-pointer text-primary2 hover:text-pink-400"
+       onclick="window.location.href='/users/edit_person'"></i>
 
+    <!-- Hamburger -->
+    <i class="fas fa-bars text-lg text-primary2 hover:text-pink-400 cursor-pointer" id="hamburgerBtn"></i>
+
+    <!-- Dropdown -->
+    <div id="dropdownMenu"
+         class="absolute top-full right-0 mt-2 w-52 bg-white border border-primary2 rounded-xl shadow-xl hidden flex-col z-50 overflow-hidden">
+
+      <!-- ประวัติการรักษา -->
+      <a href="/users/history"
+         class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text hover:bg-primary/20 hover:text-primary2 hover:bg-red-100">
+        <i class="fas fa-history text-primary2"></i> ประวัติการรักษา
+      </a>
+
+      <!-- ออกจากระบบ -->
+      <a href="/logout" 
+         onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')"
+         class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-100 hover:text-red-700 transition-all">
+        <i class="fas fa-sign-out-alt text-red-600"></i> ออกจากระบบ
+      </a>
     </div>
   </div>
-</div>
+</div><br>
+
 <script src="/js/menu.js" defer></script>

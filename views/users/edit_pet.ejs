@@ -4,117 +4,88 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>แก้ไขข้อมูลสัตว์เลี้ยง | ไชยปราการสัตวแพทย์</title>
-    <%- include('../partials/link') %>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Prompt', sans-serif;
-      background-color: #ffe6e9;
-    }
- 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      /* align-items: center; */
-      color: #FF9AA2;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #FF9AA2;
-      padding-bottom: 10px;
-    }
-    .header h2 {
-      margin: 0;
-    }
-    .menu i {
-      font-size: 24px;
-      cursor: pointer;
-      margin-left: 10px;
-      color: #FF9AA2;
-    }
-    h3.title {
-      text-align: center;
-      color: #333;
-      margin-top: 0;
-    }
-    .edit-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .edit-form label {
-      color: #555;
-      font-weight: 500;
-    }
-    .edit-form input[type="text"],
-    .edit-form select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #FF9AA2;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    .edit-form input[type="file"] {
-      border: none;
-    }
-
-  </style>
+  <%- include('../partials/link') %>
 </head>
-<body>
-  <div class="container">
-        <%- include('../partials/header') %>
+<body >
 
-    <!-- Title -->
-    <h3 class="title">
-      <i class="fas fa-paw"></i> แก้ไขข้อมูลสัตว์เลี้ยง
-    </h3>
+<div class="container max-w-2xl bg-white rounded-2xl shadow-lg p-6 ">
+  <%- include('../partials/header') %>
 
-    <!-- Form -->
-<form class="edit-form" action="/users/edit_pet" method="POST" enctype="multipart/form-data">
-  <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
-<!-- ภาพ preview + ไอคอนกล้อง -->
-  <div class="upload-icon">
-  <img src="/uploads/<%= pet.img %>" alt="รูปสัตว์เลี้ยง" class="image-preview" id="previewImage" />
-  <label class="camera-icon">
+  <!-- Title -->
+  
+  <h3 class="text-2xl font-semibold text-text flex items-center gap-2 mb-8">
+    <i class="fas fa-paw"></i> <strong >แก้ไขข้อมูลสัตว์เลี้ยง</strong>
+  </h3>
+
+  <!-- Form -->
+  <form class="flex flex-col md:flex-row gap-8" action="/users/edit_pet" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
+
+    <!-- Image Upload -->
+<!-- Image Upload -->
+<div class="flex-shrink-0 relative w-40 h-40 md:w-48 md:h-48 mx-auto">
+  <!-- รูปสัตว์เลี้ยง -->
+  <img src="/uploads/<%= pet.img %>" alt="รูปสัตว์เลี้ยง" 
+       class=" h-full object-cover form-input" id="previewImage" />
+
+  <!-- ปุ่มกล้อง -->
+  <label for="profile_img" class="absolute bottom-2 right-2 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-secondary transition" style="background-color: #FF9AA2;">
     <i class="fas fa-camera"></i>
-    <input type="file" name="pet_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)">
-
   </label>
+
+  <!-- input ไฟล์จริงซ่อน -->
+  <input type="file" name="pet_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)" class="hidden">
 </div>
 
+
+    <!-- Pet Info -->
+    <div class="flex-1 flex flex-col ">
       <!-- Name -->
-      <label for="pet_name">ชื่อ</label>
-      <input type="text" name="pet_name" id="pet_name" value="<%= pet.pet_name %>" required>
+      <div >
+        <strong for="pet_name">ชื่อ</strong>
+        <input class=" form-input w-full" type="text" name="pet_name" id="pet_name" value="<%= pet.pet_name %>" required >
+      </div><br>
 
       <!-- Gender -->
-      <label for="pet_gender">เพศ</label>
-      <select name="pet_gender" id="pet_gender" required>
-        <option value="ผู้" <%= pet.pet_gender === 'ผู้' ? 'selected' : '' %>>ผู้</option>
-        <option value="เมีย" <%= pet.pet_gender === 'เมีย' ? 'selected' : '' %>>เมีย</option>
-      </select>
+      <div>
+        <strong for="pet_gender">เพศ</strong>
+        <select name="pet_gender" id="pet_gender" required class="form-input">
+          <option value="ผู้" <%= pet.pet_gender === 'ผู้' ? 'selected' : '' %>>ผู้</option>
+          <option value="เมีย" <%= pet.pet_gender === 'เมีย' ? 'selected' : '' %>>เมีย</option>
+        </select>
+      </div><br>
 
       <!-- Pet Type -->
-      <label for="type_id">ประเภทสัตว์</label>
-      <select name="type_id" id="type_id" required>
-        <% pet_types.forEach(pt => { %>
-          <option value="<%= pt.type_id %>" <%= pt.type_id == pet.type_id ? 'selected' : '' %>>
-            <%= pt.type %>
-          </option>
-        <% }) %>
-      </select>
-
+      <div >
+        <strong for="type_id">ประเภทสัตว์</strong>
+        <select name="type_id" id="type_id" required class="form-input">
+          <% pet_types.forEach(pt => { %>
+            <option value="<%= pt.type_id %>" <%= pt.type_id == pet.type_id ? 'selected' : '' %>><%= pt.type %></option>
+          <% }) %>
+        </select>
+      </div><br>
 
       <!-- Buttons -->
-      <div class="btn-group">
-        <button type="button" class="button btn-back" onclick="window.history.back()">ยกเลิก
-      </button>
-        <button type="submit" class="button btn-next">บันทึก</button>
-      </div>
-    </form>
-  </div>
+      <div class="flex justify-between mt-6 gap-4">
+ <button type="button"
+ class="w-1/2 py-3 btn btn-cancel font-medium rounded-xl 
+               hover:bg-gray-300 transition"
+               onclick="history.back()">
+  ยกเลิก
+</button>
+
+  <button type="submit" 
+          class="btn btn-primary w-1/2 py-3">
+    <i class="fas fa-save mr-2"></i> บันทึก
+  </button>
+</div>
+
+    </div>
+  </form>
+</div>
 
   <script>
-    function previewSelectedImage(input) {
+  function previewSelectedImage(input) {
     const file = input.files[0];
     if (file) {
       const reader = new FileReader();
@@ -122,9 +93,6 @@
         document.getElementById('previewImage').src = e.target.result;
       }
       reader.readAsDataURL(file);
-
-      // แสดงชื่อไฟล์
-      document.getElementById('file-name').textContent = file.name;
     }
   }
     function toggleDropdown() {

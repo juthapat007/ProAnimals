@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ประวัติการจ่ายยา</title>
+  <%- include('../partials/link') %>
+</head>
+
+<body>
+  <div class="container ">
+
+    <!-- Header -->
+    <%- include('../partials/header_vet', { vetId: vetId }) %>
+
+      <!-- Page Title -->
+       <div style="display: flex; justify-content: center;">
+   <div class="flex items-center gap-2">
+        <div class="flex items-center text-center ">
+          <i class="fas fa-pills text-xl text-primary2"></i>
+          <strong class="text-2xl  font-bold text-text">  ประวัติการจ่ายยา</strong>
+        </div>
+      </div>
+      </div>
+      <br>
+      <!-- Table -->
+      <div class="overflow-x-auto shadow-lg rounded-lg">
+        <table class="container w-full min-w-[800px] border-collapse text-left bg-white rounded-lg">
+          <thead>
+            <tr>
+              <th class="tb-g1">รหัสการรักษา</th>
+              <th class="tb-g2">จำนวน</th>
+              <th class="tb-g3">รหัสยา</th>
+              <th class="tb-g4">ชื่อยา</th>
+              <th class="tb-g5">ราคา</th>
+              <th class="tb-g6">บรรจุภัณฑ์</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% medications.forEach(m=> { %>
+              <tr class="clickable-row hover:bg-gray transition-colors">
+                <td class="px-4 py-3 border-b border-gray-200 text-center">
+                  <%= m.treatment_id %>
+                </td>
+                <td class="px-4 py-3 border-b border-gray-200 text-center">
+                  <%= m.quantity %>
+                </td>
+                <td class="px-4 py-3 border-b border-gray-200 text-center">
+                  <%= m.medication_id %>
+                </td>
+                <td class="px-4 py-3 border-b border-gray-200 text-left">
+                  <%= m.medicine_name %>
+                </td>
+                <td class="px-4 py-3 border-b border-gray-200 text-right">
+                  <%= (+m.medicine_price).toFixed(2) %> ฿
+                </td>
+                <td class="px-4 py-3 border-b border-gray-200 text-left">
+                  <%= m.medicine_package %>
+                </td>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+
+
+  </div>
+</body>
+
+</html>

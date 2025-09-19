@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ยืนยันการจองเวลา</title>
+    <%- include('../partials/link') %>
+</head>
+<body >
+    <div class="container w-full max-w-2xl">
+        <%- include('../partials/header_admin') %>
+
+        <div class="bg-white rounded-2xl shadow-lg p-8 mt-6">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">ยืนยันการจองเวลา</h1>
+
+            <form id="confirmForm" class="space-y-4">
+                <!-- Hidden inputs -->
+                <input type="hidden" name="pet_id" value="<%= pet_id %>">
+                <input type="hidden" name="cus_id" value="<%= cus_id %>">
+                <input type="hidden" name="slot" value="<%= slot %>">
+                <input type="hidden" name="service_id" value="<%= service_id %>">
+                <input type="hidden" name="date" value="<%= date %>">
+                <input type="hidden" name="vet_id" value="<%= vet_id %>">
+
+                <!-- Display booking info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                        <span class="font-medium text-gray-700">รหัสสัตว์เลี้ยง:</span>
+                        <span class="text-gray-800"><%= pet_id || 'ไม่พบ' %></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                        <span class="font-medium text-gray-700">รหัสลูกค้า:</span>
+                        <span class="text-gray-800"><%= cus_id || 'ไม่พบ' %></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                        <span class="font-medium text-gray-700">เวลาที่เลือก:</span>
+                        <span class="text-gray-800"><%= slot || 'ไม่พบ' %></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                        <span class="font-medium text-gray-700">บริการ:</span>
+                        <span class="text-gray-800"><%= service_id || 'ไม่พบ' %></span>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm md:col-span-2">
+                        <span class="font-medium text-gray-700">วันที่:</span>
+                        <span class="text-gray-800"><%= date || 'ไม่พบ' %></span>
+                    </div>
+                </div>
+
+                <!-- Confirm button -->
+                <div class="flex justify-center mt-6">
+                    <button id="confirmButton" type="button"
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all duration-200 transform hover:scale-105">
+                        ยืนยันการจอง
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('confirmButton').addEventListener('click', async () => {
+        const form = document.getElementById('confirmForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const res = await fetch('/admin/confirm_AM', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'ยืนยันสำเร็จ!',
+                    text: 'การจองของคุณได้รับการบันทึกแล้ว',
+                    confirmButtonText: 'ตกลง'
+                }).then(() => {
+                    window.location.href = '/admin/mg_queue';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: result.message || 'ไม่สามารถยืนยันการจองได้',
+                    confirmButtonText: 'ตกลง'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้',
+                confirmButtonText: 'ตกลง'
+            });
+        }
+    });
+    </script>
+</body>
+</html>

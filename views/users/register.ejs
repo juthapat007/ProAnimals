@@ -4,15 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>สมัครสมาชิก | ไชยปราการสัตวแพทย์</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/output.css">
+  <%- include('../partials/link') %>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1><i class="fas fa-user-plus"></i> สมัครสมาชิก</h1>
+  <div class="container max-w-2xl bg-white rounded-2xl shadow-lg p-6 ">
+    <div class="header text-text text-2xl">
+      <h1><i class="fas fa-user-plus text-primary2"></i> สมัครสมาชิก</h1>
     </div>
 
     <% if (error) { %>
@@ -30,8 +27,10 @@
     <% if (!success) { %>
     <form class="register-form" action="/users/register" method="post">
       <div class="form-group">
-        <label for="name">ชื่อ-นามสกุล <span class="required">*</span></label>
+        <strong class="text-lg" for="name">ชื่อ-นามสกุล <span class="required" style="color: red;">*</span></strong>
         <input 
+          style="border-color:#f5b2b7"
+          class="form-input"
           type="text" 
           name="name" 
           id="name" 
@@ -42,9 +41,11 @@
       </div>
 
       <div class="form-group">
-        <label for="phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
+        <strong class="text-lg" for="phone">เบอร์โทรศัพท์ <span class="required" style="color: red;">*</span></strong>
         <input 
+        style="border-color:#f5b2b7"
           type="tel" 
+          class="form-input"
           name="phone" 
           id="phone" 
           pattern="[0-9]{10}" 
@@ -52,14 +53,16 @@
           required 
           placeholder="0912345678"
         />
-        <small>รูปแบบ: 0912345678 (10 หลัก)</small>
+        <!-- <p class="text-sm">รูปแบบ: 0912345678 (10 หลัก)</p> -->
       </div>
 
       <div class="form-group">
-        <label for="email">อีเมล <span class="required">*</span></label>
+        <strong class="text-lg"  for="email">อีเมล <span class="required" style="color: red;">*</span></strong>
         <input 
+        style="border-color:#f5b2b7"
           type="email" 
           name="email" 
+          class="form-input"
           id="email"
           value="<%= old.email || '' %>"
           required
@@ -68,10 +71,12 @@
       </div>
 
       <div class="form-group">
-        <label for="password">รหัสผ่าน <span class="required">*</span></label>
+        <strong class="text-lg"  for="password">รหัสผ่าน <span class="required" style="color: red;">*</span></strong>
         <input 
+        style="border-color:#f5b2b7"
           type="password" 
           name="password" 
+          class="form-input"
           id="password" 
           minlength="6" 
           required 
@@ -81,28 +86,32 @@
       </div>
 
       <div class="form-group">
-        <label for="confirm_password">ยืนยันรหัสผ่าน <span class="required">*</span></label>
-        <input 
-          type="password" 
-          name="confirm_password" 
-          id="confirm_password" 
-          required 
-          placeholder="กรอกรหัสผ่านอีกครั้ง"
-        />
+        <strong class="text-lg"  for="confirm_password">ยืนยันรหัสผ่าน <span class="required" style="color: red;">*</span></strong>
+        <input
+        style="border-color:#f5b2b7"
+        type="password"
+        name="confirm_password"
+        id="confirm_password"
+        class="form-input"
+        required
+        placeholder="กรอกรหัสผ่านอีกครั้ง"
+/>
+
       </div>
 
-      <button type="submit" class="btn-submit">
+      <button type="submit" class="btn-primary text-xl" style="width: 100%; height: 60px;">
         <i class="fas fa-user-plus"></i> สมัครสมาชิก
       </button>
     </form>
     <% } %>
 
-    <div class="login-link">
-      มีบัญชีอยู่แล้ว? <a href="/">เข้าสู่ระบบที่นี่</a>
+    <div class="login-link" style="height: 50px;">
+      <br><span class="text-lg">มีบัญชีอยู่แล้ว? <a href="/" style="color: #FF9AA2;" ><i class="fas fa-sign-out-alt text-lg"></i>  เข้าสู่ระบบที่นี่</a></span>
     </div>
   </div>
 
   <script>
+    
     // ตรวจสอบการยืนยันรหัสผ่าน
     document.getElementById('confirm_password').addEventListener('input', function() {
       const password = document.getElementById('password').value;
@@ -126,44 +135,5 @@
     });
   </script>
 
-  <style>
-    .required {
-      color: #e74c3c;
-    }
-    
-    .error-message {
-      background-color: #fee;
-      color: #c33;
-      padding: 10px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      border: 1px solid #fcc;
-    }
-    
-    .success-message {
-      background-color: #efe;
-      color: #060;
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
-      border: 1px solid #cfc;
-      text-align: center;
-    }
-
-    .btn-login {
-      display: inline-block;
-      background-color: #27ae60;
-      color: white;
-      padding: 10px 20px;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 10px;
-      transition: background-color 0.3s;
-    }
-
-    .btn-login:hover {
-      background-color: #219a52;
-    }
-  </style>
 </body>
 </html>

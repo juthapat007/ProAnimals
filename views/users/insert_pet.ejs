@@ -1,169 +1,196 @@
-
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เพิ่มข้อมูลสัตว์เลี้ยง | ไชยปราการสัตวแพทย์</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เพิ่มข้อมูลสัตว์เลี้ยง | ไชยปราการสัตวแพทย์</title>
+  <%- include('../partials/link') %>
 </head>
 
 <body>
 
-  <div class="container">
-    <div class="header">
-      <h1><i class="fas fa-paw"></i> เพิ่มข้อมูลสัตว์เลี้ยง</h1>
-    </div>
-    
-    <form id="petForm" class="pet-form" action="/users/insert_pet" method="post" enctype="multipart/form-data" novalidate>
-      <div class="form-group">
+  <div class="container max-w-2xl bg-white rounded-2xl shadow-lg p-6">
+      <%- include('../partials/header') %>
+    <div class="header text-text text-2xl">
+      <h1><i class="fas fa-paw text-primary2"></i> เพิ่มข้อมูลสัตว์เลี้ยง</h1>
+    </div><br>
+
+    <form id="petForm" class="pet-form" action="/users/insert_pet" method="post" enctype="multipart/form-data"
+      novalidate>
+      <div>
         <label for="pet_name">ชื่อสัตว์เลี้ยง <span class="required" style="color: red;">*</span></label>
-        <input type="text" name="pet_name" placeholder="กรุณากรอกชื่อสัตว์เลี้ยง" required><div class="error-message"></div>
+        <input type="text" name="pet_name" class="form-input" placeholder="กรุณากรอกชื่อสัตว์เลี้ยง" required>
+        <div class="error-message"></div>
       </div>
-      
-      <div class="form-group">
+
+      <div>
         <label for="pet_gender">เพศ <span class="required" style="color: red;">*</span></label>
-        <select name="pet_gender" required>
+        <select name="pet_gender" class="form-input" required>
           <option value="">-- เลือกเพศ --</option>
           <option value="ผู้">ผู้</option>
           <option value="เมีย">เมีย</option>
         </select>
         <div class="error-message"></div>
       </div>
-      
-<div class="form-group">
-  <label for="pet_type">ประเภทสัตว์เลี้ยง <span class="required" style="color: red;">*</span></label>
-  <select name="type_id" required>
-  <option value="">-- เลือกประเภทสัตว์ --</option>
-  <% pet_types.forEach(pt => { %>
-    <option value="<%= pt.type_id %>"><%= pt.type %></option>
-  <% }) %>
-</select>
 
-  <div class="error-message"></div>
-</div>
+      <div>
+        <label for="pet_type">ประเภทสัตว์เลี้ยง <span class="required" style="color: red;">*</span></label>
+        <select name="type_id" class="form-input" required>
+          <option value="">-- เลือกประเภทสัตว์ --</option>
+          <% pet_types.forEach(pt=> { %>
+            <option value="<%= pt.type_id %>">
+              <%= pt.type %>
+            </option>
+            <% }) %>
+        </select>
+
+        <div class="error-message"></div>
+      </div>
       <div class="form-group">
         <label for="pet_img">รูปสัตว์เลี้ยง <span class="required" style="color: red;">*</span></label>
-        <div class="file-upload">
-          <div class="file-upload-btn">
-            
-            <span id="file-name"><i class="fas fa-cloud-upload-alt"></i>เลือกไฟล์ภาพ (JPG, PNG, GIF)</span>
-          </div>
-          <input type="file" name="pet_img" id="pet_img" accept="image/jpeg,image/png,image/gif" required>
+
+
+        <div
+          class="file-upload border-2 border-dashed border-primary2 rounded-custom p-6 text-center cursor-pointer hover:bg-pink-50 transition"
+          onclick="document.getElementById('pet_img').click()">
+
+          <!-- ไอคอน + ข้อความ -->
+          <i class="fas fa-cloud-upload-alt text-4xl text-primary2"></i>
+          <p class="mt-2 text-gray-600">คลิกเพื่อเลือกรูปสัตว์เลี้ยง</p>
+
+          <!-- input file (ซ่อนอยู่) -->
+          <input type="file" name="pet_img" id="pet_img" accept="image/jpeg,image/png,image/gif" class="hidden" required
+            onchange="document.getElementById('file-name').innerText = this.files[0]?.name || 'ยังไม่ได้เลือกไฟล์';">
+
+          <!-- แสดงชื่อไฟล์ที่เลือก -->
+          <p id="file-name" class="mt-2 text-sm text-gray-500">ยังไม่ได้เลือกไฟล์</p>
         </div>
+
+
+        <div class="text-center">
+          <img id="preview" src="" alt="ตัวอย่างรูป" class="preview-image mx-auto rounded-lg shadow-md hidden max-h-48">
+        </div>
+
+
+
+
+
       </div>
-       <center><img id="preview-img" src="" alt="Preview" style="display: none; margin-top:10px; max-width: 300px; border-radius: 8px;"/></center>
-  <div class="error-message" id="file-error"></div>
+      <center><img id="preview-img" src="" alt="Preview"
+          style="display: none; margin-top:10px; max-width: 300px; border-radius: 8px;" /></center>
+      <div class="error-message" id="file-error"></div>
 
-  <small class="file-info">ขนาดไฟล์ไม่เกิน 2MB</small>
-  
-  <button type="submit" class="btn-submit">
-        <i class="fas fa-save"></i> บันทึกข้อมูล
-      </button>
-      <button type="button" class="button btn-back" onclick="history.back()">
-        <i class="fas fa-arrow-left"></i> ย้อนกลับ
-      </button>
-</div>
+      <small class="file-info">ขนาดไฟล์ไม่เกิน 2MB</small>
+      <br>
+      <div class="flex justify-between mt-2 gap-2">
+        <div style="padding-bottom: 10px;"></div>
+        <button type="button" class="btn btn-cancel w-1/2 py-3" onclick="history.back()">
+          <i class="fas fa-arrow-left"></i> ย้อนกลับ
+        </button>
+        <button type="submit" class="btn btn-primary w-1/2 py-3">
+          <i class="fas fa-save"></i> บันทึกข้อมูล
+        </button>
+      </div>
+  </div>
 
-    </form>
+  </form>
   </div>
 
   <script>
     // แสดงชื่อไฟล์เมื่อผู้ใช้เลือกไฟล์
-    document.getElementById('pet_img').addEventListener('change', function(e) {
+    document.getElementById('pet_img').addEventListener('change', function (e) {
       const fileName = e.target.files[0] ? e.target.files[0].name : 'เลือกไฟล์ภาพ (JPG, PNG, GIF)';
       document.getElementById('file-name').textContent = fileName;
-      
+
       // ซ่อนข้อความ error เมื่อเลือกไฟล์แล้ว
-      if(e.target.files.length > 0) {
+      if (e.target.files.length > 0) {
         document.getElementById('file-error').style.display = 'none';
       }
     });
-    
-    // ตรวจสอบฟอร์มก่อนส่ง
-    document.getElementById('pet_img').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  const fileName = file ? file.name : 'เลือกไฟล์ภาพ (JPG, PNG, GIF)';
-  document.getElementById('file-name').textContent = fileName;
-  
-  // preview ภาพ
-  const previewImg = document.getElementById('preview-img');
-  
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      previewImg.src = event.target.result;
-      previewImg.style.display = 'block';
-    }
-    reader.readAsDataURL(file);
-    
-    document.getElementById('file-error').style.display = 'none';
-  } else {
-    previewImg.style.display = 'none';
-  }
-});
 
-    document.getElementById('petForm').addEventListener('submit', function(e) {
+    // ตรวจสอบฟอร์มก่อนส่ง
+    document.getElementById('pet_img').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      const fileName = file ? file.name : 'เลือกไฟล์ภาพ (JPG, PNG, GIF)';
+      document.getElementById('file-name').textContent = fileName;
+
+      // preview ภาพ
+      const previewImg = document.getElementById('preview-img');
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          previewImg.src = event.target.result;
+          previewImg.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+
+        document.getElementById('file-error').style.display = 'none';
+      } else {
+        previewImg.style.display = 'none';
+      }
+    });
+
+    document.getElementById('petForm').addEventListener('submit', function (e) {
       let isValid = true;
-      
+
       // ตรวจสอบฟิลด์ข้อความ
       const textInputs = document.querySelectorAll('input[type="text"][required]');
       textInputs.forEach(input => {
-        if(!input.value.trim()) {
+        if (!input.value.trim()) {
           input.nextElementSibling.style.display = 'block';
           isValid = false;
         }
       });
-      
+
       // ตรวจสอบ dropdown
       const selects = document.querySelectorAll('select[required]');
       selects.forEach(select => {
-        if(!select.value) {
+        if (!select.value) {
           select.nextElementSibling.style.display = 'block';
           isValid = false;
         }
       });
-      
+
       // ตรวจสอบไฟล์
       const fileInput = document.getElementById('pet_img');
-      if(fileInput.files.length === 0) {
+      if (fileInput.files.length === 0) {
         document.getElementById('file-error').style.display = 'block';
         isValid = false;
       }
-      
+
       // หยุดการส่งฟอร์มถ้ามีข้อมูลไม่ครบ
-      if(!isValid) {
+      if (!isValid) {
         e.preventDefault();
-        
+
         // เลื่อนไปยังฟิลด์แรกที่ผิดพลาด
-        const firstError = document.querySelector('.error-message[style="display: block;"]') || 
-                          document.querySelector('.error-message');
-        if(firstError) {
+        const firstError = document.querySelector('.error-message[style="display: block;"]') ||
+          document.querySelector('.error-message');
+        if (firstError) {
           firstError.previousElementSibling.scrollIntoView({
             behavior: 'smooth',
             block: 'center'
           });
-          
+
           // ให้โฟกัสที่ฟิลด์นั้น
-          if(firstError.previousElementSibling.tagName === 'INPUT' || 
-             firstError.previousElementSibling.tagName === 'SELECT') {
+          if (firstError.previousElementSibling.tagName === 'INPUT' ||
+            firstError.previousElementSibling.tagName === 'SELECT') {
             firstError.previousElementSibling.focus();
           }
         }
-        
+
         // แสดง alert เพิ่มเติม
         alert('กรุณากรอกข้อมูลให้ครบถ้วนก่อนบันทึก');
       }
     });
-    
+
     // ซ่อนข้อความ error เมื่อผู้ใช้เริ่มกรอกข้อมูล
     document.querySelectorAll('input, select').forEach(element => {
-      element.addEventListener('input', function() {
-        if(this.value) {
+      element.addEventListener('input', function () {
+        if (this.value) {
           const errorMsg = this.nextElementSibling;
-          if(errorMsg && errorMsg.classList.contains('error-message')) {
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
             errorMsg.style.display = 'none';
           }
         }
@@ -171,4 +198,5 @@
     });
   </script>
 </body>
+
 </html>

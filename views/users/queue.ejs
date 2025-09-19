@@ -6,66 +6,165 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="description" content="ระบบนัดหมายสัตวแพทย์ ไชยปราการสัตวแพทย์" />
   <title>คิวการจองของคุณ - ไชยปราการสัตวแพทย์</title>
-      <%- include('../partials/link') %>
+  
+  <!-- Include your partials/link here -->
+  <%- include('../partials/link') %>
 </head>
 
 <body>
-  <div class="container" >
-
+  <div class="container">
+      <%- include('../partials/header') %>
+    <!-- Include your header partial here -->
+    
+    <!-- Welcome Section -->
+    <div class="page-header">
   
-    <%- include('../partials/header') %>
+<div class="container text-center">
+      <h1 class=" text-2xl font-bold ">
+        <i class="fas fa-calendar-check mr-2 text-primary2"></i>
+        คิวการจองของคุณ
+      </h1>
+      <span class="mt-2 opacity-90">ติดตามสถานะการจองและการรักษาของคุณได้ที่นี่</span>
+       <br><br>
+<div style="display: flex; justify-content: center;" >
+  <form method="get" action="/users/queue" class=" flex items-center gap-3">
+    <label for="SelectDate" class="font-medium text-gray-700 flex items-center gap-2">
+      <p>เลือกวันที่:</p>
+    </label>
+    <input 
+      type="text" 
+      id="SelectDate" 
+      name="date"
+      value="<%= selectedDate || '' %>"
+      class="form-input border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:ring-2 focus:ring-primary cursor-pointer"
+      placeholder="เลือกวันที่..."
+    >
+  </form></div>
 
-    <div class="welcome">
-      <br>สวัสดีคุณ: <%= cus_name %>!<br>
-    </div>
-<center>
-      <h1>คิวการจองของคุณ</h1>
-      
- <div class="overflow-x-auto rounded-lg shadow" style="height:800px;">
+</div>
+    </div><br>
+
+
+    <!-- Bookings Table Section -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden table-shadow">
+            <div class="overflow-x-auto  ">
       <% if (bookings && bookings.length > 0) { %>
-        <table>
-          
-          <thead>
+        <table class="w-full border-collapse">
+          <thead >
             <tr>
-              <th>วันที่</th>
-              <th>ช่วงเวลา</th>
-              <th>ชื่อสัตว์เลี้ยง</th>
-              <th>บริการ</th>
-              <th>ผู้จอง</th>
-              
+              <th class="tb-b1">
+                <i class="fas fa-calendar mr-2"></i>
+                วันที่
+              </th>
+              <th class="tb-b2">
+                <i class="fas fa-clock mr-2"></i>
+                ชื่อเจ้าของสัตว์
+              </th>
+              <th class="tb-b3">
+                <i class="fas fa-clock mr-2"></i>
+                ช่วงเวลา
+              </th>
+              <th class="tb-b4">
+                <i class="fas fa-paw mr-2"></i>
+                ชื่อสัตว์เลี้ยง
+              </th>
+              <th class="tb-b5">
+                <i class="fas fa-stethoscope mr-2"></i>
+                บริการ
+              </th>
+              <th class="tb-b6">
+                <i class="fas fa-info-circle mr-2"></i>
+                สถานะ
+              </th>
             </tr>
           </thead>
-          <tbody>
-            <% bookings.forEach(function(booking) { %>
-              <tr>
-                 <td>
-            <%= new Date(booking.booking_date).toLocaleDateString('th-TH', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric'
-            }) %>
-          </td>
-                <td><span class="time-badge"><%= booking.time_booking %></span></td>
-                <td><%= booking.pet_name %></td>
-                <td><%= booking.service_type %></td>
-                <td><%= booking.status %></td>
-                
-              </tr>
-            <% }); %>
-          </tbody>
+          <tbody class="divide-y divide-gray-100">
+<% bookings.forEach(function(booking) { %>
+  <tr class="<%= booking.cus_id === cus_id ? 'bg-primary/30 font-bold' : '' %>">
+    <td class="px-4 py-4"><%= new Date(booking.booking_date).toLocaleDateString('th-TH') %></td>
+    <td class="px-4 py-4"><%= booking.time_booking %></td>
+    <td class="px-4 py-4"><%= booking.cus_name %></td>
+    <td class="px-4 py-4"><%= booking.pet_name %></td>
+    <td class="px-4 py-4"><%= booking.service_type %></td>
+     <td class="px-4 py-4">
+                  <% if (booking.status === 'รอการรักษา') { %>
+                    <span class="status-pending">
+                      <i class="fas fa-hourglass-half mr-1"></i>
+                      <%= booking.status %>
+                    </span>
+                  <% } else if (booking.status === 'เสร็จสิ้น') { %>
+                    <span class="status-success">
+                      <i class="fas fa-check-circle mr-1"></i>
+                      <%= booking.status %>
+                    </span>
+                  <% } else if (booking.status === 'ล้มเหลว') { %>
+                    <span class="status-failed">
+                      <i class="fas fa-times-circle mr-1"></i>
+                      <%= booking.status %>
+                    </span>
+                  <% } else if (booking.status === 'กำลังรักษา') { %>
+                    <span class="status-wait">
+                      <i class="fas fa-spinner mr-1"></i>
+                      <%= booking.status %>
+                    </span>
+                  <% } else { %>
+                    <span class="status-pending">
+                      <%= booking.status %>
+                    </span>
+                  <% } %>
+                </td>
+  </tr>
+<% }) %>
+
+</tbody>
+
         </table>
-   
       <% } else { %>
         <div class="no-booking">
-          <p>คุณยังไม่มีคิวการจอง</p>
-          <button class="button" onclick="window.location.href='/select_pet'" style="margin-top: 15px;">
-            <i class="fas fa-calendar"></i> จองคิวบริการ
-          </button>
+              <center> <div class="text-6xl mb-4">
+            <i class="fas fa-calendar-times text-gray-300"></i>
+          </div>
+          <h3 class="text-2xl font-semibold mb-2 text-gray-600">ยังไม่มีคิวการจอง</h3>
+          <p class="text-gray-500 mb-6">คุณยังไม่มีการจองบริการใดๆ เริ่มจองบริการเพื่อดูแลสัตว์เลี้ยงของคุณกันเถอะ</p>
+          
+    
+          
+</center>
         </div>
       <% } %>
+      </div>
     </div>
-    </center>
-  </div>
 
+    <!-- Action Buttons -->
+    <div class="flex justify-center gap-4 mt-6">
+      <button class="btn-primary" onclick="window.location.href='/users/select_pet'">
+        <i class="fas fa-plus mr-2"></i>
+        เพิ่มการจองใหม่
+      </button>
+      <button class="btn btn-cancel" onclick="window.history.back()">
+        <i class="fas fa-arrow-left mr-2"></i>
+        กลับ
+      </button>
+    </div>
+  </div>
+  <script src="/js/calendar_select.js"></script>
+  <script>
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add hover effects to table rows
+      const tableRows = document.querySelectorAll('.booking-table tbody tr');
+      tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.01)';
+          this.style.boxShadow = '0 4px 20px rgba(255, 154, 162, 0.2)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+          this.style.boxShadow = 'none';
+        });
+      });
+    });
+  </script>
 </body>
 </html>

@@ -51,9 +51,9 @@ router.post("/:treatment_id", requireLogin, async (req, res) => {
 try {
   await pool.query(
     `UPDATE treatment_history 
-     SET pet_weight_kg = ?, treatment_details = ?, vet_notes = ? 
+     SET pet_weight_kg = ?, treatment_details = ?
      WHERE treatment_id = ?`,
-    [pet_weight_kg ?? null, treatment_details ?? null, vet_notes ?? null, treatment_id]
+    [pet_weight_kg ?? null, treatment_details ?? null, treatment_id]
   );
   res.redirect(`/veterinarian/mg_history/${booking_id}`);
 } catch(err) {

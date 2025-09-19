@@ -16,7 +16,7 @@ router.get('/', requireLogin, async (req, res) => {
     const { pet_id, cus_id } = req.query;
 
     if (!pet_id || !cus_id) {
-      return res.redirect('/admin/customers');
+      return res.redirect('/admin/confirm_AM');
     }
 
     const userEmail = req.session?.user_email || 'wun@example.com';
@@ -35,7 +35,7 @@ router.get('/', requireLogin, async (req, res) => {
 
       // 2) ดึงข้อมูลสัตว์เลี้ยง
       const [petRows] = await pool.query(
-        `SELECT p.pet_id, p.pet_name, p.pet_gender, p.img, pt.type AS pet_type_name
+        `SELECT p.pet_id, p.pet_name,p.pet_name, p.pet_gender, p.img, pt.type AS pet_type_name
          FROM pet p
          LEFT JOIN pet_type pt ON p.type_id = pt.type_id
          WHERE p.pet_id = ? AND p.cus_id = ?`,
@@ -62,10 +62,12 @@ router.get('/', requireLogin, async (req, res) => {
             b.status, 
             s.service_type, 
             s.service_price,
+            p.img,
             v.vet_name
         FROM booking b
         LEFT JOIN service_type s ON b.service_id = s.service_id
         LEFT JOIN veterinarian v ON b.vet_id = v.vet_id
+        LEFT JOIN pet p on b.pet_id=p.pet_id
         WHERE b.pet_id = ?
         ORDER BY b.booking_date DESC, b.time_booking DESC
         LIMIT 10`,
@@ -76,13 +78,14 @@ router.get('/', requireLogin, async (req, res) => {
 
       res.render('admin/pet_service', {
         customer: customerRows[0],
-        pet: petRows[0],
+        pets: petRows,  
         services: serviceRows,
         bookingHistory,
         today: new Date().toISOString().slice(0, 10),
         error: req.query.error || null,
         success: req.query.success || null
       });
+
 
     } catch (dbError) {
       console.error('❌ Database error in pet-service:', dbError);
@@ -188,11 +191,14 @@ router.post('/', requireLogin, async (req, res) => {
       }
 
       // ✅ สร้างการจองใหม่พร้อม vet_id และ end_time
-      const [result] = await pool.query(
-        `INSERT INTO booking (time_booking, end_time, service_id, cus_id, pet_id, vet_id, booking_date, status, customer_type)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'รอการรักษา', 'Booking')`,
-        [time, end_time, service_id, cus_id, pet_id, vet_id, date]
-      );
+const [result] = await pool.query(
+  `INSERT INTO booking 
+     (time_booking, end_time, service_id, cus_id, pet_id, vet_id, booking_date, status, customer_type)
+   VALUES (?, ?, ?, ?, ?, ?, ?, 'รอการรักษา', 'Walk-in')`,
+  [time, end_time, service_id, cus_id, pet_id, vet_id, date]
+);
+
+
 
       const bookingId = result.insertId;
       console.log(`✅ Created new booking: ${bookingId} for pet ${petCheck[0].pet_name} with vet ${vet_id}`);
@@ -436,6 +442,284 @@ router.get('/api/available-times', requireLogin, async (req, res) => {
   }
 });
 
+// ✅ API สำหรับดึงวันที่จากตาราง vet_work (ใหม่)
+router.get('/api/vet-work-dates', requireLogin, async (req, res) => {
+  try {
+    console.log('📡 API: /api/vet-work-dates called');
+
+    // ตรวจสอบสิทธิ์ admin
+    if (req.session.access_type !== 'admin') {
+      console.log('❌ Unauthorized access attempt');
+      return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์เข้าถึง' });
+    }
+
+    const userEmail = req.session?.user_email || 'wun@example.com';
+    console.log('👤 User email:', userEmail);
+
+    const pool = getPoolPromise(userEmail);
+
+    // ดึงวันที่ทั้งหมดจากตาราง vet_work ที่เป็นวันที่ในอนาคต
+    const [rows] = await pool.query(
+      `SELECT DISTINCT work_day 
+       FROM vet_work 
+       WHERE work_day >= CURDATE() 
+       ORDER BY work_day ASC`
+    );
+
+    console.log('📊 Raw vet_work data:', rows);
+
+    if (!rows || rows.length === 0) {
+      console.log('⚠️ No work days found in vet_work table');
+      return res.json({
+        success: true,
+        availableDates: [],
+        count: 0,
+        message: 'ไม่มีวันที่เปิดให้บริการในขณะนี้'
+      });
+    }
+
+    // แปลง work_day เป็น string รูปแบบ YYYY-MM-DD
+    const availableDates = rows
+      .map(row => {
+        // แก้ไขปัญหาวันที่ไม่ถูกต้อง (0000-00-00)
+        if (row.work_day && row.work_day.toString() !== '0000-00-00') {
+          return dayjs(row.work_day).format('YYYY-MM-DD');
+        }
+        return null;
+      })
+      .filter(dateStr => dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr));
+
+    console.log('✅ Processed vet work dates:', availableDates);
+
+    res.json({
+      success: true,
+      availableDates,
+      count: availableDates.length,
+      message: `พบวันที่สัตวแพทย์ทำงาน ${availableDates.length} วัน`
+    });
+
+  } catch (error) {
+    console.error('❌ Error in /api/vet-work-dates:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลวันที่จากตาราง vet_work',
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// ✅ API สำหรับดึงข้อมูลสัตวแพทย์ที่ทำงานในวันที่กำหนด (ใหม่)
+router.get('/api/vet-work/:date', requireLogin, async (req, res) => {
+  try {
+    const { date } = req.params;
+    console.log('📡 API: /api/vet-work/:date called with date:', date);
+
+    // ตรวจสอบสิทธิ์ admin
+    if (req.session.access_type !== 'admin') {
+      return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์เข้าถึง' });
+    }
+
+    // ตรวจสอบรูปแบบวันที่
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ success: false, message: 'รูปแบบวันที่ไม่ถูกต้อง' });
+    }
+
+    const userEmail = req.session?.user_email || 'wun@example.com';
+    const pool = getPoolPromise(userEmail);
+
+    // ดึงข้อมูลสัตวแพทย์ที่ทำงานในวันที่กำหนด
+    const [rows] = await pool.query(
+      `SELECT vw.work_id, vw.vet_id, vw.start_time, vw.end_time, v.vet_name
+       FROM vet_work vw
+       JOIN veterinarian v ON vw.vet_id = v.vet_id
+       WHERE vw.work_day = ?
+       ORDER BY vw.start_time ASC`,
+      [date]
+    );
+
+    console.log('📊 Vet work details for', date, ':', rows);
+
+    res.json({
+      success: true,
+      vetSchedules: rows,
+      count: rows.length,
+      message: `พบสัตวแพทย์ทำงาน ${rows.length} คนในวันที่ ${date}`
+    });
+
+  } catch (error) {
+    console.error('❌ Error in /api/vet-work/:date:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลตารางงานสัตวแพทย์',
+      error: error.message
+    });
+  }
+});
+
+// ✅ API สำหรับดึงเวลาที่ว่างตาม vet_work (ใหม่)
+router.get('/api/vet-available-times', requireLogin, async (req, res) => {
+  try {
+    console.log('📡 API: /api/vet-available-times called with params:', req.query);
+    
+    if (req.session.access_type !== 'admin') {
+      return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์เข้าถึง' });
+    }
+
+    const { date, service_id } = req.query;
+
+    if (!date || !service_id) {
+      return res.status(400).json({ success: false, message: 'ข้อมูลไม่ครบถ้วน' });
+    }
+
+    const userEmail = req.session?.user_email || 'wun@example.com';
+    const pool = getPoolPromise(userEmail);
+
+    // 1) ดึงระยะเวลาของบริการ
+    const [serviceRows] = await pool.query(
+      `SELECT service_time FROM service_type WHERE service_id = ?`,
+      [service_id]
+    );
+
+    if (serviceRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลบริการ' });
+    }
+
+    const serviceTime = serviceRows[0].service_time;
+    const [hours, minutes] = serviceTime.split(':').map(Number);
+    const serviceDurationMinutes = hours * 60 + minutes;
+
+    // 2) ดึงข้อมูลสัตวแพทย์ที่ทำงานในวันที่เลือก
+    const [vetWorkRows] = await pool.query(
+      `SELECT vw.vet_id, vw.start_time, vw.end_time, v.vet_name
+       FROM vet_work vw
+       JOIN veterinarian v ON vw.vet_id = v.vet_id
+       WHERE vw.work_day = ?
+       ORDER BY vw.start_time ASC`,
+      [date]
+    );
+
+    if (vetWorkRows.length === 0) {
+      return res.json({
+        success: true,
+        availableSlots: [],
+        message: 'ไม่มีสัตวแพทย์ทำงานในวันนี้'
+      });
+    }
+
+    // 3) ดึงการจองที่มีอยู่แล้วในวันที่เลือก
+    const [existingBookings] = await pool.query(
+      `SELECT b.time_booking, b.end_time, b.vet_id
+       FROM booking b
+       WHERE b.booking_date = ? AND b.status IN ('รอการรักษา', 'กำลังรักษา')
+       ORDER BY b.time_booking ASC`,
+      [date]
+    );
+
+    // 4) สร้าง time slots ตามช่วงเวลาทำงานของสัตวแพทย์แต่ละคน
+    const generateTimeSlots = (startTime, endTime, vetId, vetName) => {
+      const slots = [];
+      const [startHours, startMinutes] = startTime.split(':').map(Number);
+      const [endHours, endMinutes] = endTime.split(':').map(Number);
+      
+      const startTotalMinutes = startHours * 60 + startMinutes;
+      const endTotalMinutes = endHours * 60 + endMinutes;
+      
+      // สร้าง slots ทุก 30 นาที
+      for (let current = startTotalMinutes; current + serviceDurationMinutes <= endTotalMinutes; current += 30) {
+        const hours = Math.floor(current / 60);
+        const minutes = current % 60;
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        
+        // คำนวณเวลาสิ้นสุดของ slot นี้
+        const endSlotMinutes = current + serviceDurationMinutes;
+        const endHoursSlot = Math.floor(endSlotMinutes / 60);
+        const endMinutesSlot = endSlotMinutes % 60;
+        const endTimeString = `${endHoursSlot.toString().padStart(2, '0')}:${endMinutesSlot.toString().padStart(2, '0')}`;
+        
+        slots.push({
+          time: timeString,
+          endTime: endTimeString,
+          vetId: vetId,
+          vetName: vetName,
+          datetime: `${date}T${timeString}:00`
+        });
+      }
+      return slots;
+    };
+
+    // 5) ตรวจสอบความว่างของแต่ละ slot
+    const availableSlots = [];
+
+    vetWorkRows.forEach(work => {
+      const vetSlots = generateTimeSlots(work.start_time, work.end_time, work.vet_id, work.vet_name);
+      
+      vetSlots.forEach(slot => {
+        let isAvailable = true;
+
+        // ตรวจสอบการจองที่มีอยู่
+        for (const booking of existingBookings) {
+          // ตรวจสอบเฉพาะการจองของสัตวแพทย์คนนี้
+          if (booking.vet_id === work.vet_id) {
+            const [bookingHours, bookingMinutes] = booking.time_booking.split(':').map(Number);
+            const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+            
+            let bookingEndMinutes;
+            if (booking.end_time) {
+              const [endHours, endMins] = booking.end_time.split(':').map(Number);
+              bookingEndMinutes = endHours * 60 + endMins;
+            } else {
+              // ถ้าไม่มี end_time ใน booking ให้ใช้ service_time เป็น fallback
+              bookingEndMinutes = bookingStartMinutes + serviceDurationMinutes;
+            }
+
+            // คำนวณ start และ end ของ slot ปัจจุบัน
+            const [slotHours, slotMinutes] = slot.time.split(':').map(Number);
+            const slotStartMinutes = slotHours * 60 + slotMinutes;
+            const slotEndMinutes = slotStartMinutes + serviceDurationMinutes;
+
+            // ตรวจสอบการทับซ้อน
+            if (slotStartMinutes < bookingEndMinutes && bookingStartMinutes < slotEndMinutes) {
+              isAvailable = false;
+              break;
+            }
+          }
+        }
+
+        if (isAvailable) {
+          availableSlots.push(slot);
+        }
+      });
+    });
+
+    // เรียงลำดับเวลาก่อนหลัง
+    availableSlots.sort((a, b) => {
+      const [aHours, aMinutes] = a.time.split(':').map(Number);
+      const [bHours, bMinutes] = b.time.split(':').map(Number);
+      return (aHours * 60 + aMinutes) - (bHours * 60 + bMinutes);
+    });
+
+    console.log('✅ Available time slots with vet info:', availableSlots);
+
+    res.json({
+      success: true,
+      availableSlots,
+      serviceDurationMinutes,
+      vetWorkHours: vetWorkRows,
+      message: `พบเวลาว่าง ${availableSlots.length} ช่วงจากสัตวแพทย์ ${vetWorkRows.length} คน`
+    });
+
+  } catch (error) {
+    console.error('❌ Error in /api/vet-available-times:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลเวลาว่าง',
+      error: error.message
+    });
+  }
+});
 
 
 

@@ -4,89 +4,116 @@
   <meta charset="UTF-8">
   <title>รายละเอียดสัตว์เลี้ยงของลูกค้า</title>
   <%- include('../partials/link') %>
-
-
 </head>
 <body>
-<div class="container">
-  <%- include('../partials/header_vet') %>
-  <p>รหัสคุณหมอ: <%= vetId %></p>
-
-
+<div class="container ">
   
-  <h2>รายละเอียดสัตว์เลี้ยงของลูกค้า</h2>
+  <!-- Header -->
+  <%- include('../partials/header_vet') %>
+ <p class="text-sm text-gray mt-2">
+  รหัสคุณหมอ: <span class="font-semibold"><%= vetId %></span>
+</p>
+
+<div class="container border-2 border-gray-200 flex flex-col md:flex-row md:justify-between md:items-center gap-6 mt-4">
+  
+  <!-- หัวเรื่องไอคอน -->
+  <div class="flex items-center gap-2">
+    <i class="fas fa-paw text-2xl text-primary2"></i>
+    <h2 class="text-xl font-bold text-text">
+      รายละเอียดสัตว์เลี้ยงของลูกค้า
+    </h2>
+  </div>
   
   <!-- Date Filter -->
-  <div class="filter-date" style="display: flex;" >
-    <form method="get" action="/veterinarian/pet_order" >
-      <span for="SelectDate">เลือกวันที่: </span>
-      <input 
-        class="date-input-wrapper" 
-        type="date" 
-        id="SelectDate" 
-        name="date"
-        value="<%= selectedDate %>"
-        onchange="this.form.submit()" 
-      >
-    </form>
-  </div>
+  <div class="flex items-center gap-4">
+
+    <p>วันที่ :</p>
+  <form method="get" action="/veterinarian/pet_order" class="flex items-center gap-3">
+
+    <input 
+      type="text" 
+      id="SelectDate" 
+      name="date"
+      value="<%= selectedDate %>"
+      class="form-input "
+      placeholder="เลือกวันที่..."
+    >
+  </form>
+</div>
+
+
+
+
+</div>
+<br>
 
   <!-- Booking Cards -->
   <% if (bookings && bookings.length > 0) { %>
-    <% bookings.forEach((pet) => { %>
-      <div  style="display: flex;">
-        <div class="pet-id">ID เคส : <%= pet.booking_id %>
-              <img src="<%= pet.pet_image ? '/uploads/' + pet.pet_image : '/images/no-pet.png' %>" class="image-preview" alt="pet"></div>
-
-    <div class="pet-card" >
-      <div class="pet-info">
-          <div class="pet-row" >
-            <strong style="padding-left: 33px;">ชื่อสัตว์เลี้ยง :</strong>
-            <span><%= pet.pet_name %></span>
-            <strong>บริการ :</strong>
-            <span><%= pet.service_name %></span>
-          </div>
-            
-          <div class="pet-row">
-            <strong style="padding-left: 48px;">ชื่อเจ้าของ :</strong>
-            <span><%= pet.owner_name %></span>
-            <strong >ประเภทสัตว์เลี้ยง :</strong>
-            <span><%= pet.pet_type_name %></span>
+    <div class="grid gap-6">
+      <% bookings.forEach((pet) => { %>
+        <div class="flex gap-4 bg-white border-2 border-gray-200 rounded-xl shadow-custom p-4 hover:shadow-lg transition">
+          
+          <!-- Pet Image -->
+          <div class="w-40 flex flex-col items-center">
+            <span class="text-sm text-gray-500 mb-2">ID เคส : <%= pet.booking_id %></span>
+            <img 
+              src="<%= pet.pet_image ? '/uploads/' + pet.pet_image : '/images/no-pet.png' %>" 
+              alt="pet"
+              class="w-32 h-32 object-cover rounded-lg border"
+            >
           </div>
 
-          <div class="pet-row">
-            <strong style="padding-left: 30px;">ประเภทลูกค้า :</strong>
-            <span><%= pet.customer_type %></span>
+          <!-- Pet Info -->
+          <div class="flex-1 space-y-3">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <p><strong>ชื่อสัตว์เลี้ยง:</strong> <%= pet.pet_name %></p>
+              <p><strong>บริการ:</strong> <%= pet.service_name %></p>
+              <p><strong>ชื่อเจ้าของ:</strong> <%= pet.owner_name %></p>
+              <p><strong>ประเภทสัตว์เลี้ยง:</strong> <%= pet.pet_type_name %></p>
+              <p><strong>ประเภทลูกค้า:</strong> <%= pet.customer_type %></p>
+              <div class="flex items-center gap-2">
+                <label for="status<%= pet.booking_id %>" class="font-semibold">สถานะลูกค้า:</label>
+                <select 
+                  id="status<%= pet.booking_id %>" 
+                  class="border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-primary text-sm"
+                >
+                  <% ['รอการรักษา','กำลังรักษา','เสร็จสิ้น','ล้มเหลว'].forEach(st => { %>
+                    <option value="<%= st %>" <%= pet.status === st ? 'selected' : '' %>>
+                      <%= st %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
 
-  <strong for="status<%= pet.booking_id %>">สถานะลูกค้า :</strong>
-  <select name="status" id="status<%= pet.booking_id %>">
-    <% ['รอการรักษา','กำลังรักษา','เสร็จสิ้น','ล้มเหลว'].forEach(st => { %>
-      <option value="<%= st %>" <%= pet.status === st ? 'selected' : '' %>>
-        <%= st %>
-      </option>
-    <% }) %>
-  </select>
-          </div>
-
-          <div style="display: flex; justify-content: flex-end;" >
-            <button type="button" class="btn btn-info" onclick="goToHistory(<%= pet.booking_id %>)">
-  จัดการประวัติ
-</button>
-            <div style="padding-left: 5px;"></div>
-            <button type="button" class="btn btn-edit" onclick="updateStatus(<%= pet.booking_id %>, document.getElementById('status<%= pet.booking_id %>').value)">
-              อัพเดทสถานะ
-            </button>
+            <!-- Action Buttons -->
+            <div class="flex justify-end gap-2">
+             <button 
+                type="button" 
+                class="px-4 py-2 bg-warning text-white text-sm rounded-lg hover: bg-edit transition"
+                onclick="updateStatus(<%= pet.booking_id %>, document.getElementById('status<%= pet.booking_id %>').value)">
+                อัพเดทสถานะ
+              </button>
+              <button 
+                type="button" 
+                class="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition"
+                onclick="goToHistory(<%= pet.booking_id %>)">
+                จัดการประวัติ
+              </button>
+              
+            </div>
           </div>
         </div>
-      </div>
-      </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-12 text-gray-500 text-lg">
+      🎉 ไม่มีคิวการรักษาในขณะนี้
+    </div>
+  <% } %>
 
-    <% }) %>
-<% } else { %>
-    <div style="text-align:center; padding:30px; color:#999;">🎉 ไม่มีคิวการรักษาในขณะนี้</div>
-<% } %>
 </div>
-
+<script src="/js/calendar_select.js" defer></script>
 <script>
   
 // ฟังก์ชันสำหรับไปหน้าจัดการประวัติ - แก้ไข URL ให้ถูกต้อง
@@ -142,21 +169,21 @@ function goHome() {
     window.location.href = '/veterinarian/pet_order';
 }
 
-// ฟังก์ชันสำหรับเปิด/ปิดเมนู
-function toggleMenu() {
-    const menu = document.getElementById('menuDropdown');
-    menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
-}
+// // ฟังก์ชันสำหรับเปิด/ปิดเมนู
+// function toggleMenu() {
+//     const menu = document.getElementById('menuDropdown');
+//     menu.style.display = menu.style.display === 'none' || menu.style.display === '' ? 'block' : 'none';
+// }
 
-// ปิดเมนูเมื่อคลิกข้างนอก
-document.addEventListener('click', function(event) {
-    const menu = document.getElementById('menuDropdown');
-    const menuIcon = document.querySelector('.icon-menu');
+// // ปิดเมนูเมื่อคลิกข้างนอก
+// document.addEventListener('click', function(event) {
+//     const menu = document.getElementById('menuDropdown');
+//     const menuIcon = document.querySelector('.icon-menu');
     
-    if (!menuIcon.contains(event.target)) {
-        menu.style.display = 'none';
-    }
-});
+//     if (!menuIcon.contains(event.target)) {
+//         menu.style.display = 'none';
+//     }
+// });
 </script>
 </body>
 </html>

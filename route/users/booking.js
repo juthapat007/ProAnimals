@@ -18,6 +18,7 @@ router.get('/booking', requireLogin, async (req, res) => {
     }
 
     res.render('users/booking', {
+      step: 2,
       cus_id: req.session.cus_id,
       cus_name: req.session.user_name,
       pet_id: null,
@@ -30,6 +31,7 @@ router.get('/booking', requireLogin, async (req, res) => {
   } catch (error) {
     console.error('❌ GET /users/booking Error:', error);
     res.render('users/booking', {
+      step: 2,
       cus_id: req.session.cus_id,
       cus_name: req.session.user_name,
       pet_id: null,
@@ -72,6 +74,7 @@ router.post('/booking', async (req, res) => {
     if (petResults.length === 0) {
       console.log('❌ Pet not found:', { pet_id, cus_id });
       return res.render('users/booking', {
+        step: 2,
         cus_id: req.session.cus_id,
         cus_name: req.session.user_name,
         pet_id: null,
@@ -94,6 +97,7 @@ router.post('/booking', async (req, res) => {
 
     // 3) แสดงหน้าเลือกบริการ
     res.render('users/booking', {
+      step: 2,
       pet_id: parseInt(pet_id),
       cus_id: parseInt(cus_id),
       pet: petResults[0],
@@ -106,6 +110,7 @@ router.post('/booking', async (req, res) => {
   } catch (error) {
     console.error('❌ POST /users/booking Error:', error);
     res.render('users/booking', {
+      step: 2,
       cus_id: req.session.cus_id,
       cus_name: req.session.user_name,
       pet_id: null,
@@ -142,7 +147,8 @@ router.get('/api/available-dates', async (req, res) => {
 });
 
 
-// ✅ API สำหรับดึงข้อมูลเวลาที่ให้บริการในวันที่เฉพาะ
+// ✅ แก้ไข API สำหรับดึงเวลาที่ว่าง ใน booking.js
+
 router.get('/api/available-times/:date', async (req, res) => {
   try {
     const { date } = req.params;
@@ -177,13 +183,24 @@ router.get('/api/available-times/:date', async (req, res) => {
     if (rows.length === 0) {
       return res.json({
         success: true,
+        times: [],  // ✅ เพิ่ม field นี้สำหรับ backward compatibility
         availableTimes: [],
         message: 'ไม่มีสัตวแพทย์ให้บริการในวันที่นี้'
       });
     }
 
+    // ดึงการจองที่มีอยู่แล้วในวันนี้
+    const [existingBookings] = await pool.query(
+      `SELECT time_booking, end_time, vet_id 
+       FROM booking 
+       WHERE booking_date = ? 
+       AND status IN ('รอการรักษา', 'กำลังรักษา')`,
+      [date]
+    );
+
     // สร้างช่วงเวลาที่สามารถจองได้ (เป็นช่วง 30 นาที)
     const availableTimes = [];
+    const simpleTimeList = []; // ✅ สำหรับ backward compatibility
     
     for (const vet of rows) {
       const startTime = dayjs(`${date} ${vet.start_time}`);
@@ -192,24 +209,51 @@ router.get('/api/available-times/:date', async (req, res) => {
       let currentTime = startTime;
       
       while (currentTime.isBefore(endTime)) {
-        availableTimes.push({
-          vet_id: vet.vet_id,
-          vet_name: vet.vet_name,
-          time: currentTime.format('HH:mm'),
-          display_time: currentTime.format('HH:mm'),
-          datetime: currentTime.format('YYYY-MM-DD HH:mm:ss')
+        const timeStr = currentTime.format('HH:mm');
+        const datetimeStr = currentTime.format('YYYY-MM-DD HH:mm:ss');
+        
+        // ตรวจสอบว่าเวลานี้ว่างหรือไม่
+        const isTimeAvailable = !existingBookings.some(booking => {
+          if (booking.vet_id !== vet.vet_id) return false;
+          
+          const bookingStart = dayjs(`${date} ${booking.time_booking}`);
+          const bookingEnd = booking.end_time 
+            ? dayjs(`${date} ${booking.end_time}`)
+            : bookingStart.add(30, 'minute'); // default 30 min if no end_time
+          
+          return currentTime.isBefore(bookingEnd) && currentTime.add(30, 'minute').isAfter(bookingStart);
         });
+        
+        if (isTimeAvailable) {
+          availableTimes.push({
+            vet_id: vet.vet_id,
+            vet_name: vet.vet_name,
+            time: timeStr,
+            display_time: timeStr,
+            datetime: datetimeStr
+          });
+          
+          // เพิ่มใน simple list (เฉพาะเวลา) สำหรับ backward compatibility
+          if (!simpleTimeList.includes(timeStr)) {
+            simpleTimeList.push(timeStr);
+          }
+        }
         
         // เพิ่มทุกๆ 30 นาที
         currentTime = currentTime.add(30, 'minute');
       }
     }
     
+    // เรียงเวลาจากน้อยไปมาก
+    availableTimes.sort((a, b) => a.time.localeCompare(b.time));
+    simpleTimeList.sort();
+    
     console.log(`✅ Available times for ${date}:`, availableTimes.length, 'slots');
     
     res.json({
       success: true,
-      availableTimes: availableTimes,
+      times: simpleTimeList,  // ✅ รูปแบบเก่า - array ของ string เวลา
+      availableTimes: availableTimes,  // ✅ รูปแบบใหม่ - array ของ object พร้อมข้อมูล vet
       date: date,
       count: availableTimes.length
     });
@@ -223,6 +267,57 @@ router.get('/api/available-times/:date', async (req, res) => {
     });
   }
 });
+
+// ✅ เพิ่ม API endpoint ใหม่สำหรับ admin ที่รองรับ service_id
+router.get('/admin/api/available-times', async (req, res) => {
+  try {
+    const { date, service_id } = req.query;
+
+    if (!date || !service_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'ต้องระบุ date และ service_id'
+      });
+    }
+
+    const userEmail = req.session?.user_email || 'wun@example.com';
+    const pool = getPoolPromise(userEmail);
+
+    // ดึงระยะเวลาของบริการ
+    const [serviceRows] = await pool.query(
+      `SELECT service_time FROM service_type WHERE service_id = ?`,
+      [service_id]
+    );
+
+    if (serviceRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'ไม่พบข้อมูลบริการ'
+      });
+    }
+
+    const serviceTime = serviceRows[0].service_time;
+    const [hours, minutes] = serviceTime.split(':').map(Number);
+    const serviceDurationMinutes = hours * 60 + minutes;
+
+    // เรียกใช้ logic เดียวกับ user API แต่คำนึงถึงระยะเวลาบริการ
+    // ... (logic เหมือนกับข้างบน แต่ปรับให้เหมาะกับ admin)
+
+    res.json({
+      success: true,
+      availableSlots: [], // ปรับให้เหมาะกับ admin format
+      serviceDurationMinutes
+    });
+
+  } catch (error) {
+    console.error('❌ Error in admin available-times API:', error);
+    res.status(500).json({
+      success: false,
+      message: 'เกิดข้อผิดพลาดในการดึงข้อมูลเวลา'
+    });
+  }
+});
+
 
 // ✅ API สำหรับตรวจสอบข้อมูล session (สำหรับ debugging)
 router.get('/api/session-info', (req, res) => {

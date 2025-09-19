@@ -4,249 +4,405 @@
   <meta charset="UTF-8">
   <title>ไชปราการสัตวแพทย์ - คิวการรักษา</title>
   <meta name="viewport" content="width=900, initial-scale=1">
-<%- include('../partials/link') %>
-  
+    <%- include('../partials/link') %>
 </head>
 <body>
-  <div class="container">
-<%- include('../partials/header_admin') %>
+  
+  <div class="container ">
+        <%- include('../partials/header_admin') %>
+    <!-- Header Section -->
+     <br>
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-3">
+           <i class="fas fa-calendar-alt text-primary2 text-2xl"></i>
 
-    <div style="display: flex;justify-content: space-between;">
-    <h2>คิวการรักษา</h2>
-    <input class="date-input-wrapper" type="date" id="SelectDate" value="<%= selectedDate %>">
-  </div><br>
-
-    <!-- ฟอร์มเพิ่มข้อมูล -->
-<input class="form-row form-row-small" type="text" id="cus_id" placeholder="ลำดับ">
-<input class="form-row" type="text" id="cus_name" placeholder="ชื่อลูกค้า">
-<input class="form-row" type="email" id="cus_email" placeholder="Email">
-<input class="form-row" type="text" id="cus_phon" placeholder="เบอร์โทร">
-<input class="form-row" type="date" id="qDate">
-<input class="form-row" type="time" id="qTime">
-<select class="form-row" name="status" id="qStatus">
-    <option value="">เลือกสถานะ</option>
-    <% statusOptions.forEach(status => { %>
-      <option value="<%= status %>"><%= status %></option>
-    <% }) %>
-  </select>
-  <button type="submit" id="btnSave"
-          class="btn-edit" >อัพเดต</button>
-
-
-    <!-- ตารางข้อมูล -->
-    <div class="table-responsive">
-      <table id="queueTable">
-        <thead>
-          <tr>
-            <th>ลำดับ</th>
-            <th>เบอร์โทร</th>
-            <th>สัตว์เลี้ยง</th>
-            <th>ชื่อลูกค้า</th>
-            <th>Email</th>
-            <th>วันที่</th>
-            <th>เวลา</th>
-            <th>สถานะ</th>
-            <th>การชำระเงิน</th>
-            <th>เคส</th>
-            <th>ชำระเงิน</th>
-          </tr>
-        </thead>
-        <tbody>
-  <% data.forEach((booking, i) => { %>
-    <tr class="clickable-row"
-        data-id="<%= booking.booking_id %>"
-        data-name="<%= booking.cus_name %>"
-        data-email="<%= booking.cus_email %>"
-        data-phon="<%= booking.cus_phon %>" 
-        data-date="<%= moment(booking.booking_date).format('YYYY-MM-DD') %>"
-        data-time="<%= booking.time_booking %>"
-        data-status="<%= booking.status %>">
-      
-      <!-- ใส่ลำดับ -->
-      <td><%= i + 1 %></td>
-      <td><%= booking.cus_phon %></td>
-      <td><%= booking.pet_name %></td>
-      <td><%= booking.cus_name %></td>
-      <td><%= booking.cus_email %></td>
-      <td><%= moment(booking.booking_date).format('DD/MM/YYYY') %></td>
-      <td><%= booking.time_booking %></td>
-      <td><%= booking.status %></td>
-            <td><%= booking.pay_status %></td>
-      <td><%= booking.booking_id %></td>
-      <td>
-<button class="btn-info" 
-        type="button" onclick="window.location.href='/admin/total_pay?booking_id=<%= booking.booking_id %>'">
-  ชำระเงิน
-</button>
-
-</td>
-
-    </tr>
-  <% }) %>
-</tbody>
-
-        <tbody>
-          
-        </tbody>
-      </table>
-    </div>
-    <% if (data) { %>
-  <h3>ข้อมูลวันที่ <%= selectedDate %></h3>
-<% } %>
-  </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('paid') === 'success') {
-      Swal.fire({
-        icon: 'success',
-        title: 'ชำระเงินสำเร็จ',
-        text: 'บันทึกการชำระเงินเรียบร้อยแล้ว',
-        confirmButtonText: 'ตกลง'
-      });
-    }
-  });
-  </script>
-  <script>
-      function toggleDropdown() {
-    const dropdown = document.getElementById('dropdownMenu');
-    dropdown.classList.toggle('show');
-  }
-
-// ปิด dropdown เมื่อคลิกข้างนอก
-window.addEventListener('click', function(e) {
-  const menu = document.querySelector('.menu');
-  if (!menu.contains(e.target)) {
-    document.getElementById('dropdownMenu').classList.remove('show');
-  }
-});
-;
-// ในส่วนของ JavaScript
-document.addEventListener("DOMContentLoaded", function() {
-    const dateInput = document.getElementById("SelectDate");
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">คิวการรักษา</h1>
+            <p class="text-gray-500 text-sm">จัดการคิวนัดหมายและสถานะการรักษา</p>
+          </div>
+        </div>
+        
+        <!-- Date Filter -->
+  <div class="flex items-center gap-3">
+  <form method="get" action="/veterinarian/pet_order" class="flex items-center gap-3">
+    <label for="SelectDate" class="font-medium text-gray-700 flex items-center gap-2">
+      <i class="fas fa-calendar-alt text-primary"></i> เลือกวันที่:
+    </label>
+    <input 
+      type="text" 
+      id="SelectDate" 
+      name="date"
+      value="<%= selectedDate %>"
+      class="border border-gray-300 rounded-xl px-4 py-2 shadow-sm focus:ring-2 focus:ring-primary cursor-pointer"
+      placeholder="เลือกวันที่..."
+    >
+  </form>
+</div>
     
-    // ตั้งค่าวันที่เริ่มต้นจาก URL (ถ้ามี)
-    const urlParams = new URLSearchParams(window.location.search);
-    const dateParam = urlParams.get('date');
-    if (dateParam) {
-        dateInput.value = dateParam;
+      </div>
+    </div>
+
+    <!-- Form Section -->
+<div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-8 gap-4 items-end">
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">ลำดับ</label>
+      <input class="form-group" type="text" id="cus_id" placeholder="ลำดับ" readonly>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อลูกค้า</label>
+      <input class="form-group" type="text" id="cus_name" placeholder="ชื่อลูกค้า" readonly>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+      <input class="form-group" type="email" id="cus_email" placeholder="Email" readonly>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">เบอร์โทร</label>
+      <input class="form-group" type="text" id="cus_phon" placeholder="เบอร์โทร" readonly>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">วันที่</label>
+      <input class="form-group" type="date" id="qDate" readonly>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">เวลา</label>
+      <input class="form-group" type="text" id="qTime" placeholder="เวลา" readonly>
+    </div>
+    
+    <!-- ✅ อันนี้แก้ไขได้ -->
+    <div class="lg:col-span-1">
+      <label class="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
+      <select class="form-input bg-white" name="status" id="qStatus">
+        <option value="">เลือกสถานะ</option>
+        <% statusOptions.forEach(status => { %>
+          <option value="<%= status %>"><%= status %></option>
+        <% }) %>
+      </select>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <button type="submit" id="btnSave" class="btn btn-primary w-full h-12">
+        <i class="fas fa-save mr-2"></i>อัพเดต
+      </button>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Table Section -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden table-shadow">
+      <div class="overflow-x-auto">
+        <table class="w-full" id="queueTable">
+          <!-- Header -->
+          <thead class="text-white">
+            <tr>
+              <th class="tb-p1">
+                <i class="fas fa-hashtag mr-2"></i>ลำดับ
+              </th>
+              <th class="tb-p2">
+                <i class="fas fa-phone mr-2"></i>เบอร์โทร
+              </th>
+              <th class="tb-p3">
+                <i class="fas fa-paw mr-2"></i>สัตว์เลี้ยง
+              </th>
+              <th class="tb-p4">
+                <i class="fas fa-user mr-2"></i>ชื่อลูกค้า
+              </th>
+
+
+              <th class="tb-b8  ">
+                <i class="fas fa-envelope mr-2"></i>อีเมล
+              </th>
+              <th class="tb-b6">
+                <i class="fas fa-calendar mr-2"></i>วันที่
+              </th>
+              <th class="tb-b5">
+                <i class="fas fa-clock mr-2"></i>เวลา
+              </th>
+              <th class="tb-b4">
+                <i class="fas fa-info-circle mr-2"></i>สถานะ
+              </th>
+              <th class="tb-b3">
+                การชำระเงิน
+              </th>
+              <th class="tb-b2">
+                </i>เคส
+              </th>
+              <th class="tb-b1">
+                ดำเนินการ
+              </th>
+            </tr>
+          </thead>
+          
+          <!-- Body -->
+          <tbody class="divide-y divide-gray-100">
+            <% data.forEach((booking, i) => { %>
+            <tr class="clickable-row border-b hover:bg-pink-50"
+                data-id="<%= booking.booking_id %>"
+                data-name="<%= booking.cus_name %>"
+                data-email="<%= booking.cus_email %>"
+                data-phon="<%= booking.cus_phon %>" 
+                data-date="<%= moment(booking.booking_date).format('YYYY-MM-DD') %>"
+                data-time="<%= booking.time_booking %>"
+                data-status="<%= booking.status %>">
+              
+              <!-- ลำดับ -->
+              <td class="px-4 py-4">
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center font-bold text-sm">
+                    <%= i + 1 %>
+                  </div>
+                </div>
+              </td>
+              
+              <!-- เบอร์โทร -->
+              <td class="px-4 py-4 text-gray-700 font-medium">
+                <div class="flex items-center">
+                  <i class="fas fa-phone text-gray-400 mr-2"></i>
+                  <%= booking.cus_phon %>
+                </div>
+              </td>
+              
+              <!-- สัตว์เลี้ยง -->
+              <td class="px-4 py-4">
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-800"><%= booking.pet_name %></span>
+                </div>
+              </td>
+              
+              <!-- ชื่อลูกค้า -->
+              <td class="px-4 py-4">
+                <div class="flex items-center">
+                  <span class="font-medium text-gray-800"><%= booking.cus_name %></span>
+                </div>
+              </td>
+              
+              <!-- อีเมล -->
+              <td class="px-4 py-4 text-gray-600 text-sm">
+                <div class="flex items-center">
+                  <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                  <%= booking.cus_email %>
+                </div>
+              </td>
+              
+              <!-- วันที่ -->
+              <td class="px-4 py-4">
+                <div class="flex items-center">
+                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                  <span class="bg-gray-100 px-3 py-1 rounded-lg text-sm font-medium">
+                    <%= moment(booking.booking_date).format('DD/MM/YYYY') %>
+                  </span>
+                </div>
+              </td>
+              
+              <!-- เวลา -->
+              <td class="px-4 py-4">
+                <div class="flex items-center">
+                  <i class="fas fa-clock text-gray-400 mr-2"></i>
+                  <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-lg text-sm font-medium">
+                    <%= booking.time_booking %>
+                  </span>
+                </div>
+              </td>
+              
+              <!-- สถานะ -->
+              <td class="px-4 py-4 text-center">
+                <% 
+                let statusClass = 'status-pending';
+                if (booking.status === 'เสร็จสิ้น' || booking.status === 'สำเร็จ') statusClass = 'status-success';
+                else if (booking.status === 'ยกเลิก' || booking.status === 'ไม่สำเร็จ') statusClass = 'status-failed';
+                else if (booking.status === 'รอการรักษา' || booking.status === 'รออนุมัติ') statusClass = 'status-wait';
+                %>
+                <span class="<%= statusClass %>">
+                  <%= booking.status %>
+                </span>
+              </td>
+              
+              <!-- การชำระเงิน -->
+              <td class="px-4 py-4 text-center">
+                <% 
+                let payStatusClass = 'bg-gray-100 text-gray-700';
+                if (booking.pay_status === 'ชำระแล้ว' || booking.pay_status === 'paid') payStatusClass = 'bg-green-100 text-green-700';
+                else if (booking.pay_status === 'ยังไม่ชำระ' || booking.pay_status === 'unpaid') payStatusClass = 'bg-red-100 text-red-700';
+                %>
+                <span class="<%= payStatusClass %> px-3 py-1 rounded-lg text-sm font-medium">
+                  <%= booking.pay_status %>
+                </span>
+              </td>
+              
+              <!-- เคส -->
+              <td class="px-4 py-4 text-center">
+                <div class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm font-mono font-bold">
+                  #<%= booking.booking_id %>
+                </div>
+              </td>
+              
+              <!-- ปุ่มชำระเงิน -->
+              <td class="px-4 py-4 text-center">
+                <button class="btn btn-add" 
+                        type="button" onclick="window.location.href='/admin/total_pay?booking_id=<%= booking.booking_id %>'">ชำระเงิน
+                  
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Footer -->
+      <div class="bg-gray-50 px-6 py-4 border-t">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-gray-600">
+            <i class="fas fa-info-circle"></i>
+            <span class="text-sm">คลิกที่แถวเพื่อแก้ไขข้อมูล</span>
+          </div>
+          <% if (data) { %>
+          <div class="flex items-center gap-2 text-gray-700">
+            <i class="fas fa-calendar-day text-pink-400"></i>
+            <span class="font-medium">ข้อมูลวันที่ <%= selectedDate %> | ทั้งหมด <%= data.length %> รายการ</span>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+ <script src="/js/calendar_select.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('paid') === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: 'ชำระเงินสำเร็จ',
+          text: 'บันทึกการชำระเงินเรียบร้อยแล้ว',
+          confirmButtonText: 'ตกลง'
+        });
+      }
+    });
+
+    function toggleDropdown() {
+      const dropdown = document.getElementById('dropdownMenu');
+      dropdown.classList.toggle('show');
     }
 
-    // เมื่อวันที่เปลี่ยน
-    dateInput.addEventListener("change", function() {
+    window.addEventListener('click', function(e) {
+      const menu = document.querySelector('.menu');
+      if (!menu.contains(e.target)) {
+        document.getElementById('dropdownMenu').classList.remove('show');
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const dateInput = document.getElementById("SelectDate");
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const dateParam = urlParams.get('date');
+      if (dateParam) {
+        dateInput.value = dateParam;
+      }
+
+      dateInput.addEventListener("change", function() {
         const selectedDate = this.value;
         window.location.href = `/admin/mg_queue?date=${selectedDate}`;
+      });
     });
-});
 
-//   function goToPay(bookingId) {
-//   if (bookingId) {
-//     // ส่ง bookingId ไปหน้า /admin/total_pay
-//     window.location.href = `/total_pay?booking_id=${encodeURIComponent(bookingId)}`;
-//   } else {
-//     alert("ไม่พบ Booking ID");
-//   }
-// }
+    document.getElementById('SelectDate').addEventListener('change', function() {
+      const selectedDate = this.value;
+      window.location.href = `/admin/mg_queue?date=${selectedDate}`;
+    });
 
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".clickable-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          const id = this.dataset.id;
+          const name = this.dataset.name;
+          const email = this.dataset.email;
+          const phon = this.dataset.phon;
+          const date = this.dataset.date;
+          const time = this.dataset.time;
+          const status = this.dataset.status;
+          
+          document.getElementById("cus_id").value = id;
+          document.getElementById("cus_name").value = name;
+          document.getElementById("cus_email").value = email;
+          document.getElementById("cus_phon").value = phon;
+          document.getElementById("qDate").value = date;
+          document.getElementById("qTime").value = time;
 
-// เมื่อเปลี่ยนวันที่ → โหลดหน้าใหม่พร้อม query date
-document.getElementById('SelectDate').addEventListener('change', function() {
-  const selectedDate = this.value;
-  window.location.href = `/admin/mg_queue?date=${selectedDate}`;
-});
-
-  // ใช้ event delegation สำหรับทุก <tr> ที่มี class="clickable-row"
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".clickable-row").forEach(function (row) {
-      row.addEventListener("click", function () {
-        // ดึงข้อมูลจาก data-* attributes
-        const id = this.dataset.id;
-        const name = this.dataset.name;
-        const email = this.dataset.email;
-        const phon = this.dataset.phon;
-        const date = this.dataset.date;
-        const time = this.dataset.time;
-        const status = this.dataset.status;
-        
-        // นำข้อมูลใส่ในฟอร์ม
-        document.getElementById("cus_id").value = id;
-        document.getElementById("cus_name").value = name;
-        document.getElementById("cus_email").value = email;
-        document.getElementById("cus_phon").value = phon;
-        document.getElementById("qDate").value = date;
-        document.getElementById("qTime").value = time;
-        // ตั้งค่า select status
-        const statusSelect = document.getElementById("qStatus");
-        for (let i = 0; i < statusSelect.options.length; i++) {
-          if (statusSelect.options[i].textContent === status || statusSelect.options[i].value.includes(status)) {
-            statusSelect.selectedIndex = i;
-            break;
+          const statusSelect = document.getElementById("qStatus");
+          for (let i = 0; i < statusSelect.options.length; i++) {
+            if (statusSelect.options[i].textContent === status || statusSelect.options[i].value.includes(status)) {
+              statusSelect.selectedIndex = i;
+              break;
+            }
           }
+        });
+      });
+    });
+
+    document.getElementById('btnSave').addEventListener('click', function () {
+      const data = {
+        booking_id: document.getElementById('cus_id').value,
+        status: document.getElementById('qStatus').value
+      };
+
+      if (!data.booking_id || !data.status) {
+        alert('กรุณาเลือกข้อมูลคิวและสถานะก่อนบันทึก');
+        return;
+      }
+
+      fetch('/admin/mg_queue/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            alert('อัปเดตข้อมูลสำเร็จ');
+            location.reload();
+          } else {
+            alert('เกิดข้อผิดพลาด: ' + (response.message || 'ไม่ทราบสาเหตุ'));
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+        });
+    });
+
+    document.querySelectorAll('.qStatus').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const bookingId = e.target.getAttribute('data-booking-id');
+        const newStatus = e.target.value;
+
+        if (!bookingId || !newStatus) return;
+
+        const res = await fetch('/admin/mg_queue/update-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_id: bookingId, status: newStatus })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('อัปเดตสถานะสำเร็จ');
+        } else {
+          alert('อัปเดตไม่สำเร็จ');
         }
       });
     });
-  });
-
-  
-
-  document.getElementById('btnSave').addEventListener('click', function () {
-  const data = {
-    booking_id: document.getElementById('cus_id').value,
-    status: document.getElementById('qStatus').value
-  };
-
-  if (!data.booking_id || !data.status) {
-    alert('กรุณาเลือกข้อมูลคิวและสถานะก่อนบันทึก');
-    return;
-  }
-
-  fetch('/admin/mg_queue/update-status', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-    .then(res => res.json())
-    .then(response => {
-      if (response.success) {
-        alert('อัปเดตข้อมูลสำเร็จ');
-        location.reload();
-      } else {
-        alert('เกิดข้อผิดพลาด: ' + (response.message || 'ไม่ทราบสาเหตุ'));
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
-    });
-});
-
-
-document.querySelectorAll('.qStatus').forEach(select => {
-  select.addEventListener('change', async (e) => {
-    const bookingId = e.target.getAttribute('data-booking-id');
-    const newStatus = e.target.value;
-
-    if (!bookingId || !newStatus) return;
-
-    const res = await fetch('/admin/mg_queue/update-status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ booking_id: bookingId, status: newStatus })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert('อัปเดตสถานะสำเร็จ');
-    } else {
-      alert('อัปเดตไม่สำเร็จ');
-    }
-  });
-});
-
-
-</script>
-
-
+  </script>
 </body>
 </html>

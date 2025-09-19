@@ -4,93 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>สัตว์เลี้ยงของฉัน | ไชยปราการสัตวแพทย์</title>
-<%- include('../partials/link') %>
-  <style>
-    /* styles เหมือนเดิม */
-  </style>
+  <%- include('../partials/link') %>
 </head>
-<body>
+<body class="min-h-screen  bg-body-page">
 <div class="container">
-<%- include('../partials/header') %>
+  <%- include('../partials/header') %>
 
-  <div class="progress">
-    <div class="progress-step active">
-      <div class="progress-circle">1</div>
-      <span>ข้อมูลสัตว์</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">2</div>
-      <span>เลือกบริการ-วัน</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">3</div>
-      <span>เวลา</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">4</div>
-      <span>ยืนยัน</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">5</div>
-      <span>เสร็จสิ้น</span>
-    </div>
-  </div>
+  <!-- Progress steps -->
+<%- include('../partials/numberBar', { step: 1 }) %>
 
-  <p>สัตว์เลี้ยงทั้งหมดของคุณ : <%= cus_name %> <!-- <(cus_id = <%= cus_id %>)--></p> 
+  <p class="text-lg">สัตว์เลี้ยงทั้งหมดของคุณ : <%= cus_name %></p> 
+
   <% if (error) { %>
-    <div class="error-message"><%= error %></div>
+    <div class="bg-red-100  border-red-400 text-red-700 px-4 py-2 rounded mb-4"><%= error %></div>
   <% } %>
 
-<% if (pets && pets.length > 0) { %>
-  <!-- <div class="pet-card" style="display: flex; flex-wrap: wrap; gap: 20px;"> -->
-    <% pets.forEach(function(pet) { %>
-      <form method="POST" action="/users/booking" class="pet-form" >
-        <div style="display: flex;">
-        <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
-        <input type="hidden" name="cus_id" value="<%= cus_id %>">
+  <% if (pets && pets.length > 0) { %>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% pets.forEach(function(pet) { %>
+        <form method="POST" action="/users/booking" class="info-card">
+          <input type="hidden" name="pet_id" value="<%= pet.pet_id %>">
+          <input type="hidden" name="cus_id" value="<%= cus_id %>">
 
-        <button type="submit" class="pet-card" style="width: 150%;">
-        <div style="display: flex; " >
-          <div class="image-preview" >
-            <img style="width: 150px; height: 150px; border-radius: 10px; object-fit: cover;"
-                 src="/uploads/<%= pet.img %>"
-                 alt="รูปภาพสัตว์เลี้ยง">
-          </div>
-          <div style="text-align: left;">
-            <strong class="text-primary"><%= pet.pet_name %></strong><br>
-    <p>
-    <i class="fas fa-venus-mars"></i> เพศ: <%= pet.pet_gender %><br>
-    <i class="fas fa-paw"></i> ประเภท: <%= pet.type || '-' %>
-  </p>
-</div>
+          <button type="submit" class="flex w-full gap-4 text-left">
+            <div class="w-36 h-36">
+              <img class="w-full h-full object-cover rounded-lg"
+                   src="/uploads/<%= pet.img %>"
+                   alt="รูปภาพสัตว์เลี้ยง">
+            </div>
 
-          </div>
-        </button>
+            <div class="flex flex-col justify-center">
+              <strong class="text-primary2 text-2xl"><%= pet.pet_name %></strong>
+              <p class="text-sm mt-1">
+                <i class="fas fa-venus-mars"></i> เพศ: <%= pet.pet_gender %><br>
+                <i class="fas fa-paw"></i> ประเภท: <%= pet.type || '-' %>
+              </p>
+            </div>
 
-        <a href="/users/edit_pet?pet_id=<%= pet.pet_id %>" 
-        class="btn-edit">
-  <center><div style="padding-top: 100%; height: 100px;"><i class="fas fa-edit">แก้ไขข้อมูล</i></div></center>
-</a></div>
-
-      </form>
-
-    <% }) %>
-  <!-- </div> -->
-<% }
-  else { %>
-  <p class="no-pets">ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
-  <br>
-<% } %>
-<a href="/users/insert_pet" class="button add-pet-btn">
-    <i class="fas fa-plus"></i> เพิ่มข้อมูลสัตว์เลี้ยง
+            <div class="">
+  <p class=" text-gray"><i class="fa-solid fa-hand-pointer text-gray fs-5 cursor-pointer"></i>  คลิก 1 ครั้ง</p></div>
+          </button><br>
+          <a href="/users/edit_pet?pet_id=<%= pet.pet_id %>" 
+             class="btn btn-edit text-center"
+             style="width: 100%;"
+             >
+             <i class="fas fa-edit"></i> แก้ไขข้อมูล
+          </a>
+        </form>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="text-gray-600">ยังไม่มีข้อมูลสัตว์เลี้ยง</p>
+  <% } %>
+<br>
+<a href="/users/insert_pet" class="w-full btn btn-info text-text">
+    <i class="fas fa-plus mr-2"></i> เพิ่มข้อมูลสัตว์เลี้ยง
+  </a><br><br>
+<a href="/users/main" class="w-full button btn-cancel">
+    <i class="fas fa-arrow-left"></i> กลับ
   </a>
-
+  
 </div>
+
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
     const update = urlParams.get('update');
-
     if (update === 'success') {
       Swal.fire({
         icon: 'success',
@@ -100,7 +79,7 @@
       });
     }
   });
+  
 </script>
-
 </body>
 </html>

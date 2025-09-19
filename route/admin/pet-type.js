@@ -4,30 +4,34 @@ import { requireLogin } from "../../middleware/auth.js";
 
 const router = express.Router();
 
-// แสดงหน้า pet_type
+// แสดงหน้า manage_pet_type
 router.get("/", requireLogin, async (req, res) => {
   try {
     const pool = getPoolPromise(req.session.user_email);
-    const [types] = await pool.query("SELECT type_id,type FROM pet_type ORDER BY type_id");
 
-    res.render("admin/manage_pet_type", { types });
+    const [types] = await pool.query("SELECT type_id, type FROM pet_type ORDER BY type_id");
+    const [services] = await pool.query("SELECT service_id, service_type, service_price, service_time FROM service_type ORDER BY service_id");
+
+    res.render("admin/manage_pet_type", { types, services });
   } catch (err) {
     console.error(err);
     res.status(500).send("Database Error: " + err.message);
   }
 });
+
 // เพิ่มประเภทสัตว์
-router.post("/add", requireLogin,async (req,res) => {
-  try{
-    const {type} = req.body;
+router.post("/add", requireLogin, async (req, res) => {
+  try {
+    const { type } = req.body;
     const pool = getPoolPromise(req.session.user_email);
-    await pool.query("INSERT INTO pet_type (type) VALUES (?)",[type]);
-     res.redirect("/admin/manage_pet_type");
-  }catch (err){
+    await pool.query("INSERT INTO pet_type (type) VALUES (?)", [type]);
+    res.redirect("/admin/manage_pet_type");
+  } catch (err) {
     console.error(err);
     res.status(500).send("Database Error: " + err.message);
   }
 });
+
 // แก้ไขประเภทสัตว์
 router.post("/update", requireLogin, async (req, res) => {
   try {
@@ -53,4 +57,5 @@ router.post("/delete", requireLogin, async (req, res) => {
     res.status(500).send("Database Error: " + err.message);
   }
 });
+
 export default router;

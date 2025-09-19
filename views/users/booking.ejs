@@ -5,349 +5,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>เลือกบริการ | ไชยปราการสัตวแพทย์</title>
 
-<%- include('../partials/link') %>
+  <%- include('../partials/link') %>
 
-  <!-- Flatpickr CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
-
-</head>
-<body>
+ </head>
+<body class="">
 <div class="container">
-  <!-- ส่วนหัว -->
-<%- include('../partials/header') %>
-  <!-- Progress Bar -->
-  <div class="progress">
-    <div class="progress-step">
-      <div class="progress-circle">1</div>
-      <span>ข้อมูลสัตว์</span>
-    </div>
-    <div class="progress-step active">
-      <div class="progress-circle">2</div>
-      <span>เลือกบริการ-วัน</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">3</div>
-      <span>เวลา</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">4</div>
-      <span>ยืนยัน</span>
-    </div>
-    <div class="progress-step">
-      <div class="progress-circle">5</div>
-      <span>เสร็จสิ้น</span>
-    </div>
-  </div>
 
-  <!-- ✅ แสดงข้อมูลสัตว์เลี้ยงที่เลือก -->
-  <% if (locals.pet && locals.pet_id) { %>
-    <div class="pet-card">
-      <h4><i class="fas fa-paw"></i> ข้อมูลสัตว์เลี้ยงที่เลือก</h4>
-      <div class="pet-details">
-        <strong><%= pet.pet_name %></strong> •
-        <span><i class="fas fa-venus-mars"></i> <%= pet.pet_gender %></span> •
-        <span><i class="fas fa-tag"></i> <%= pet.pet_type_name || 'ไม่ระบุ' %></span>
-      </div>
-    </div>
-  <% } else { %>
-    <div class="error-message">
-      <i class="fas fa-exclamation-triangle"></i> 
-      กรุณาเลือกสัตว์เลี้ยงก่อน
+  <!-- Header -->
+  <%- include('../partials/header') %>
+  <%- include('../partials/numberBar', { step: 2 }) %>
+
+  <!-- แสดง error ถ้าไม่มี pet -->
+  <% if (!(locals.pet && locals.pet_id)) { %>
+    <div class="error-message bg-red-50 border border-red-400 text-red p-4 rounded-lg text-center my-5">
+      <i class="fas fa-exclamation-triangle mr-2"></i> กรุณาเลือกสัตว์เลี้ยงก่อน
       <br><br>
-      <a href="/users/select_pet" class="btn-primary" style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none;">
-        <i class="fas fa-arrow-left"></i> กลับไปเลือกสัตว์เลี้ยง
+      <a href="/users/select_pet" class="btn btn-primary inline-block">
+        <i class="fas fa-arrow-left mr-2"></i> กลับไปเลือกสัตว์เลี้ยง
       </a>
     </div>
   <% } %>
 
-<strong>เลือกบริการที่ต้องการ <span style="color: red;">*</span></strong><br>
+  <h2 class="text-xl font-bold text-text mt-5 mb-3">
+    เลือกบริการที่ต้องการ <span class="text-red">*</span>
+  </h2>
+
   <!-- ฟอร์มเลือกบริการ -->
-  <form id="bookingForm" method="GET" action="/users/select_time">
+  <form id="bookingForm" method="POST" action="/users/confirm" class="space-y-6">
     <input type="hidden" name="pet_id" value="<%= pet_id %>">
     <input type="hidden" name="cus_id" value="<%= cus_id %>">
+<input type="hidden" name="time" id="selectedTime">
+
     <input type="hidden" id="selectedDateTime" name="datetime" value="">
     <input type="hidden" id="selectedVetId" name="vet_id" value="">
-    
-    <% if (services.length > 0) { %>
-      <% services.forEach(service => { %>
-        <div class="service-card">
-            <label for="service_<%= service.service_id %>">
-              <div style="display: flex;">
-              <input type="radio" id="service_<%= service.service_id %>" name="service_id" value="<%= service.service_id %>" required>
-              <div class="service-title"><%= service.service_type %>  <div class="service-price"><%= service.service_price.toLocaleString() %> บาท</div></div>
-              </div>
-            </label>
-        </div>
-        <div style="padding-bottom: 5px;"></div>
+
+    <!-- เลือกบริการ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-2  rounded-xl">
+      <% services.forEach(s => { %>
+        <label class="service-card flex flex-col p-4 border-2 rounded-lg cursor-pointer hover:bg-light-pink transition">
+
+          <div style="display: flex;">
+          <input type="radio" name="service_id" value="<%= s.service_id %>" class="mb-2" onchange="updateService()"><div style="padding-right: 3%;"></div>
+          <span class="text-lg font-bold text-primary2"><%= s.service_type %></span><div style="padding: 1%;"></div>
+          <span class="text-text mt-1"><%= s.service_price.toLocaleString() %> บาท</span>
+          </div>
+        </label>
       <% }) %>
-    <% } else { %>
-      <p style="text-align: center; color: #666;">ไม่พบข้อมูลบริการ</p>
-    <% } %>
-
-    <div style="text-align: left; display: flex;">
-      <strong>เลือกวันที่</strong><div style="color: red;">*</div>
-    </div>
-  
-    <!-- ✅ เพิ่มข้อความแสดงสถานะ -->
-    <div id="loadingMessage" class="loading-message">กำลังโหลดวันที่ที่ให้บริการ...</div>
-    <div id="errorMessage" class="error-message" style="display: none;"></div>
-  
-    <div class="date-input-wrapper">
-      <input type="text" id="bookingDate" name="date" placeholder="เลือกวันที่..." required >
-      <i class="fa-solid fa-calendar-days calendar-icon"></i>
     </div>
 
-    <!-- ✅ ส่วนเลือกเวลา -->
-    <!-- <div id="timeSelection" class="time-selection">
-      <div style="text-align: left; display: flex; margin-top: 15px;">
-        <strong>เลือกเวลา</strong><div style="color: red;">*</div>
-      </div>
-      <div id="timeLoading" class="time-loading" style="display: none;">
-        กำลังโหลดเวลาที่ให้บริการ...
-      </div>
-      <div id="timeError" class="error-message" style="display: none; margin-top: 10px;"></div>
-      <div id="timeSlotsContainer" class="time-slots-container"></div>
-    </div> -->
+  
 
-    <br>
-    <button type="submit" class="btn-primary" style="width: 100%; height: 60px;">
-      ถัดไป <i class="fas fa-arrow-right"></i> 
-    </button><br><br>
-    <button type="button" class="btn-cancel" style="width: 100%; height: 60px;" onclick="window.history.back()">
-      <i class="fas fa-arrow-left"></i>  ย้อนกลับ
-    </button><br>
-      
-  </form>
+<!-- เลือกวันที่ -->
+<div class="flex items-center gap-1 mt-4 mb-2">
+  <strong class="text-lg">เลือกวันที่</strong><span class="text-red">*</span>
+</div>
+<div class="relative">
+  <input 
+    type="date" 
+    id="SelectDate" 
+    name="date"
+    class="form-input border border-gray-300 rounded-lg px-3 py-2 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none"
+  />
+  <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary2 text-lg cursor-pointer">
+    <i class="fas fa-calendar-alt"></i>
+  </span>
+</div>
+<div id="loadingMessage" class="text-sm text-gray my-2">กำลังโหลดวันที่ที่ให้บริการ...</div>
+<div id="errorMessage" class="text-red-500 text-sm my-2 hidden"></div>
+
+<!-- แสดงข้อความแนะนำ -->
+<div id="instructionMessage" class="text-sm text-blue-600 my-2">
+  📌 เลือกประเภทบริการและวันที่เพื่อดูเวลาที่ว่าง
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+<!-- ปุ่มดูเวลาที่ว่าง -->
+<div id="timeSelectionSection" class="hidden mt-4">
+  <div class="flex items-center gap-1 mb-2">
+    <strong class="text-lg">เลือกเวลา</strong><span class="text-red">*</span>
+  </div>
+  <button type="button" 
+          id="showTimeBtn"
+          onclick="showAvailableTimes()" 
+          class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+    <i class="fas fa-clock"></i>
+    ดูเวลาที่ว่าง
+  </button>
   
-  let flatpickrInstance = null;
-  let availableTimesData = [];
-  
-  // ✅ ฟังก์ชันโหลดวันที่ที่ให้บริการจาก vet_work table
-  async function loadAvailableDates() {
-    const loadingMessage = document.getElementById('loadingMessage');
-    const errorMessage = document.getElementById('errorMessage');
-    const dateInput = document.getElementById('bookingDate');
+  <!-- แสดงเวลาที่เลือก -->
+  <div id="selectedTimeDisplay" class="hidden mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+    <span class="text-green-700">เวลาที่เลือก: <span id="selectedTimeText">-</span></span>
+  </div>
+</div>
+
+<!-- Modal เลือกเวลา -->
+<div id="timeModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
+    <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+      <i class="fas fa-clock text-primary"></i>
+      เลือกเวลา
+    </h3>
     
-    try {
-      // แสดงข้อความโหลด
-      loadingMessage.style.display = 'block';
-      errorMessage.style.display = 'none';
-      
-      // ดึงข้อมูลวันที่จาก API
-      const response = await fetch('/users/api/available-dates');
-      const data = await response.json();
-      
-      console.log('🔍 API Response:', data); // ✅ เพิ่ม debug
-      
-      if (!data.success) {
-        throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลได้');
-      }
-      
-      const availableDates = data.availableDates;
-      
-      console.log('📅 Available dates from API:', availableDates); // ✅ เพิ่ม debug
-      console.log('📊 Total available dates:', availableDates.length); // ✅ เพิ่ม debug
-      
-      // ซ่อนข้อความโหลด
-      loadingMessage.style.display = 'none';
-      
-      if (availableDates.length === 0) {
-        errorMessage.textContent = 'ขออภัย ไม่มีวันที่เปิดให้บริการในขณะนี้';
-        errorMessage.style.display = 'block';
-        return;
-      }
-      
-      // เปิดใช้งาน input และสร้าง Flatpickr
-      dateInput.disabled = false;
-      dateInput.placeholder = 'เลือกวันที่...';
-      
-      flatpickrInstance = flatpickr("#bookingDate", {
-        locale: "th",
-        dateFormat: "Y-m-d",
-        disableMobile: true,
-        altInput: true,
-        altFormat: "d/m/Y",
-        allowInput: false,
-        enable: availableDates, // ✅ ใช้วันที่จาก API โดยตรง
-        defaultDate: new Date(),
-
-        onReady: function(selectedDates, dateStr, instance) {
-          console.log('🗓️ Flatpickr initialized with dates:', availableDates);
-          if (availableDates.length === 0) {
-            instance.input.placeholder = 'ไม่มีวันที่ให้บริการ';
-          }
-        },
-
-        onChange: function(selectedDates, dateStr, instance) {
-          console.log('📅 Date selected:', dateStr);
-          if (dateStr && availableDates.includes(dateStr)) {
-            loadAvailableTimes(dateStr);
-          } else {
-            hideTimeSelection();
-          }
-        },
-
-        onValueUpdate: function(selectedDates, dateStr, instance) {
-          if (selectedDates.length === 0 && dateStr && !availableDates.includes(dateStr)) {
-            alert('วันที่ที่เลือกไม่เปิดให้บริการ กรุณาเลือกวันที่อื่น');
-          }
-        }
-      });
-      
-      console.log('✅ โหลดวันที่ให้บริการสำเร็จ:', availableDates);
-      
-    } catch (error) {
-      console.error('❌ Error loading available dates:', error);
-      loadingMessage.style.display = 'none';
-      errorMessage.textContent = 'เกิดข้อผิดพลาดในการโหลดวันที่ให้บริการ กรุณาลองใหม่อีกครั้ง';
-      errorMessage.style.display = 'block';
-    }
-  }
-
-  // ✅ ฟังก์ชันโหลดเวลาที่ให้บริการตามวันที่
-  async function loadAvailableTimes(selectedDate) {
-    const timeSelection = document.getElementById('timeSelection');
-    const timeLoading = document.getElementById('timeLoading');
-    const timeError = document.getElementById('timeError');
-    const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+    <!-- Loading state -->
+    <div id="timeModalLoading" class="text-center py-8 hidden">
+      <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+      <p>กำลังโหลดเวลาที่ว่าง...</p>
+    </div>
     
-    try {
-      // แสดงส่วนเลือกเวลา
-      timeSelection.style.display = 'block';
-      timeLoading.style.display = 'block';
-      timeError.style.display = 'none';
-      timeSlotsContainer.innerHTML = '';
-      
-      // ดึงข้อมูลเวลาจาก API
-      const response = await fetch(`/users/api/available-times/${selectedDate}`);
-      const data = await response.json();
-      
-      timeLoading.style.display = 'none';
-      
-      if (!data.success) {
-        throw new Error(data.message || 'ไม่สามารถโหลดข้อมูลเวลาได้');
-      }
-      
-      availableTimesData = data.availableTimes;
-      
-      if (availableTimesData.length === 0) {
-        timeError.textContent = 'ไม่มีช่วงเวลาให้บริการในวันที่นี้';
-        timeError.style.display = 'block';
-        return;
-      }
-      
-      // สร้าง time slots
-      renderTimeSlots();
-      
-      console.log(`✅ โหลดเวลาสำหรับวันที่ ${selectedDate} สำเร็จ:`, availableTimesData.length, 'slots');
-      
-    } catch (error) {
-      console.error('❌ Error loading available times:', error);
-      timeLoading.style.display = 'none';
-      timeError.textContent = 'เกิดข้อผิดพลาดในการโหลดเวลา กรุณาลองใหม่อีกครั้ง';
-      timeError.style.display = 'block';
-    }
-  }
+    <!-- container สำหรับปุ่มเวลา -->
+    <div id="timeSlotsContainer" class="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto"></div>
 
-  // ✅ ฟังก์ชันสร้าง time slots
-  function renderTimeSlots() {
-    const container = document.getElementById('timeSlotsContainer');
-    container.innerHTML = '';
-    
-    availableTimesData.forEach((timeSlot, index) => {
-      const slotElement = document.createElement('div');
-      slotElement.className = 'time-slot';
-      slotElement.dataset.datetime = timeSlot.datetime;
-      slotElement.dataset.vetId = timeSlot.vet_id;
+    <!-- ปุ่ม action -->
+    <div class="flex justify-end gap-2 mt-6">
+      <button type="button" onclick="closeTimeModal()" class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors">
+        ยกเลิก
+      </button>
+    </div>
+  </div>
+</div>
+    <!-- ปุ่มถัดไป / ย้อนกลับ -->
+    <div class="flex flex-col gap-3 mt-6">
       
-      slotElement.innerHTML = `
-        <div class="time-display">${timeSlot.display_time}</div>
-        <div class="vet-info">คุณหมอ ${timeSlot.vet_name}</div>
-      `;
-      
-      // เพิ่ม event listener
-      slotElement.addEventListener('click', function() {
-        // ลบ selection ออกจาก slot อื่นๆ
-        document.querySelectorAll('.time-slot.selected').forEach(slot => {
-          slot.classList.remove('selected');
-        });
-        
-        // เลือก slot นี้
-        this.classList.add('selected');
-        
-        // เก็บข้อมูลใน hidden fields
-        document.getElementById('selectedDateTime').value = this.dataset.datetime;
-        document.getElementById('selectedVetId').value = this.dataset.vetId;
-        
-        console.log('✅ Selected time:', {
-          datetime: this.dataset.datetime,
-          vet_id: this.dataset.vetId
-        });
-      });
-      
-      container.appendChild(slotElement);
-    });
-  }
+      <button type="button" class="btn-cancel w-full h-14 flex items-center justify-center gap-2"
+              onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i> ย้อนกลับ
+      </button>
+    </div>
+  </form>
 
-  // ✅ ฟังก์ชันซ่อนส่วนเลือกเวลา
-  // function hideTimeSelection() {
-  //   const timeSelection = document.getElementById('timeSelection');
-  //   timeSelection.style.display = 'none';
-    
-  //   // ลบข้อมูลที่เลือก
-  //   document.getElementById('selectedDateTime').value = '';
-  //   document.getElementById('selectedVetId').value = '';
-  //   availableTimesData = [];
-  // }
-  
-  // โหลดวันที่เมื่อหน้าเว็บโหลดเสร็จ
-  loadAvailableDates();
-
-  // ✅ Validate form - เพิ่มการตรวจสอบเวลาด้วย
-  document.getElementById("bookingForm").addEventListener("submit", function (e) {
-    const selectedService = document.querySelector('input[name="service_id"]:checked');
-    const selectedDate = document.getElementById("bookingDate").value;
-    const selectedDateTime = document.getElementById("selectedDateTime").value;
-    const selectedVetId = document.getElementById("selectedVetId").value;
-
-    // ตรวจสอบการเลือกบริการ
-    if (!selectedService) {
-      e.preventDefault();
-      alert("กรุณาเลือกบริการ");
-      return;
-    }
-
-    // ตรวจสอบการเลือกวันที่
-    if (!selectedDate) {
-      e.preventDefault();
-      alert("กรุณาเลือกวันที่");
-      return;
-    }
-
-    // ตรวจสอบการเลือกเวลา
-    // if (!selectedDateTime || !selectedVetId) {
-    //   e.preventDefault();
-    //   alert("กรุณาเลือกเวลาที่ต้องการจอง");
-    //   return;
-    // }
-
-    console.log('✅ Form validation passed:', {
-      service_id: selectedService.value,
-      date: selectedDate,
-      datetime: selectedDateTime,
-      vet_id: selectedVetId
-    });
-  });
-});
-</script>
+</div>
+<script src="/js/calendar_booking.js"></script>
 
 </body>
 </html>

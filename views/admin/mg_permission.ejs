@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดการสิทธิ์</title>
+  <%- include('../partials/link') %>
+</head>
+<body >
+  <div class="container mx-auto p-6">
+    <%- include('../partials/header_admin') %>
+
+    <!-- Header -->
+     <br>
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold mb-2 flex text-text items-center justify-center">
+        <i class="fas fa-user-shield text-primary2 mr-2"></i>จัดการสิทธิ์การเข้าถึง
+      </h1>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-primary/20">
+      
+      <div class="overflow-x-auto shadow-lg rounded-lg">
+        <table class="w-full min-w-[800px] border-collapse text-left bg-white rounded-lg">
+          <thead>
+  <tr>
+    <th class="px-6 py-4 text-lg font-semibold text-white bg-purple-600">
+      <i class="fas fa-hashtag mr-2"></i>Email
+    </th>
+    <th class="px-6 py-4 text-lg font-semibold text-white bg-purple-500">
+      <i class="fas fa-user mr-2"></i>ชื่อ
+    </th>
+    <th class="px-6 py-4 text-lg font-semibold text-white bg-purple-400">
+      <i class="fas fa-phone mr-2"></i>เบอร์โทร
+    </th>
+    <th class="px-6 py-4 text-lg font-semibold text-text bg-purple-300">
+      <i class="fas fa-key mr-2"></i>สิทธิ์
+    </th>
+    <th class="px-6 py-4 text-lg font-semibold text-text bg-purple-200">
+      <i class="fas fa-cogs mr-2"></i>จัดการ
+    </th>
+  </tr>
+</thead>
+
+          <tbody>
+            <% if (permissions && permissions.length > 0) { %>
+              <% permissions.forEach((p, index) => { %>
+                <tr class="<%= index % 2 === 0 ? 'bg-gray-50' : 'bg-white' %> hover:bg-light-pink transition-all duration-200">
+                  <td class="px-6 py-3"><%= p.access_email %></td>
+                  <td class="px-6 py-3"><%= p.cus_name %></td>
+                  <td class="px-6 py-3"><%= p.cus_phon %></td>
+                  <td class="px-6 py-3 font-medium text-text"><%= p.access_type %></td>
+                  <td class="px-6 py-3">
+                    <form action="/admin/mg_permission/update/<%= p.count_users %>" method="POST" class="flex gap-2">
+                      <select name="access_type" required
+                        class="form-select border-2 border-primary/30 rounded-lg px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary/30">
+                        <option value="customer" <%= p.access_type === "customer" ? "selected" : "" %>>Customer</option>
+                        <option value="admin" <%= p.access_type === "admin" ? "selected" : "" %>>Admin</option>
+                        <option value="veterinarian" <%= p.access_type === "veterinarian" ? "selected" : "" %>>Veterinarian</option>
+                      </select>
+                      <button type="submit" class="btn-success px-4 py-2 rounded-lg font-semibold hover:scale-105 hover:shadow-lg transition-all duration-300">
+                        บันทึก
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="text-center py-6 text-gray-500">ไม่มีข้อมูลสิทธิ์</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+  </div>
+</body>
+</html>

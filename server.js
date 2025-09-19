@@ -17,6 +17,7 @@ const __dirname = path.dirname(__filename);
 
 
 const app = express();
+app.use(express.static(path.join(process.cwd(), "public")));
 
 // Middleware สำหรับรับ JSON และ form
 app.use(express.json()); // สำหรับ parse JSON
@@ -82,14 +83,28 @@ import queueRoutes from "./route/users/queue.js";
 app.use("/users/queue", queueRoutes);
 
 
-
-
-import petTypeRouter from "./route/admin/pet_type.js";
+// Import routers
+import petTypeRouter from "./route/admin/pet-type.js";
 app.use("/admin/manage_pet_type", petTypeRouter);
 
 import servicePetRouter from "./route/admin/service-pet.js";
-// ✅ กำหนด path /admin/manage_service_pet
 app.use("/admin/manage_service_pet", servicePetRouter);
+import treatmentHistoryRouter from "./route/admin/treatmentHistory.js";
+app.use("/admin/treatment_history", treatmentHistoryRouter);
+
+import medicationHistoryRouter from "./route/admin/medicationHistory.js";
+app.use("/admin/medication_history", medicationHistoryRouter);
+
+import confirmAMRouter from "./route/admin/confirmAM.js";
+app.use("/admin/confirm_AM", confirmAMRouter);
+
+
+import vet_treatmentHistoryRouter from "./route/vet/treatmentHistory.js";
+import vet_medicationHistoryRouter from "./route/vet/medicationHistory.js";
+app.use("/veterinarian/history_treatment", vet_treatmentHistoryRouter);
+app.use("/veterinarian/history_medication", vet_medicationHistoryRouter);
+
+
 
 
 import totalPayRouter from './route/admin/totalPayments.js'; 
@@ -112,8 +127,9 @@ import manageMedicationRoutes from "./route/vet/manageMedication.js";
 import reportRoutes from "./route/vet/report.js";
 import workDayRoutes from "./route/vet/workDays.js";
 import editHistoryRouter from "./route/vet/editHistory.js";
-import managePermissionRouter from "./route/vet/managePermission.js";
 
+import managePermissionRouter from "./route/admin/managePermission.js";
+app.use("/admin/mg_permission", managePermissionRouter);
 
 
 // ...
@@ -146,7 +162,8 @@ app.use("/veterinarian/manage_medication", manageMedicationRoutes);
 app.use("/veterinarian/report", reportRoutes);
 app.use("/veterinarian/work_days", workDayRoutes);
 app.use("/veterinarian/edit_history", editHistoryRouter);
-app.use("/veterinarian/mg_permission", managePermissionRouter);
+
+
 
 
 app.get("/users/verify-email", async (req, res) => {
@@ -219,7 +236,7 @@ app.post('/login', async (req, res) => {
 
     // เชื่อมต่อฐานข้อมูล
     const pool = getPoolPromise(email);
-    console.log("✅ Pool selected for:", email);
+    // console.log("✅ Pool selected for:", email);
 
     // 1️⃣ ตรวจสอบ permission
     console.log("🔍 Checking permission table...");
@@ -228,7 +245,7 @@ app.post('/login', async (req, res) => {
       [email]
     );
     
-    console.log("📊 Permission results:", permissionResults);
+    // console.log("📊 Permission results:", permissionResults);
     
     if (!permissionResults || permissionResults.length === 0) {
       console.log("❌ No user found in permission table");
@@ -450,17 +467,15 @@ app.post('/booking', requireLogin, async (req, res) => {
   }
 });
 
-
 // หน้า HTML
-// หน้า HTML
-app.get('/admin/manage_service_pet', (req, res) => {
-  // ตรวจสอบสิทธิ์ admin
-  if (!req.session.user_email) return res.redirect('/login');
+// app.get('/admin/manage_service_pet', (req, res) => {
+//   // ตรวจสอบสิทธิ์ admin
+//   if (!req.session.user_email) return res.redirect('/login');
 
-  res.render('admin/manage_service_pet', {
-    user: req.session.user_email
-  });
-});
+//   res.render('admin/manage_service_pet', {
+//     user: req.session.user_email
+//   });
+// });
 
 
 // =====================================================================================================================

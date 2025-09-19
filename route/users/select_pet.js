@@ -28,6 +28,7 @@ router.get("/", requireLogin, async (req, res) => {
     if (cusRows.length === 0) {
       console.log('❌ Customer not found for email:', user_email);
       return res.render("users/select_pet", {
+        step: 1,
         cus_id: null,
         cus_name: "",
         pets: [],
@@ -56,9 +57,9 @@ router.get("/", requireLogin, async (req, res) => {
       [cus_id]
     );
 
-    console.log(`✅ Found ${petRows.length} pets for customer ${cus_name} (ID: ${cus_id})`);
 
     res.render("users/select_pet", {
+
       cus_id: cus_id,
       cus_name: cus_name,
       pets: petRows,
@@ -68,6 +69,7 @@ router.get("/", requireLogin, async (req, res) => {
   } catch (err) {
     console.error("❌ Error GET /users/select_pet:", err);
     res.render("users/select_pet", {
+
       cus_id: req.session.cus_id || null,
       cus_name: req.session.user_name || "",
       pets: [],
@@ -98,7 +100,6 @@ router.post("/", requireLogin, async (req, res) => {
       return res.redirect('/users/select_pet?error=invalid_pet');
     }
 
-    console.log(`✅ Pet selected: ${petCheck[0].pet_name} (ID: ${pet_id}) by customer ${cus_id}`);
 
     // ส่งต่อไป booking route
     res.redirect(`/users/booking?pet_id=${pet_id}&cus_id=${cus_id}`);

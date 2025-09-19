@@ -175,9 +175,9 @@ router.post('/', requireLogin, async (req, res) => {
       [payment_method, booking_id]
     );
 
-    console.log(`✅ อัปเดตชำระเงิน booking_id=${booking_id}, method=${payment_method}`);
+    // console.log(`✅ อัปเดตชำระเงิน booking_id=${booking_id}, method=${payment_method}`);
 
-    res.redirect('/admin/mg_queue?paid=success');
+    res.redirect('/admin/mg_queue');
 
   } catch (err) {
     console.error("❌ Payment save error:", err);

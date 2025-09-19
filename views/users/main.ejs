@@ -1,49 +1,68 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>หน้าแรก - ไชยปราการสัตวแพทย์</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/output.css">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ไชยปราการสัตวแพทย์</title>
+    <%- include('../partials/link') %>
  
 </head>
-
-<body>
-<center>
-<div class="container">
-
-<%- include('../partials/header') %>
+<body class="min-h-screen  bg-body-page">
+    
+  <!-- Header -->
 
 
-<!-- ใน views/users/main.ejs -->
-  สวัสดีคุณ <%= user_name %>!
+  <!-- Main Container -->
+  <div class="container">
+    <%- include('../partials/header') %>
+    <!-- Hero Section -->
+    <div class="relative h-100 hero-bg overflow-hidden">
+      <!-- Background Image -->
+<div class="relative w-full h-96 md:h-[400px] lg:h-[500px] overflow-hidden">
+  <div class="absolute inset-0 opacity-100">
+    <img src="/images/dog.jpg" alt="Cat" class="w-full h-full object-cover">
+  </div>
+      
+<div class="relative z-10 p-6 h-full justify-center text-white">
+    <h2 class="font-bold mb-4 leading-tight text-lg sm:text-xl md:text-2xl lg:text-3xl">
+    
+  สวัสดีคุณ <%= cus_name %>!
+</h2>
+        <div class="space-y-2 text-xs sm:text-sm md:text-base lg:text-lg opacity-90 leading-relaxed">
+          <p>ยินดีต้อนรับสู่ ไชยปราการสัตวแพทย์!</p>
+          <p>เราพร้อมดูแลเพื่อนสี่ขาของคุณ</p>
+          <p>ด้วยความรักและ</p>
+          <p>ความเชี่ยวชาญเสมอ</p>
+        </div>
+      </div>
+      <!-- Action Buttons -->
+      <div class="absolute bottom-6 left-6 right-6 flex gap-3 z-20">
+        <button class="btn btn-cancel flex-1 h-15"
+            onclick="window.location.href='/users/queue'">
+            <i class="fas fa-user mr-2"></i> ดูคิวของท่าน
+          </button>
 
+          <!-- ปุ่มจองคิว -->
+          <button class="btn btn-primary flex-1 h-15"
+            onclick="window.location.href='/users/select_pet?cus_id=<%= cus_id %>'">
+            <i class="fas fa-calendar mr-2"></i> จองบริการ
+          </button>
+        
+      </div>
+    </div>
 
-
-  <div>
-    <img style="width: 100%;" src="/images/cat_dotor.jpg" alt="แมวสัตวแพทย์" loading="lazy">
+    <!-- About Section -->
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-primary2 mb-4">เกี่ยวกับเรา</h3>
+      <div class="space-y-2 text-lg  text-gray-600 leading-relaxed">
+        <p><span class="font-medium text-primary2">เพจ :</span> ไชยปราการสัตวแพทย์</p>
+        <p><span class="font-medium text-primary2">อีเมล :</span> <span >hospitalA@gmail.com</span></p>
+        <p><span class="font-medium text-primary2">เบอร์โทร :</span> 0123456789</p>
+      </div>
+    </div>
   </div>
 
-  <div class="menu-options" style="margin-top: 20px; width: 100%;">
-    <button class="bg-secondary from-secondary to-pink-300 text-white px-6 py-3 rounded-lg hover:scale-105 transition-transform"
-        onclick="window.location.href='/users/select_pet?cus_id=<%= cus_id %>'">
-  <i class="fas fa-calendar"></i> จองคิวบริการ
-</button>
 
-<br><div style="padding-bottom:10px;"></div>
-    <button class="bg-secondary from-secondary to-pink-300 text-white px-6 py-3 rounded-lg hover:scale-105 transition-transform"
-      onclick="window.location.href='/users/queue'">
-      <i class="fas fa-user" style="color: #fff;"></i> ดูคิวของท่าน
-    </button>
-  </div>
-</div>
-</center>
 
-  <!-- <script src="/js/menu.js"></script> -->
 </body>
 </html>

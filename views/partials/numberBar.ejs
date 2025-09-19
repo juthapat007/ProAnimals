@@ -1,0 +1,65 @@
+<%
+  // กำหนด current step (รับจาก page ที่เรียกใช้)
+  const currentStep = typeof step !== 'undefined' ? step : 1;
+  
+  // กำหนดข้อมูล steps
+  const steps = [
+    { number: 1, label: 'ข้อมูลสัตว์' },
+    { number: 2, label: 'บริการ-วัน' },
+    { number: 3, label: 'ยืนยัน' },
+    { number: 4, label: 'เสร็จสิ้น' }
+  ];
+%>
+
+<div class="flex justify-between items-center mb-6">
+  <% steps.forEach((stepItem, index) => { %>
+    <div class="flex-1 flex flex-col items-center">
+      <!-- วงกลมของแต่ละ step -->
+      <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold transition-all duration-300 <%= stepItem.number <= currentStep ? 'completed-step' : 'inactive-step' %>">
+        <%= stepItem.number %>
+      </div>
+      <!-- ข้อความใต้วงกลม -->
+      <span class="mt-2 text-sm text-center <%= stepItem.number <= currentStep ? 'text-gray-800 font-medium' : 'text-gray-500' %>">
+        <%= stepItem.label %>
+      </span>
+    </div>
+    
+    <!-- เส้นเชื่อม (ไม่แสดงหลัง step สุดท้าย) -->
+    <% if (index < steps.length - 1) { %>
+      <div class="flex-1 h-1 mx-2 rounded transition-all duration-300 <%= stepItem.number < currentStep ? 'completed-line' : 'inactive-line' %>"></div>
+    <% } %>
+  <% }) %>
+</div>
+
+<style>
+  /* Step ที่เสร็จแล้วหรือกำลังทำอยู่ */
+  .completed-step {
+    background-color: #FF9AA2;
+    box-shadow: 0 2px 8px rgba(255, 154, 162, 0.3);
+    transform: scale(1.1);
+  }
+  
+  /* Step ที่ยังไม่ถึง */
+  .inactive-step {
+    background-color: #D1D5DB;
+    color: #6B7280;
+  }
+  
+  /* เส้นเชื่อมที่เสร็จแล้ว */
+  .completed-line {
+    background: linear-gradient(90deg, #FF9AA2, #FFB7BE);
+  }
+  
+  /* เส้นเชื่อมที่ยังไม่เสร็จ */
+  .inactive-line {
+    background-color: #E5E7EB;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .w-10 { width: 2rem; height: 2rem; }
+    .text-sm { font-size: 0.75rem; }
+    .mt-2 { margin-top: 0.25rem; }
+    .mx-2 { margin-left: 0.25rem; margin-right: 0.25rem; }
+  }
+</style>

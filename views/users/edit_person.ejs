@@ -3,53 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>แก้ไขข้อมูลส่วนตัว</title>
+  <title>แก้ไขข้อมูลส่วนตัว | ไชยปราการสัตวแพทย์</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-        <%- include('../partials/link') %>
+  <%- include('../partials/link') %>
 </head>
-
 <body>
-  <div class="container" style="width: 800px;">
-      <%- include('../partials/header') %>
 
-    <div class="title"><i class="fas fa-user-circle"></i> แก้ไขข้อมูลส่วนตัว</div>
-<form method="POST" action="/users/edit_person" enctype="multipart/form-data">
-  <input type="hidden" name="cus_id" value="<%= customer.cus_id %>">
-  <p><%= customer.cus_email %></p>
-<input type="hidden" name="cus_email" value="<%= customer.cus_email %>">
+<div class="container max-w-2xl bg-white rounded-2xl shadow-lg p-6">
+  <%- include('../partials/header') %>
 
-  <div class="upload-icon">
-    <% if (customer.cus_img && customer.cus_img.trim() !== '') { %>
-      <img id="preview-image" src="/uploads/<%= customer.cus_img %>" alt="รูปprofile" class="image-preview">
-    <% } else { %>
-      <img id="preview-image" src="/uploads/default.png" alt="รูปprofile" class="image-preview">
-    <% } %>
-    <label class="camera-icon">
-      <i class="fas fa-camera"></i>
-      <input type="file" name="profile_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)">
-    </label>
-  </div>
+  <!-- Title -->
+  <h3 class="text-2xl font-semibold text-text flex items-center gap-2 mb-8">
+    <i class="fas fa-user-circle text-primary2"></i> แก้ไขข้อมูลส่วนตัว
+  </h3>
 
-  <div class="form-group">
-    <label for="name">ชื่อ</label>
-    <input type="text" id="name" name="cus_name" value="<%= customer.cus_name %>" required>
-  </div>
+  <!-- Form -->
+  <form class="flex flex-col md:flex-row gap-8" method="POST" action="/users/edit_person" enctype="multipart/form-data">
+    <input type="hidden" name="cus_id" value="<%= customer.cus_id %>">
+    <input type="hidden" name="cus_email" value="<%= customer.cus_email %>">
 
-  <div class="form-group">
-    <label for="phone">เบอร์โทร</label>
-    <input type="text" id="phone" name="cus_phon" value="<%= customer.cus_phon %>">
-  </div>
+    <!-- Profile Image -->
+    <div class="flex-shrink-0 relative w-40 h-40 md:w-48 md:h-48 mx-auto">
+      <% if (customer.cus_img && customer.cus_img.trim() !== '') { %>
+        <img id="preview-image" src="/uploads/<%= customer.cus_img %>" alt="รูปโปรไฟล์"
+             class="h-full object-cover form-input" />
+      <% } else { %>
+        <img id="preview-image" src="/uploads/default.png" alt="รูปโปรไฟล์"
+             class="h-full object-cover" />
+      <% } %>
 
-  <strong>อีเมล </strong><%= customer.cus_email %>
+      <!-- Camera Icon -->
+      <label for="profile_img" class="absolute bottom-2 right-2 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-secondary transition" style="background-color: #FF9AA2;">
+        <i class="fas fa-camera"></i>
+      </label>
+      <input type="file" name="profile_img" id="profile_img" accept="image/*" onchange="previewSelectedImage(this)" class="hidden">
+    </div>
 
-  <div class="btn-group">
-    <button type="button" class="btn-cancel" onclick="window.location.href='/users/main'">ยกเลิก</button>
-    <button type="submit" class="btn-primary">บันทึก</button>
-  </div>
-</form>
+    <!-- User Info -->
+    <div class="flex-1 flex flex-col">
+      <!-- Name -->
+      <div class="form-group mb-4">
+        <label for="name" class="font-semibold text-lg">ชื่อ</label>
+        <input type="text" clss="form-group" id="name" name="cus_name" value="<%= customer.cus_name %>" required class="form-input w-full">
+      </div>
 
-  </div>
-  <script>
+      <!-- Phone -->
+      <div class="form-group mb-4">
+        <label for="phone" class="font-semibold">เบอร์โทร</label>
+        <input type="text" id="phone" name="cus_phon" value="<%= customer.cus_phon %>" class="form-input w-full">
+      </div>
+
+      <!-- Email -->
+      <div class="form-group mb-4">
+        <label class="font-semibold">อีเมล</label>
+        <p class="text-gray-700"><%= customer.cus_email %></p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-between mt-6 gap-4">
+  <button type="button" 
+          class="btn btn-cancel w-1/2 py-3" 
+          onclick="window.location.href='/users/select_pet'">
+    ยกเลิก
+  </button>
+  <button type="submit" 
+          class="btn btn-primary w-1/2 py-3">
+    <i class="fas fa-save mr-2"></i> บันทึก
+  </button>
+</div>
+
+    </div>
+  </form>
+</div>
+
+<script>
   function previewSelectedImage(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
@@ -59,18 +86,8 @@
       reader.readAsDataURL(input.files[0]);
     }
   }
-  function toggleDropdown() {
-    const dropdown = document.getElementById('dropdownMenu');
-    dropdown.classList.toggle('show');
-  }
 
-  // ปิด dropdown เมื่อคลิกข้างนอก
-  window.addEventListener('click', function(e) {
-    const menu = document.querySelector('.menu');
-    if (!menu.contains(e.target)) {
-      document.getElementById('dropdownMenu').classList.remove('show');
-    }
-  });
+ 
 </script>
 </body>
 </html>

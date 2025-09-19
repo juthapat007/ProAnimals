@@ -15,11 +15,10 @@ router.get("/", requireLogin, async (req, res) => {
       WHERE access_type = 'customer';
     `);
 
-    res.render("veterinarian/mg_permission", {
-      permissions, // ส่งไปหน้า ejs
-      user: req.session, // เผื่อเอาไปใช้โชว์ชื่อ
-        vetId: req.session.vet_id  // สมมุติคุณเก็บ vet_id ไว้ใน session
-    });
+res.render("admin/mg_permission", {
+  permissions,
+  user: req.session
+});
   } catch (err) {
     console.error("❌ Error fetching permissions:", err);
     res.status(500).send("เกิดข้อผิดพลาดในการดึงข้อมูลสิทธิ์");
@@ -92,10 +91,9 @@ router.post("/update/:id", requireLogin, async (req, res) => {
       }
     }
 
-    res.render("veterinarian/mg_permission", {
+res.render("admin/mg_permission", {
   permissions,
-  user: req.session,
-  vetId: req.session.vet_id  // สมมุติคุณเก็บ vet_id ไว้ใน session
+  user: req.session
 });
 
   } catch (err) {

@@ -1,31 +1,49 @@
-<!-- views/partials/header.ejs -->
-<div class="header" style="display: flex; color: #FF9AA2; justify-content: space-between; align-items: center;">
-  <h1>ไชยปราการสัตวแพทย์</h1>
+<!-- views/partials/header_vet.ejs -->
+<div class="header flex justify-between items-center px-5 py-3 border-b-2 border-primary2 relative">
+  <h1 class="text-xl md:text-2xl font-bold text-primary2">ไชยปราการสัตวแพทย์</h1>
 
-  <div class="menu">
-    <i class="fa-solid fa-house" onclick="window.location.href='/veterinarian/pet_order'"></i>
-    <i class="fa-solid fa-capsules" onclick="window.location.href='/veterinarian/manage_medication'"></i>
-    <i class="fa-solid fa-chart-line" onclick="window.location.href='/veterinarian/report'"></i>
-        <i class="fas fa-user-cog" onclick="window.location.href='/veterinarian/mg_permission'"></i>
-    <i class="fa-solid fa-calendar-alt" 
+  <div class="menu flex items-center gap-4 relative">
+    <!-- หน้าแรก -->
+    <i class="fa-solid fa-house text-lg" onclick="window.location.href='/veterinarian/pet_order'"></i>
+    <i class="fas fa-pills text-lg" onclick="window.location.href='/veterinarian/manage_medication'"></i>
+    <i class="fa-solid fa-calendar-alt text-lg" 
    style="cursor: pointer;" 
    onclick="window.location.href='/veterinarian/work_days?vet_id=<%= vetId %>'">
 </i>
 
+    <!-- Hamburger / Icon bar -->
+    <i class="fas fa-bars text-lg text-primary2 hover:text-pink-400 cursor-pointer" id="hamburgerBtn"></i>
 
-    <div class="hamburger" onclick="toggleDropdown()">
-      <i class="fas fa-bars"></i>
-    </div>
-
-    <div class="dropdown" id="dropdownMenu">
-      <a href="/veterinarian/report"><i class="fa-solid fa-chart-line" ></i>รายงานการเข้ารักษา</a>
-      <a href="/veterinarian/medication_history"><i class="fas fa-history"></i> ประวัติการจ่ายยาา</a>
-      <a href="/veterinarian/#"><i class="fas fa-history"></i> ประวัติการรักษา</a>
-      <a href="/logout" onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')">
-  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-</a>
-
+    <!-- Dropdown -->
+    <div id="dropdownMenu"
+         class="absolute top-full right-0 mt-4 w-48 bg-white border border-primary2 rounded-lg shadow-lg hidden flex-col z-50">
+      
+      <!-- รายงานการเข้ารักษา -->
+      <a href="/veterinarian/report"
+         class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text hover:bg-primary/20 hover:text-primary2 hover:bg-red-100">
+        <i class="fa-solid fa-chart-line text-primary2"></i> รายงานการเข้ารักษา
+      </a>
+      
+      <!-- ประวัติการจ่ายยา -->
+      <a href="/veterinarian/history_medication"
+         class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text hover:bg-primary/20 hover:text-primary2 hover:bg-red-100">
+        <i class="fas fa-pills text-sm text-primary2"></i> ประวัติการจ่ายยา
+      </a>
+      
+      <!-- ประวัติการรักษา -->
+      <a href="/veterinarian/history_treatment"
+         class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-text hover:bg-primary/20 hover:text-primary2 hover:bg-red-100">
+        <i class="fas fa-history text-primary2"></i> ประวัติการรักษา
+      </a>
+      
+      <!-- ออกจากระบบ -->
+      <a href="/logout"
+         onclick="return confirm('คุณแน่ใจต้องการออกจากระบบ?')"
+         class="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-100">
+        <i class="fas fa-sign-out-alt text-red-600"></i> ออกจากระบบ
+      </a>
     </div>
   </div>
-</div>
+</div><br>
+
 <script src="/js/menu.js" defer></script>

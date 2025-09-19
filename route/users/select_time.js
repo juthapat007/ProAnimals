@@ -41,7 +41,7 @@ const serviceTimeToMinutes = (serviceTime) => {
 const generateTimeSlots = (serviceDurationMinutes) => {
   const CLINIC_START = '09:00';
   const CLINIC_END = '18:00';
-  const STEP_MINUTES = 60; // 1 hour steps
+  const STEP_MINUTES = 30; // 1 hour steps
   
   const slots = [];
   const startMinutes = timeToMinutes(CLINIC_START);

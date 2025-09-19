@@ -1,37 +1,137 @@
-<!-- public/incex.html -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&family=Prompt:wght@300;400;500;700&display=swap">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
 
   <title>เข้าสู่ระบบ | ไชยปราการสัตวแพทย์</title>
+
+  <style>
+   
+
+    .container {
+      background: #fff;
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.8s ease;
+    }
+
+    
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    input {
+      width: 95%;
+      padding: 0.75rem ;
+      border: 1px solid #ddd;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      /* transition: border 0.3s; */
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #ff9aa2;
+      box-shadow: 0 0 0 3px rgba(255,154,162,0.3);
+    }
+
+    .button {
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary {
+      background: #ff9aa2;
+      color: white;
+      
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255,111,145,0.3);
+    }
+
+    .btn-cancel {
+      background: #ffffff;
+      color: #FF5B1A;
+      margin-top: 1rem;
+      border: 1px solid #FF5B1A;
+      text-align: center;
+    }
+
+    .btn-cancel:hover {
+      background: #e5b7c3;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(241,197,208,0.3);
+    }
+
+    .extra-links {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .forgot-link {
+      display: block;
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: #666;
+      text-decoration: none;
+    }
+
+    .forgot-link:hover {
+      text-decoration: underline;
+      color: #ff6f91;
+    }
+  </style>
 </head>
 <body>
+  
   <div class="container">
-    <div class="login-header">
-      <h1>ไชยปราการสัตวแพทย์</h1>
-    </div>
+    <center>
+    <div class="login-header ">
+      <h2> ไชยปราการสัตวแพทย์</h2>
+    </div></center>
     
-    <form class="login-form" action="/login" method="POST">
-      <div class="form-group">
+    <form action="/login" method="POST">
+      <div class="">
         <label for="email">อีเมล</label>
         <input type="email" name="access_email" placeholder="กรุณากรอกอีเมล" required>
       </div>
       
-      <div class="form-group">
+      <div class="">
         <label for="password">รหัสผ่าน</label>
-        <input type="password" name="access_pwd" placeholder="กรุณากรอกรหัสผ่าน" required >
+        <input type="password" name="access_pwd" placeholder="กรุณากรอกรหัสผ่าน" required>
       </div>
-      <button type="submit" class="login-btn">เข้าสู่ระบบ</button>
-      
+     <br>
+      <button type="submit" class="button btn-primary">เข้าสู่ระบบ</button>
     </form>
-    <a href="/users/register"><button class="button">สมัครสมาชิก</button></a>
-    <a href="/users/forgot-password">ลืมรหัสผ่าน</a>
+
+    <a href="/users/register" ><button class="button btn-cancel">สมัครสมาชิก</button></a>
+         <a href="/users/forgot-password" class="forgot-link">ลืมรหัสผ่าน?</a>
+    
   </div>
 </body>
 </html>
